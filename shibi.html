@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>粉本試筆 · 諸尊白描</title>
+<style>
+  body { background: #0c1020; color: #d8b36a; font: 14px/1.6 serif; margin: 24px; }
+  .row { display: flex; flex-wrap: wrap; gap: 14px; }
+  figure { margin: 0; text-align: center; }
+  canvas { background: radial-gradient(circle, #141a30 0%, #0c1020 100%); border-radius: 50%; }
+  figcaption { font-size: 12px; margin-top: 4px; }
+  h2 { font-weight: normal; border-bottom: 1px solid #3a3a52; padding-bottom: 6px; }
+  #pending canvas { outline: 1px dashed #a05050; }
+  .empty { color: #6a6a82; font-size: 13px; }
+</style>
+</head>
+<body>
+<h2>已核之尊（信＝已核，得上壇）</h2>
+<div class="row" id="ok"></div>
+<h2>候審之尊（考據未足或落筆未經印可——確認之所）</h2>
+<div class="row" id="pending"><span class="empty">今無候審之尊。工單既領，新落筆者列於此，候主人過目。</span></div>
+<h2>中尊放大 · 金剛界大日（智拳印）與胎藏大日（法界定印）</h2>
+<div class="row" id="big"></div>
+<script type="module">
+import { 儀軌 } from './fenben/yigui.js';
+import { 白描 } from './fenben/baimiao.js';
+
+function render(el, face, label, size) {
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  ctx.translate(size / 2, size / 2);
+  ctx.strokeStyle = '#d8b36a';
+  ctx.fillStyle = '#d8b36a';
+  白描(ctx, size / 2, face);
+  const fig = document.createElement('figure');
+  fig.appendChild(c);
+  const cap = document.createElement('figcaption');
+  cap.textContent = label;
+  fig.appendChild(cap);
+  el.appendChild(fig);
+}
+
+const ok = document.getElementById('ok');
+const pending = document.getElementById('pending');
+let nPending = 0;
+for (const g of 儀軌) {
+  for (const side of ['t', 'k']) {
+    const f = g[side];
+    if (!f) continue;
+    const label = `${side === 't' ? '胎' : '金'}·${f.尊 || g.id}·${f.印}`;
+    if (f.信 === '已核') render(ok, f, label, 236);
+    else {
+      if (!nPending++) pending.textContent = '';
+      render(pending, f, `${label}（${f.信}）`, 236);
+    }
+  }
+}
+
+const 大日 = 儀軌.find(g => g.id === 'center');
+const big = document.getElementById('big');
+render(big, 大日.k, '金剛界大日 512', 512);
+render(big, 大日.t, '胎藏大日 512', 512);
+</script>
+</body>
+</html>

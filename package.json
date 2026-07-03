@@ -1,0 +1,12 @@
+{
+  "name": "fenben",
+  "version": "0.0.0",
+  "description": "粉本 · 如法造像之標準庫（量度・儀軌・白描）",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./liangdu": "./fenben/liangdu.js",
+    "./yigui": "./fenben/yigui.js",
+    "./baimiao": "./fenben/baimiao.js"
+  }
+}
