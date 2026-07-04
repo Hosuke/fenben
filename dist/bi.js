@@ -179,3 +179,44 @@ export function 執筆(ctx, R) {
     };
     return { ctx, R, u, Y, W_OUT, W_IN, P, A, Q, B, E, dot, thin, dim, 一筆 };
 }
+export function 運筆(bi) {
+    const { ctx, W_OUT } = bi;
+    let 軌 = [];
+    let 現寬 = W_OUT * 0.6;
+    let 現起 = '藏';
+    let 現收 = '回';
+    const 執 = (w, 起, 收, fn) => {
+        const [w0, q0, s0] = [現寬, 現起, 現收];
+        ctx.save();
+        ctx.lineWidth = w;
+        現寬 = w;
+        現起 = 起;
+        現收 = 收;
+        try {
+            fn();
+        }
+        finally {
+            ctx.restore();
+            現寬 = w0;
+            現起 = q0;
+            現收 = s0;
+        }
+    };
+    return {
+        M(x, z) { 軌.push(p => p.M(x, z)); },
+        L(x, z) { 軌.push(p => p.L(x, z)); },
+        C(c1x, c1z, c2x, c2z, x, z) { 軌.push(p => p.C(c1x, c1z, c2x, c2z, x, z)); },
+        Qk(cx, cz, x, z) { 軌.push(p => p.Q(cx, cz, x, z)); },
+        S() {
+            const 錄 = 軌;
+            軌 = [];
+            bi.一筆({ 寬: 現寬, 起: 現起, 收: 現收 }, p => { for (const f of 錄)
+                f(p); });
+        },
+        以(w, fn) { 執(w, 現起, 現收, fn); },
+        骨(fn) { 執(W_OUT * 0.6, '藏', '回', fn); },
+        衣(fn) { 執(W_OUT * 0.36, '藏', '回', fn); },
+        細(fn) { 執(W_OUT * 0.24, '尖', '出', fn); },
+        逸(fn) { 執(現寬, '尖', '出', fn); },
+    };
+}

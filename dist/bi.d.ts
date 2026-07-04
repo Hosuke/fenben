@@ -27,3 +27,16 @@ export interface 筆具 {
     一筆: (法: 鋒法, 書: (p: 鋒路) => void) => void;
 }
 export declare function 執筆(ctx: CanvasRenderingContext2D, R: number): 筆具;
+export interface 運筆具 {
+    M(x: number, z: number): void;
+    L(x: number, z: number): void;
+    C(c1x: number, c1z: number, c2x: number, c2z: number, x: number, z: number): void;
+    Qk(cx: number, cz: number, x: number, z: number): void;
+    S(): void;
+    以(w: number, fn: () => void): void;
+    骨(fn: () => void): void;
+    衣(fn: () => void): void;
+    細(fn: () => void): void;
+    逸(fn: () => void): void;
+}
+export declare function 運筆(bi: 筆具): 運筆具;

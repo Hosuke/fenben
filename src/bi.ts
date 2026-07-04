@@ -175,3 +175,51 @@ export function 執筆(ctx: CanvasRenderingContext2D, R: number): 筆具 {
 
   return { ctx, R, u, Y, W_OUT, W_IN, P, A, Q, B, E, dot, thin, dim, 一筆 };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 運筆 · 三等筆之機關——記軌於鋒路，S() 乃以一筆()揮之
+// 骨（藏起回收）立形，衣（藏回）走褶，細（尖出）開臉，逸（尖起出鋒）飄帶；
+// 等寬弧筆（A/E/dot）之寬同步（ctx.lineWidth），故兩制並用而階一致。
+// 部件（src/bujian/）與逐尊之筆（src/zun/）皆由此運筆，線階遂一。
+// ─────────────────────────────────────────────────────────────────────────────
+export interface 運筆具 {
+  M(x: number, z: number): void;
+  L(x: number, z: number): void;
+  C(c1x: number, c1z: number, c2x: number, c2z: number, x: number, z: number): void;
+  Qk(cx: number, cz: number, x: number, z: number): void;
+  S(): void;
+  以(w: number, fn: () => void): void;
+  骨(fn: () => void): void;
+  衣(fn: () => void): void;
+  細(fn: () => void): void;
+  逸(fn: () => void): void;
+}
+
+export function 運筆(bi: 筆具): 運筆具 {
+  const { ctx, W_OUT } = bi;
+  let 軌: Array<(p: 鋒路) => void> = [];
+  let 現寬 = W_OUT * 0.6;
+  let 現起: '藏' | '尖' = '藏';
+  let 現收: '回' | '出' = '回';
+  const 執 = (w: number, 起: '藏' | '尖', 收: '回' | '出', fn: () => void) => {
+    const [w0, q0, s0] = [現寬, 現起, 現收] as const;
+    ctx.save(); ctx.lineWidth = w; 現寬 = w; 現起 = 起; 現收 = 收;
+    try { fn(); }
+    finally { ctx.restore(); 現寬 = w0; 現起 = q0; 現收 = s0; }
+  };
+  return {
+    M(x, z) { 軌.push(p => p.M(x, z)); },
+    L(x, z) { 軌.push(p => p.L(x, z)); },
+    C(c1x, c1z, c2x, c2z, x, z) { 軌.push(p => p.C(c1x, c1z, c2x, c2z, x, z)); },
+    Qk(cx, cz, x, z) { 軌.push(p => p.Q(cx, cz, x, z)); },
+    S() {
+      const 錄 = 軌; 軌 = [];
+      bi.一筆({ 寬: 現寬, 起: 現起, 收: 現收 }, p => { for (const f of 錄) f(p); });
+    },
+    以(w, fn) { 執(w, 現起, 現收, fn); },
+    骨(fn) { 執(W_OUT * 0.6, '藏', '回', fn); },
+    衣(fn) { 執(W_OUT * 0.36, '藏', '回', fn); },
+    細(fn) { 執(W_OUT * 0.24, '尖', '出', fn); },
+    逸(fn) { 執(現寬, '尖', '出', fn); },
+  };
+}
