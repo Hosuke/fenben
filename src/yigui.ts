@@ -13,8 +13,31 @@
 // 法脈之律（2026-07-03 印可）：現圖為正，五部心觀為證。
 // 現階段：五佛淬火。十面俱經考據代理多源交叉（2026-07-03），全升「已核」。
 // ─────────────────────────────────────────────────────────────────────────────
+import type { 搩度數 } from './liangdu.js';
 
-export const 儀軌 = [
+// ── 類型即律：閉集聯合鎖其形，寫錯一字，編譯即破戒 ──────────────────────────
+export type 形類 = '如來形' | '菩薩形' | '明王形' | '天部形' | '天女形' | '童子形';
+export type 印名 = '法界定印' | '彌陀定印' | '智拳印' | '觸地印' | '與願印' | '施無畏印';
+export type 信級 = '已核' | '待核';
+export interface 出典條 { 典: string; 據?: string; 引?: string; 註?: string; 卷?: string }
+export interface 面 {
+  尊: string;                                        // 尊名
+  形: 形類;
+  搩度: 搩度數;                                      // 10 佛菩薩 · 9 佛母 · 8 忿怒 · 6 矮身
+  面臂: { 面: number; 臂: number; 目?: number };
+  印: 印名;
+  印法: string;                                      // 逐指之法
+  持物: string[];
+  身色: { 経軌: string; 現図: string } | null;       // 兩軌並錄；未核則 null
+  座: string;
+  光: { 頭光?: boolean; 月輪?: boolean; 舉身光?: boolean; 火焰?: boolean };
+  出典: 出典條[];
+  異說?: string;
+  信: 信級;
+}
+export interface 尊條 { id: string; t?: 面; k?: 面; 註?: string }
+
+export const 儀軌: 尊條[] = [
 
   // ═══ 五佛（兩部同體五對）═══════════════════════════════════════════════════
   {
@@ -135,10 +158,10 @@ export const 儀軌 = [
   },
 ];
 
-export const 依號 = Object.fromEntries(儀軌.map(g => [g.id, g]));
+export const 依號: Record<string, 尊條> = Object.fromEntries(儀軌.map(g => [g.id, g]));
 
 // 上壇之律：唯「已核」得渲染；餘者退種字／三昧耶形（寧缺毋誤）
-export function 已核之(id, side) {
+export function 已核之(id: string, side: 't' | 'k'): 面 | null {
   const g = 依號[id];
   const f = g && g[side];
   return f && f.信 === '已核' ? f : null;

@@ -12,52 +12,36 @@
 // 頸底24 心窩36 臍48 陰藏60 盤線64 座面68；膝寬52（盤線至白毫之距）。
 // ─────────────────────────────────────────────────────────────────────────────
 import { 錨點, 坐像 } from './liangdu.js';
+import { 執筆, type 筆具 } from './bi.js';
+import { 落筆簿 } from './zun/index.js';
+import type { 面 } from './yigui.js';
 
 const M = 錨點(); // { 肉髻:4, 頂髮:8, 額:12(=白毫), 鼻:16, 頦:20, 頸喉:24, 心窩... }
 const 白毫 = M.白毫, 髮際 = M.頂髮, 頦 = M.頦, 頸底 = M.頸喉;
 const 心窩 = M.喉至心窩, 臍 = M.心窩至臍;
 const 盤線 = 坐像.盤線, 座面 = 坐像.座面, 膝半 = 坐像.膝寬 / 2;
 
-export function 白描(ctx, R, face) {
-  const u = R * 0.0145;
-  const yT = -R * 0.565;                // 頂之縱座標（微沉，使坐像安於輪心）
-  const Y = z => yT + z * u;            // 縱錨（指→畫布）
-  const W_OUT = R * 0.0285, W_IN = R * 0.0163;
+// 白描總門：鍵（'尊號|側'，如 'fugen|k'）有專筆則用專筆，無則退通形
+export function 白描(ctx: CanvasRenderingContext2D, R: number, face: 面, 鍵?: string): void {
+  const bi = 執筆(ctx, R);
   ctx.save();
-  ctx.lineWidth = W_OUT;
+  ctx.lineWidth = bi.W_OUT;
   ctx.lineCap = 'round';
+  const 專 = 鍵 ? 落筆簿[鍵] : undefined;
+  if (專) 專(bi, face); else 通形(bi, face);
+  ctx.restore();
+}
 
-  // ── 筆具（座標以指為單位）──
-  const P = (pts, close = false) => {
-    ctx.beginPath();
-    pts.forEach(([x, z], i) => (i ? ctx.lineTo(x * u, Y(z)) : ctx.moveTo(x * u, Y(z))));
-    if (close) ctx.closePath();
-    ctx.stroke();
-  };
-  const A = (x, z, r, a0 = 0, a1 = 7) => {
-    ctx.beginPath(); ctx.arc(x * u, Y(z), r * u, a0, a1); ctx.stroke();
-  };
-  const Q = (x0, z0, cx, cz, x1, z1) => {
-    ctx.beginPath(); ctx.moveTo(x0 * u, Y(z0));
-    ctx.quadraticCurveTo(cx * u, Y(cz), x1 * u, Y(z1)); ctx.stroke();
-  };
-  const B = (x0, z0, c1x, c1z, c2x, c2z, x1, z1) => {
-    ctx.beginPath(); ctx.moveTo(x0 * u, Y(z0));
-    ctx.bezierCurveTo(c1x * u, Y(c1z), c2x * u, Y(c2z), x1 * u, Y(z1)); ctx.stroke();
-  };
-  const E = (x, z, rx, rz, rot = 0) => {
-    ctx.beginPath(); ctx.ellipse(x * u, Y(z), rx * u, rz * u, rot, 0, 7); ctx.stroke();
-  };
-  const dot = (x, z, r) => { ctx.beginPath(); ctx.arc(x * u, Y(z), r * u, 0, 7); ctx.fill(); };
-  const thin = fn => { ctx.save(); ctx.lineWidth = W_IN; fn(); ctx.restore(); };
-  const dim = (a, fn) => { ctx.save(); ctx.globalAlpha *= a; fn(); ctx.restore(); };
+// 通形：形類（如來形／菩薩形）之基準白描——專筆未立時之所依，亦可為專筆之底
+export function 通形(bi: 筆具, face: 面): void {
+  const { ctx, u, Y, P, A, Q, B, E, dot, thin, dim } = bi;
 
   // ── 頭光：細雙環，心在白毫上一指，容肉髻而有餘 ──
   dim(0.6, () => thin(() => { A(0, 白毫 - 1, 15); A(0, 白毫 - 1, 16.6); }));
 
   // ── 蓮臺：仰瓣二重，承於座面（68），闊過雙膝 ──
   const throne = () => {
-    const petal = (px, tipZ, baseZ, hw) => {
+    const petal = (px: number, tipZ: number, baseZ: number, hw: number) => {
       ctx.beginPath();
       ctx.moveTo((px - hw) * u, Y(baseZ));
       ctx.quadraticCurveTo((px - hw * 0.45) * u, Y(tipZ - 0.3), px * u, Y(tipZ));
@@ -98,16 +82,16 @@ export function 白描(ctx, R, face) {
   thin(() => { for (const d of [-1, 1]) Q(d * (shoulder + 1), elbowZ, d * 11, 55, d * 9.5, 盤線 - 3); });
 
   // ── 手之筆法 ──
-  const fist = (x, z, r = 2.0) => thin(() => {
+  const fist = (x: number, z: number, r = 2.0) => thin(() => {
     A(x, z, r);
     P([[x - r * 0.8, z + r * 0.35], [x + r * 0.8, z + r * 0.35]]);
     P([[x - r * 0.7, z - r * 0.25], [x + r * 0.7, z - r * 0.25]]);
   });
-  const palmOnLap = (x, z) => thin(() => {           // 仰掌安膝
+  const palmOnLap = (x: number, z: number) => thin(() => {  // 仰掌安膝
     E(x, z, 2.4, 1.1);
     for (const f of [-1.2, -0.4, 0.4, 1.2]) P([[x + f, z - 0.6], [x + f * 1.5, z - 1.8]]);
   });
-  const openHand = (x, z, dir) => thin(() => {       // 展掌：dir 'up'掌立指上 · 'down'垂指向下
+  const openHand = (x: number, z: number, dir: 'up' | 'down') => thin(() => { // 展掌：'up'掌立指上 · 'down'垂指向下
     const sgn = dir === 'up' ? -1 : 1;
     E(x, z, 2.0, 2.5);
     for (let i = 0; i < 4; i++) {
@@ -117,14 +101,15 @@ export function 白描(ctx, R, face) {
     }
     P([[x + (x < 0 ? 2.0 : -2.0), z + 0.4], [x + (x < 0 ? 3.1 : -3.1), z + sgn * -0.9]]); // 拇指side
   });
-  const robeGrip = (x, z) => {                       // 腹前握衣端（金剛界四佛左手之相）
+  const robeGrip = (x: number, z: number) => {       // 腹前握衣端（金剛界四佛左手之相）
     fist(x, z, 1.7);
     thin(() => Q(x + 0.4, z - 1.6, x + 2.2, z - 6, x + 4.4, z - 11)); // 衣端上牽
   };
 
   // ── 印相：尊之右手在畫面之左（-x）──
-  const forearmTo = (d, wx, wz) => thin(() => Q(d * (shoulder + 1), elbowZ, (d * (shoulder + 1) + wx) / 2, (elbowZ + wz) / 2 + 1.5, wx, wz));
-  const MUDRA = {
+  const forearmTo = (d: number, wx: number, wz: number) => thin(() => Q(d * (shoulder + 1), elbowZ, (d * (shoulder + 1) + wx) / 2, (elbowZ + wz) / 2 + 1.5, wx, wz));
+  type 閒手 = 'robe' | 'fist' | 'lap';
+  const MUDRA: Record<string, (opt?: 閒手) => void> = {
     法界定印(opt) {
       forearmTo(-1, -4.5, 57.6); forearmTo(1, 4.5, 57.6);
       thin(() => {
@@ -268,8 +253,6 @@ export function 白描(ctx, R, face) {
     A(0, M.鼻 + 2.0, 1.4, Math.PI * 0.3, Math.PI * 0.7);          // 靜口（頦上）
   });
   dot(0, 白毫, 0.5);                                              // 白毫右旋，點以誌之
-
-  ctx.restore();
 }
 
 // 舊名之通（mandala 相容）
