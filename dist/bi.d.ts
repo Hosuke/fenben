@@ -1,3 +1,14 @@
+export interface 鋒法 {
+    寬: number;
+    起?: '藏' | '尖';
+    收?: '回' | '出';
+}
+export interface 鋒路 {
+    M(x: number, z: number): 鋒路;
+    L(x: number, z: number): 鋒路;
+    Q(cx: number, cz: number, x: number, z: number): 鋒路;
+    C(c1x: number, c1z: number, c2x: number, c2z: number, x: number, z: number): 鋒路;
+}
 export interface 筆具 {
     ctx: CanvasRenderingContext2D;
     R: number;
@@ -13,5 +24,6 @@ export interface 筆具 {
     dot: (x: number, z: number, r: number) => void;
     thin: (fn: () => void) => void;
     dim: (a: number, fn: () => void) => void;
+    一筆: (法: 鋒法, 書: (p: 鋒路) => void) => void;
 }
 export declare function 執筆(ctx: CanvasRenderingContext2D, R: number): 筆具;
