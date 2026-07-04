@@ -1,6 +1,6 @@
 import type { 搩度數 } from './liangdu.js';
 export type 形類 = '如來形' | '菩薩形' | '明王形' | '天部形' | '天女形' | '童子形';
-export type 印名 = '法界定印' | '彌陀定印' | '智拳印' | '觸地印' | '與願印' | '施無畏印';
+export type 印名 = '法界定印' | '彌陀定印' | '智拳印' | '觸地印' | '與願印' | '施無畏印' | '執杵鈴';
 export type 信級 = '已核' | '待核';
 export interface 出典條 {
     典: string;
