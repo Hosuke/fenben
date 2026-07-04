@@ -11,9 +11,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import type { 筆具 } from '../bi.js';
 import type { 面 } from '../yigui.js';
+import { 大日金剛界 } from './center-k.js';
 
 export type 筆 = (bi: 筆具, mian: 面) => void;
 
 export const 落筆簿: Record<string, 筆> = {
+  'center|k': 大日金剛界,
   // 'fugen|k': 金剛薩埵之筆 —— 候親筆逐尊登簿
 };
