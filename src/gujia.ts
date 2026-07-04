@@ -15,17 +15,27 @@ import type { 筆具, 運筆具 } from './bi.js';
 export interface 節 { x: number; z: number; d: number }
 export const 節之 = (x: number, z: number, d = 0): 節 => ({ x, z, d });
 
-// 肢：自節 a 至節 b 之膠囊，半徑 ra→rb 漸變
-export interface 肢 { a: 節; b: 節; ra: number; rb: number }
+// 肢：自節 a 至節 b 之膠囊。弓＝軸之彎矢（指，正值向軸左法向鼓——臂股之天然
+// 微彎）；肉＝肌腹之隆（指，半徑於中段加此數之弧——二頭肌股肉之曲，
+// 文藝復興—犍陀羅之採：形自體積出，非直管）
+export interface 肢 { a: 節; b: 節; ra: number; rb: number; 弓?: number; 肉?: number }
 
-// 沿肢取樣：t∈[0,1] 得軸上點與該處半徑、軸向單位向量（畫面投影）
+// 沿肢取樣：t∈[0,1] 得軸上點（二次曲軸）、該處半徑（含肌腹）、軸向單位向量
 export function 沿(l: 肢, t: number): { x: number; z: number; r: number; ux: number; uz: number } {
-  const x = l.a.x + (l.b.x - l.a.x) * t;
-  const z = l.a.z + (l.b.z - l.a.z) * t;
-  const r = l.ra + (l.rb - l.ra) * t;
   const dx = l.b.x - l.a.x, dz = l.b.z - l.a.z;
-  const n = Math.hypot(dx, dz) || 1;
-  return { x, z, r, ux: dx / n, uz: dz / n };
+  const n0 = Math.hypot(dx, dz) || 1;
+  const 弓 = l.弓 ?? 0;
+  // 控點：中點沿左法向（-dz,dx）偏弓矢
+  const cx = (l.a.x + l.b.x) / 2 + (-dz / n0) * 弓;
+  const cz = (l.a.z + l.b.z) / 2 + (dx / n0) * 弓;
+  const s = 1 - t;
+  const x = s * s * l.a.x + 2 * s * t * cx + t * t * l.b.x;
+  const z = s * s * l.a.z + 2 * s * t * cz + t * t * l.b.z;
+  const r = l.ra + (l.rb - l.ra) * t + (l.肉 ?? 0) * Math.sin(Math.PI * t);
+  const tx = 2 * s * (cx - l.a.x) + 2 * t * (l.b.x - cx);
+  const tz = 2 * s * (cz - l.a.z) + 2 * t * (l.b.z - cz);
+  const n = Math.hypot(tx, tz) || 1;
+  return { x, z, r, ux: tx / n, uz: tz / n };
 }
 
 // 肢面點：t 沿軸、s∈[-1,1] 橫越（-1 左緣 +1 右緣，垂軸方向）——衣紋錨點之源
@@ -34,13 +44,19 @@ export function 肢面(l: 肢, t: number, s: number): [number, number] {
   return [p.x + -p.uz * p.r * s, p.z + p.ux * p.r * s];
 }
 
-// 輪廓：膠囊之兩緣線（限t0..t1段）——肢體外形自體積出，一筆一緣
+// 輪廓：膠囊之兩緣線（限t0..t1段）——肢體外形自體積出（曲軸＋肌腹），
+// 逐段折線密取樣，一筆一緣
 export function 輪廓(bi: 筆具, 筆: 運筆具, l: 肢, t0 = 0, t1 = 1, 側: -1 | 1 | 0 = 0): void {
-  const { M, C, S } = 筆;
+  const { M, L, S } = 筆;
   const 畫緣 = (s: -1 | 1) => {
-    const p0 = 肢面(l, t0, s), p1 = 肢面(l, t0 + (t1 - t0) / 3, s),
-          p2 = 肢面(l, t0 + (2 * (t1 - t0)) / 3, s), p3 = 肢面(l, t1, s);
-    M(p0[0], p0[1]); C(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]); S();
+    const N = 14;
+    const p0 = 肢面(l, t0, s);
+    M(p0[0], p0[1]);
+    for (let i = 1; i <= N; i++) {
+      const p = 肢面(l, t0 + ((t1 - t0) * i) / N, s);
+      L(p[0], p[1]);
+    }
+    S();
   };
   if (側 === 0 || 側 === -1) 畫緣(-1);
   if (側 === 0 || 側 === 1) 畫緣(1);

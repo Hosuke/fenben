@@ -38,5 +38,7 @@ export interface 運筆具 {
     衣(fn: () => void): void;
     細(fn: () => void): void;
     逸(fn: () => void): void;
+    陰(fn: () => void): void;
+    陽(fn: () => void): void;
 }
 export declare function 運筆(bi: 筆具): 運筆具;

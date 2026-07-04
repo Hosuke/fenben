@@ -10,6 +10,8 @@ export interface 肢 {
     b: 節;
     ra: number;
     rb: number;
+    弓?: number;
+    肉?: number;
 }
 export declare function 沿(l: 肢, t: number): {
     x: number;
