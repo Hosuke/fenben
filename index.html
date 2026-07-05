@@ -221,6 +221,7 @@
 <script type="module">
 import { 依號, 已核之 } from './dist/yigui.js';
 import { 白描 } from './dist/baimiao.js';
+import { 候審筆 } from './dist/zun/index.js';
 
 // 三十七尊之目（金剛界成身會）＋胎藏五佛；尊號承 mandala deities.js
 const 帖目 = [
@@ -268,7 +269,8 @@ for (const 帖 of 帖目) {
       總數++; if (帖.側 === 'k') 金剛界總++;
       const 條 = 依號[id];
       const face = 條 && 條[帖.側];
-      const 核 = face && face.信 === '已核';
+      // 已核之章：儀軌信已核**且**筆非候審（新筆必經主人過目乃摘朱界）
+      const 核 = face && face.信 === '已核' && !候審筆.has(`${id}|${帖.側}`);
       if (核) { 成數++; if (帖.側 === 'k') 金剛界成++; }
       const 卡 = document.createElement('figure');
       卡.className = '尊卡 ' + (核 ? '已核 可觀' : face ? '候審 可觀' : '候筆');

@@ -23,6 +23,22 @@ const 圖錄目 = {
     夾: 'fugen-k',
     局部: { '執杵': [-12, 29, 9, 45], '執鈴': [8, 50, 24, 66], '開臉': [-11, 0, 11, 26] },
   },
+  'east|k': {
+    夾: 'east-k',
+    局部: { '觸地印': [-26, 50, 0, 70], '握衣端': [-2, 44, 14, 60], '開臉': [-11, 0, 11, 26] },
+  },
+  'south|k': {
+    夾: 'south-k',
+    局部: { '與願印': [-26, 50, 0, 70], '開臉': [-11, 0, 11, 26] },
+  },
+  'west|k': {
+    夾: 'west-k',
+    局部: { '定印': [-12, 48, 12, 66], '開臉': [-11, 0, 11, 26] },
+  },
+  'north|k': {
+    夾: 'north-k',
+    局部: { '施無畏印': [-22, 28, 0, 50], '開臉': [-11, 0, 11, 26] },
+  },
 };
 
 function 覓playwright() {
@@ -106,11 +122,15 @@ function 覓headless() {
       x.textAlign = 'right'; x.textBaseline = 'middle';
       for (const [z, name] of anchors) x.fillText(`${name} ${z}`, cx - R * 0.68, Yz(z));
       x.globalAlpha = 1;
-      // 本尊
-      x.save(); x.translate(cx, cy);
-      x.strokeStyle = '#d8b36a'; x.fillStyle = '#d8b36a';
-      白描(x, R, face, `${id}|${side}`);
-      x.restore();
+      // 本尊：畫於別紙（透明畫布）乃貼合——蔽法（destination-out）鑿處露底紙，
+      // 不傷底色錨線
+      const c2 = document.createElement('canvas');
+      c2.width = c2.height = size;
+      const x2 = c2.getContext('2d');
+      x2.translate(cx, cy);
+      x2.strokeStyle = '#d8b36a'; x2.fillStyle = '#d8b36a';
+      白描(x2, R, face, `${id}|${side}`);
+      x.drawImage(c2, 0, 0);
       return c.toDataURL('image/png');
     }, { id, side, size: 1600 });
     writeFileSync(join(夾, '全身.png'), Buffer.from(全身.split(',')[1], 'base64'));
@@ -126,9 +146,13 @@ function 覓headless() {
         c.width = c.height = size;
         const x = c.getContext('2d');
         x.fillStyle = '#0d1124'; x.fillRect(0, 0, size, size);
-        x.translate(size / 2, size / 2);
-        x.strokeStyle = '#d8b36a'; x.fillStyle = '#d8b36a';
-        白描(x, size / 2, face, `${id}|${side}`);
+        const c2 = document.createElement('canvas');
+        c2.width = c2.height = size;
+        const x2 = c2.getContext('2d');
+        x2.translate(size / 2, size / 2);
+        x2.strokeStyle = '#d8b36a'; x2.fillStyle = '#d8b36a';
+        白描(x2, size / 2, face, `${id}|${side}`);
+        x.drawImage(c2, 0, 0);
         const R = size / 2, u = R * 0.0145, yT = R - R * 0.565;
         const [x0, z0, x1, z1] = 框;
         const px = R + x0 * u, py = yT + z0 * u, pw = (x1 - x0) * u, ph = (z1 - z0) * u;
