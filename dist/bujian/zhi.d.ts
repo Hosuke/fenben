@@ -7,8 +7,9 @@ export interface 指相 {
     甲?: boolean;
     腹?: number;
     斂?: boolean;
+    蔽?: boolean;
 }
-export declare function 畫指(運: 運筆具, 鏈: 點[], w根: number, w梢: number, 相?: 指相): void;
+export declare function 畫指(運: 運筆具, 鏈: 點[], w根: number, w梢: number, 相?: 指相, bi?: 筆具): void;
 export declare const 指寬: {
     readonly 根: 0.95;
     readonly 梢: 0.72;
@@ -32,5 +33,6 @@ export interface 手勢具 {
     弧: (a: number, b: number, r: number, a0?: number, a1?: number) => void;
     指: (x0: number, z0: number, θ0: number, 節長: number[], 節角?: number[]) => 點[];
     畫: (鏈點: 點[], w根: number, w梢: number, 相?: 指相) => void;
+    蔽: (郭: 點[]) => void;
 }
 export declare function 手勢(bi: 筆具, x: number, z: number, 比: number, 鏡?: number): 手勢具;

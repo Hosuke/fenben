@@ -17,7 +17,8 @@ export function 佈(列, x, z, 比, 鏡 = 1) {
 }
 // 畫指：鏈上雙緣立形。w根/w梢＝全寬（格網單位，呼者自乘比）。
 // 主契約：契約線起於根之兩緣（開口，沒入掌郭——端必有著是呼者之責）。
-export function 畫指(運, 鏈, w根, w梢, 相 = {}) {
+// bi 予之則行蔽法（destination-out 鑿身而後勒線）；畫序須後手先落、前手後落。
+export function 畫指(運, 鏈, w根, w梢, 相 = {}, bi) {
     const n = 鏈.length - 1;
     if (n < 1)
         return;
@@ -41,6 +42,31 @@ export function 畫指(運, 鏈, w根, w梢, 相 = {}) {
         右.push([鏈[i][0] - nx * hw(i), 鏈[i][1] - nz * hw(i)]);
     }
     const 腹 = 相.腹 ?? 0.11;
+    // 蔽法：先鑿指身，使先落之線於此身中斷——鑿面與勒線同軌（腹凸與梢帽同一幾何）
+    if (bi && 相.蔽 !== false) {
+        const { ctx, u, Y } = bi;
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.moveTo(左[0][0] * u, Y(左[0][1]));
+        for (let i = 0; i < n; i++) {
+            const nx = Math.cos(dir[i] + Math.PI / 2), nz = Math.sin(dir[i] + Math.PI / 2);
+            const 凸 = 腹 * (hw(i) + hw(i + 1));
+            ctx.quadraticCurveTo(((左[i][0] + 左[i + 1][0]) / 2 + nx * 凸) * u, Y((左[i][1] + 左[i + 1][1]) / 2 + nz * 凸), 左[i + 1][0] * u, Y(左[i + 1][1]));
+        }
+        {
+            const tx = Math.cos(dir[n - 1]), tz = Math.sin(dir[n - 1]), r = hw(n) * 1.25;
+            ctx.bezierCurveTo((左[n][0] + tx * r) * u, Y(左[n][1] + tz * r), (右[n][0] + tx * r) * u, Y(右[n][1] + tz * r), 右[n][0] * u, Y(右[n][1]));
+        }
+        for (let i = n; i > 0; i--) {
+            const nx = Math.cos(dir[i - 1] + Math.PI / 2), nz = Math.sin(dir[i - 1] + Math.PI / 2);
+            const 凸 = 腹 * 0.55 * (hw(i) + hw(i - 1));
+            ctx.quadraticCurveTo(((右[i][0] + 右[i - 1][0]) / 2 - nx * 凸) * u, Y((右[i][1] + 右[i - 1][1]) / 2 - nz * 凸), 右[i - 1][0] * u, Y(右[i - 1][1]));
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
     // 一筆貫氣：左緣（腹凸向外）→ 梢帽（圓收）→ 右緣歸根
     M(左[0][0], 左[0][1]);
     for (let i = 0; i < n; i++) {
@@ -105,6 +131,22 @@ export function 手勢(bi, x, z, 比, 鏡 = 1) {
                 bi.A(tx(a), tz(b), r * 絕, Math.PI - a1 + 旋, Math.PI - a0 + 旋);
         },
         指: (x0, z0, θ0, 節長, 節角) => 佈(指鏈(x0, z0, θ0, 節長, 節角), x, z, 比, 鏡),
-        畫: (鏈點, w根, w梢, 相) => 畫指(運, 鏈點, w根 * 絕, w梢 * 絕, 相),
+        畫: (鏈點, w根, w梢, 相) => 畫指(運, 鏈點, w根 * 絕, w梢 * 絕, 相, bi),
+        蔽: 郭 => {
+            const { ctx, u, Y } = bi;
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            郭.forEach(([a, b], i) => {
+                const px = tx(a) * u, py = Y(tz(b));
+                if (i)
+                    ctx.lineTo(px, py);
+                else
+                    ctx.moveTo(px, py);
+            });
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        },
     };
 }
