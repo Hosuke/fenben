@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>金剛薩埵骨相透視稿 · 粗驗</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f6f0df;
+      --ink: #30291e;
+      --dim: rgba(48, 41, 30, 0.28);
+      --red: #9f2f24;
+      --blue: #1f5d7a;
+      --gold: #9a6d20;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #ded5c4;
+      color: var(--ink);
+      font-family: "Songti TC", "Noto Serif CJK TC", "Source Han Serif TC", serif;
+      letter-spacing: 0;
+    }
+    main {
+      display: grid;
+      grid-template-columns: minmax(760px, 920px) minmax(280px, 420px);
+      gap: 18px;
+      padding: 22px;
+      align-items: start;
+    }
+    .sheet, .side {
+      background: var(--paper);
+      border: 1px solid rgba(48, 41, 30, 0.22);
+      border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(48, 41, 30, 0.12);
+    }
+    .sheet { padding: 12px; }
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fbf7ea;
+      border: 1px solid rgba(48, 41, 30, 0.18);
+    }
+    .side { padding: 16px 18px; }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 23px;
+      line-height: 1.22;
+      font-weight: 650;
+    }
+    h2 {
+      margin: 18px 0 8px;
+      font-size: 17px;
+      line-height: 1.25;
+    }
+    p, li {
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    ul { margin: 0; padding-left: 1.2em; }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      background: rgba(48, 41, 30, 0.06);
+      border: 1px solid rgba(48, 41, 30, 0.14);
+      border-radius: 4px;
+      padding: 10px;
+    }
+    .ok { color: #17613d; font-weight: 650; }
+    @media (max-width: 1060px) {
+      main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <section class="sheet" aria-label="粗渲稿">
+    <svg id="view" viewBox="0 0 900 900" role="img" aria-label="金剛薩埵骨相透視粗驗圖"></svg>
+  </section>
+  <aside class="side">
+    <h1>金剛薩埵骨相透視稿</h1>
+    <p>此頁只作比例與遮擋驗收。膠囊為體塊，紅線為 68 指格網錨，藍線為外膝寬。</p>
+    <h2>錨點驗算</h2>
+    <pre id="checks"></pre>
+    <h2>透視要點</h2>
+    <ul id="perspective"></ul>
+  </aside>
+</main>
+
+<script>
+const D = {
+  "格網錨": { "白毫": 12, "頦": 20, "心窩": 36, "臍": 48, "盤線": 64, "座面": 68, "膝寬": 52, "肩寬": 23.6 },
+  "骨架": {
+    "頭傾": -0.16,
+    "白毫": [2.1, 12],
+    "頦": [2.8, 20],
+    "脊": [[-1.0,64],[-1.7,56],[-1.4,48],[-0.3,41],[0.8,36],[1.5,28],[2.2,20],[2.1,12]],
+    "肩": { "尊右": [-10.4,31.1], "尊左": [13.2,30.0] },
+    "肘": { "尊右": [-13.4,39.0], "尊左": [15.2,45.6] },
+    "腕": { "尊右": [-3.1,36.1], "尊左": [19.4,60.0] },
+    "掌": { "尊右": [-1.2,35.9], "尊左": [20.0,60.8] },
+    "股膝踝": {
+      "尊右": { "膝外": [-26.0,64.0], "踝": [10.8,61.1], "足心": [17.0,61.8], "趾": [23.0,62.4] },
+      "尊左": { "膝外": [26.0,64.0], "踝": [-15.8,64.4], "足背": [-22.2,64.7] }
+    }
+  },
+  "體塊": [
+    { "名": "頭塊", "a": [1.8,7.6], "b": [2.8,20.0], "ra": 4.9, "rb": 5.2, "深": 0.25 },
+    { "名": "頸", "a": [2.1,20.0], "b": [1.7,25.2], "ra": 2.2, "rb": 2.8, "深": 0.0 },
+    { "名": "胸腔", "a": [1.5,27.2], "b": [-0.9,47.4], "ra": 7.2, "rb": 8.1, "深": 0.15 },
+    { "名": "腹骨盆", "a": [-0.9,47.4], "b": [-1.0,64.0], "ra": 8.2, "rb": 10.5, "深": -0.05 },
+    { "名": "尊右上臂", "a": [-10.4,31.1], "b": [-13.4,39.0], "ra": 2.6, "rb": 2.2, "深": -0.15 },
+    { "名": "尊右前臂", "a": [-13.4,39.0], "b": [-3.1,36.1], "ra": 2.0, "rb": 1.55, "深": 0.8 },
+    { "名": "尊右手", "a": [-3.1,36.1], "b": [0.8,35.4], "ra": 1.5, "rb": 1.35, "深": 1.1 },
+    { "名": "尊左上臂", "a": [13.2,30.0], "b": [15.2,45.6], "ra": 2.5, "rb": 2.0, "深": -0.25 },
+    { "名": "尊左前臂", "a": [15.2,45.6], "b": [19.4,60.0], "ra": 2.0, "rb": 1.55, "深": 0.45 },
+    { "名": "尊左手", "a": [19.4,60.0], "b": [21.5,61.1], "ra": 1.45, "rb": 1.15, "深": 0.75 },
+    { "名": "尊左大腿", "a": [3.4,55.0], "b": [26.0,64.0], "ra": 4.6, "rb": 3.9, "深": 0.05 },
+    { "名": "尊右大腿", "a": [-4.2,55.5], "b": [-26.0,64.0], "ra": 4.7, "rb": 4.0, "深": 0.0 },
+    { "名": "尊右足掌", "a": [10.8,61.1], "b": [23.0,62.4], "ra": 2.0, "rb": 1.25, "深": 1.0 },
+    { "名": "尊左足背", "a": [-15.8,64.4], "b": [-22.2,64.7], "ra": 1.7, "rb": 1.2, "深": 0.2 }
+  ],
+  "持物": {
+    "杵": { "心": [-0.4,34.7], "軸角": -0.78, "長": 15.6, "前端": [5.2,29.2], "後端": [-6.0,40.2] },
+    "鈴": { "心": [20.8,60.7], "柄頂": [20.0,56.9], "口緣": [21.2,63.0], "高": 6.1 }
+  },
+  "嚴飾位": {
+    "冠": [2.0,7.7],
+    "五化佛": [[-4.2,7.5],[-1.0,6.2],[2.0,5.5],[5.0,6.4],[7.3,8.0]],
+    "頸瓔": { "路": [[-4.0,24.6],[-1.0,26.2],[2.0,26.6],[5.5,25.5]] },
+    "胸瓔": { "路": [[-6.6,31.7],[-3.8,38.0],[0.2,41.7],[5.8,37.2],[9.8,31.4]] }
+  },
+  "透視": [
+    { "部": "頭面", "縮": 0.94, "注": "頭向尊右微傾而面略轉尊左，右頰略窄，白毫仍鎖 z=12" },
+    { "部": "胸腔", "縮": 0.90, "注": "肩線不平，尊左肩略後，胸骨沿 S 脊偏向尊左" },
+    { "部": "尊右前臂", "縮": 0.82, "注": "肘在外後，腕向觀者，節距漸密；腕壓杵心前" },
+    { "部": "尊左前臂", "縮": 0.88, "注": "自肘垂向左膝，掌與鈴同在前層，鈴口遮膝" },
+    { "部": "尊右足掌", "縮": 0.76, "注": "右足仰於左股，足心向觀者，足趾橫向右緣" }
+  ]
+};
+
+const svg = document.getElementById('view');
+const NS = 'http://www.w3.org/2000/svg';
+const S = 10.2;
+const OX = 450;
+const OZ = 78;
+const P = ([x, z]) => [OX + x * S, OZ + z * S];
+const E = (name, attrs = {}, parent = svg) => {
+  const el = document.createElementNS(NS, name);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  parent.appendChild(el);
+  return el;
+};
+const pathD = pts => pts.map((p, i) => {
+  const [x, y] = P(p);
+  return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
+}).join(' ');
+
+function line(a, b, attrs) {
+  const [x1, y1] = P(a);
+  const [x2, y2] = P(b);
+  E('line', { x1, y1, x2, y2, ...attrs });
+}
+function circle(c, r, attrs) {
+  const [cx, cy] = P(c);
+  E('circle', { cx, cy, r: r * S, ...attrs });
+}
+function label(text, p, attrs = {}) {
+  const [x, y] = P(p);
+  E('text', { x, y, 'font-size': 13, 'text-anchor': 'middle', fill: '#30291e', ...attrs }).textContent = text;
+}
+function capsule(block, color) {
+  const [x1, y1] = P(block.a);
+  const [x2, y2] = P(block.b);
+  const w = Math.max(2, (block.ra + block.rb) * S);
+  E('line', {
+    x1, y1, x2, y2,
+    stroke: color,
+    'stroke-width': w,
+    'stroke-linecap': 'round',
+    opacity: 0.24 + Math.max(0, block.深) * 0.12
+  });
+  E('line', {
+    x1, y1, x2, y2,
+    stroke: '#30291e',
+    'stroke-width': 1.15,
+    'stroke-dasharray': '4 5',
+    opacity: 0.48
+  });
+}
+
+E('rect', { x: 0, y: 0, width: 900, height: 900, fill: '#fbf7ea' });
+
+for (let x = -30; x <= 30; x += 5) {
+  line([x, 0], [x, 70], { stroke: '#30291e', 'stroke-width': x === 0 ? 1.1 : 0.45, opacity: x === 0 ? 0.35 : 0.12 });
+}
+for (let z = 0; z <= 70; z += 4) {
+  line([-34, z], [34, z], { stroke: '#30291e', 'stroke-width': 0.45, opacity: 0.10 });
+}
+
+const anchors = [['白毫',12],['頦',20],['心窩',36],['臍',48],['盤線',64],['座面',68]];
+for (const [name, z] of anchors) {
+  line([-36, z], [36, z], { stroke: '#9f2f24', 'stroke-width': 1.1, opacity: 0.55 });
+  label(`${name} ${z}`, [-33.2, z - 0.45], { 'text-anchor': 'start', fill: '#9f2f24' });
+}
+
+circle([0, 38.5], 37.8, { fill: 'none', stroke: '#9a6d20', 'stroke-width': 2, opacity: 0.45 });
+circle([2.2, 15.6], 12.0, { fill: 'none', stroke: '#9a6d20', 'stroke-width': 1.5, opacity: 0.38 });
+
+E('ellipse', { cx: P([0, 68])[0], cy: P([0, 69.8])[1], rx: 31 * S, ry: 5.2 * S, fill: 'none', stroke: '#9a6d20', 'stroke-width': 2.2, opacity: 0.58 });
+for (let i = -5; i <= 5; i++) {
+  const x = i * 5.2;
+  E('path', { d: pathD([[x - 3.2, 69.0], [x, 63.8], [x + 3.2, 69.0]]), fill: 'none', stroke: '#9a6d20', 'stroke-width': 1.5, opacity: 0.42 });
+}
+
+line(D.骨架.股膝踝.尊右.膝外, D.骨架.股膝踝.尊左.膝外, { stroke: '#1f5d7a', 'stroke-width': 2.2, opacity: 0.75 });
+label('膝寬 52', [0, 62.8], { fill: '#1f5d7a' });
+
+const legs = D.體塊.filter(b => b.名.includes('腿') || b.名.includes('足'));
+const trunk = D.體塊.filter(b => ['胸腔','腹骨盆','頸','頭塊'].includes(b.名));
+const leftArm = D.體塊.filter(b => b.名.includes('尊左') && !b.名.includes('腿') && !b.名.includes('足'));
+const rightArm = D.體塊.filter(b => b.名.includes('尊右') && !b.名.includes('腿') && !b.名.includes('足'));
+for (const b of legs) capsule(b, '#9a6d20');
+for (const b of trunk) capsule(b, '#30291e');
+for (const b of leftArm) capsule(b, '#1f5d7a');
+
+const bell = D.持物.鈴;
+line(bell.柄頂, bell.口緣, { stroke: '#30291e', 'stroke-width': 2.1, opacity: 0.72 });
+circle(bell.心, 1.6, { fill: 'none', stroke: '#30291e', 'stroke-width': 1.8, opacity: 0.72 });
+E('path', { d: pathD([[18.6,62.7],[21.2,63.5],[23.0,62.6]]), fill: 'none', stroke: '#30291e', 'stroke-width': 1.8, opacity: 0.72 });
+
+for (const b of rightArm) capsule(b, '#9f2f24');
+const vajra = D.持物.杵;
+line(vajra.後端, vajra.前端, { stroke: '#30291e', 'stroke-width': 2.4, opacity: 0.82 });
+circle(vajra.心, 0.9, { fill: '#fbf7ea', stroke: '#30291e', 'stroke-width': 1.6, opacity: 0.86 });
+for (const p of [vajra.前端, vajra.後端]) {
+  circle(p, 1.2, { fill: 'none', stroke: '#30291e', 'stroke-width': 1.3, opacity: 0.72 });
+}
+
+E('path', { d: pathD(D.骨架.脊), fill: 'none', stroke: '#9f2f24', 'stroke-width': 2.2, 'stroke-dasharray': '6 4', opacity: 0.76 });
+line(D.骨架.肩.尊右, D.骨架.肩.尊左, { stroke: '#30291e', 'stroke-width': 1.3, opacity: 0.65 });
+for (const group of ['肩','肘','腕','掌']) {
+  const val = D.骨架[group];
+  if (!val) continue;
+  for (const p of Object.values(val)) circle(p, 0.55, { fill: '#30291e', opacity: 0.8 });
+}
+circle(D.骨架.白毫, 0.55, { fill: '#9f2f24', opacity: 0.9 });
+circle(D.骨架.頦, 0.4, { fill: '#9f2f24', opacity: 0.75 });
+
+E('path', { d: pathD([[-4.8,9.1],[-1.0,6.4],[2.0,5.7],[5.0,6.6],[8.1,9.2]]), fill: 'none', stroke: '#30291e', 'stroke-width': 1.7, opacity: 0.72 });
+for (const p of D.嚴飾位.五化佛) circle(p, 0.9, { fill: '#fbf7ea', stroke: '#30291e', 'stroke-width': 1.1, opacity: 0.8 });
+E('path', { d: pathD(D.嚴飾位.頸瓔.路), fill: 'none', stroke: '#30291e', 'stroke-width': 1.15, opacity: 0.62 });
+E('path', { d: pathD(D.嚴飾位.胸瓔.路), fill: 'none', stroke: '#30291e', 'stroke-width': 1.15, opacity: 0.55 });
+
+for (const b of D.體塊) {
+  const mid = [(b.a[0] + b.b[0]) / 2, (b.a[1] + b.b[1]) / 2];
+  label(b.名, [mid[0], mid[1] - b.ra - 0.6], { 'font-size': 10, fill: '#30291e', opacity: 0.74 });
+}
+
+const checks = [
+  ['白毫', D.骨架.白毫[1], 12],
+  ['頦', D.骨架.頦[1], 20],
+  ['心窩', D.骨架.脊.find(p => p[1] === 36)[1], 36],
+  ['臍', D.骨架.脊.find(p => p[1] === 48)[1], 48],
+  ['盤線', D.格網錨.盤線, 64],
+  ['座面', D.格網錨.座面, 68],
+  ['膝寬', D.骨架.股膝踝.尊左.膝外[0] - D.骨架.股膝踝.尊右.膝外[0], 52],
+  ['肩寬約', +(D.骨架.肩.尊左[0] - D.骨架.肩.尊右[0]).toFixed(1), 23.6]
+];
+document.getElementById('checks').innerHTML = checks.map(([name, got, want]) => {
+  const ok = Math.abs(got - want) < 0.001;
+  return `${name}: ${got} / ${want} ${ok ? '<span class="ok">OK</span>' : 'FAIL'}`;
+}).join('\n');
+document.getElementById('perspective').innerHTML = D.透視.map(p => `<li>${p.部} 縮 ${p.縮}: ${p.注}</li>`).join('');
+window.__fugenDraftReady = true;
+</script>
+</body>
+</html>

@@ -13,6 +13,7 @@ import type { 筆具 } from '../bi.js';
 import type { 面 } from '../yigui.js';
 import { 大日金剛界 } from './center-k.js';
 import { 金剛薩埵 } from './fugen-k.js';
+import { 金剛薩埵合筆 } from './fugen2-k.js';
 import { 阿閦如來 } from './east-k.js';
 import { 寶生如來 } from './south-k.js';
 import { 阿彌陀如來 } from './west-k.js';
@@ -23,6 +24,7 @@ export type 筆 = (bi: 筆具, mian: 面) => void;
 export const 落筆簿: Record<string, 筆> = {
   'center|k': 大日金剛界,
   'fugen|k': 金剛薩埵,
+  'fugen2|k': 金剛薩埵合筆,   // 合筆實驗（匠骨吾筆），僅圖錄陳列不入壇
   'east|k': 阿閦如來,
   'south|k': 寶生如來,
   'west|k': 阿彌陀如來,

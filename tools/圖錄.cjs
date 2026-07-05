@@ -23,6 +23,10 @@ const 圖錄目 = {
     夾: 'fugen-k',
     局部: { '執杵': [-12, 29, 9, 45], '執鈴': [8, 50, 24, 66], '開臉': [-11, 0, 11, 26] },
   },
+  'fugen2|k': {
+    夾: 'fugen2-k', 據: 'fugen|k',
+    局部: { '執杵': [-14, 26, 8, 44], '執鈴': [12, 50, 28, 66], '開臉': [-8, 0, 14, 26] },
+  },
   'east|k': {
     夾: 'east-k',
     局部: { '觸地印': [-26, 50, 0, 70], '握衣端': [-2, 44, 14, 60], '開臉': [-11, 0, 11, 26] },
@@ -96,14 +100,15 @@ function 覓headless() {
 
   for (const [鍵, 配] of Object.entries(圖錄目)) {
     const [id, side] = 鍵.split('|');
+    const [fid, fside] = (配.據 ?? 鍵).split('|');
     const 夾 = join(ROOT, '圖錄', 配.夾);
     mkdirSync(夾, { recursive: true });
 
     // ── 全身：紺紙金泥＋淡硃格線（量度錨線，粉本之印記）──
-    const 全身 = await page.evaluate(async ({ id, side, size }) => {
+    const 全身 = await page.evaluate(async ({ id, side, fid, fside, size }) => {
       const { 依號 } = await import('/dist/yigui.js');
       const { 白描 } = await import('/dist/baimiao.js');
-      const face = 依號[id][side];
+      const face = 依號[fid][fside];
       const c = document.createElement('canvas');
       c.width = c.height = size;
       const x = c.getContext('2d');
@@ -132,16 +137,16 @@ function 覓headless() {
       白描(x2, R, face, `${id}|${side}`);
       x.drawImage(c2, 0, 0);
       return c.toDataURL('image/png');
-    }, { id, side, size: 1600 });
+    }, { id, side, fid, fside, size: 1600 });
     writeFileSync(join(夾, '全身.png'), Buffer.from(全身.split(',')[1], 'base64'));
     console.log('機出', 配.夾 + '/全身.png');
 
     // ── 局部：自 2400 大圖裁格網框 ──
     for (const [名, 框] of Object.entries(配.局部)) {
-      const dataUrl = await page.evaluate(async ({ id, side, size, 框 }) => {
+      const dataUrl = await page.evaluate(async ({ id, side, fid, fside, size, 框 }) => {
         const { 依號 } = await import('/dist/yigui.js');
         const { 白描 } = await import('/dist/baimiao.js');
-        const face = 依號[id][side];
+        const face = 依號[fid][fside];
         const c = document.createElement('canvas');
         c.width = c.height = size;
         const x = c.getContext('2d');
@@ -161,7 +166,7 @@ function 覓headless() {
         out.width = Math.round(pw * k); out.height = Math.round(ph * k);
         out.getContext('2d').drawImage(c, px, py, pw, ph, 0, 0, out.width, out.height);
         return out.toDataURL('image/png');
-      }, { id, side, size: 2400, 框 });
+      }, { id, side, fid, fside, size: 2400, 框 });
       writeFileSync(join(夾, `局部-${名}.png`), Buffer.from(dataUrl.split(',')[1], 'base64'));
       console.log('機出', 配.夾 + `/局部-${名}.png`);
     }

@@ -1,5 +1,6 @@
 import { 大日金剛界 } from './center-k.js';
 import { 金剛薩埵 } from './fugen-k.js';
+import { 金剛薩埵合筆 } from './fugen2-k.js';
 import { 阿閦如來 } from './east-k.js';
 import { 寶生如來 } from './south-k.js';
 import { 阿彌陀如來 } from './west-k.js';
@@ -7,6 +8,7 @@ import { 不空成就如來 } from './north-k.js';
 export const 落筆簿 = {
     'center|k': 大日金剛界,
     'fugen|k': 金剛薩埵,
+    'fugen2|k': 金剛薩埵合筆, // 合筆實驗（匠骨吾筆），僅圖錄陳列不入壇
     'east|k': 阿閦如來,
     'south|k': 寶生如來,
     'west|k': 阿彌陀如來,
