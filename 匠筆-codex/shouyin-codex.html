@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>手印廿七式 · Codex 白描</title>
+  <style>
+    :root {
+      --bg: #0d1124;
+      --panel: #121832;
+      --panel2: #171f3d;
+      --gold: #d8b36a;
+      --bright: #f2d9a4;
+      --silk: #e8e1cf;
+      --red: #b0402c;
+      --muted: #7a7f9a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(242, 217, 164, 0.08), transparent 32rem),
+        var(--bg);
+      color: var(--silk);
+      font-family: "Noto Serif TC", "Songti TC", "STSong", "PMingLiU", serif;
+      letter-spacing: 0;
+    }
+    header {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 34px 24px 14px;
+    }
+    h1 {
+      margin: 0;
+      color: var(--bright);
+      font-size: clamp(30px, 4vw, 54px);
+      font-weight: 700;
+      line-height: 1.12;
+    }
+    .lead {
+      max-width: 920px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+    main {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 0 24px 48px;
+    }
+    section { margin-top: 30px; }
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 14px;
+      color: var(--bright);
+      font-size: 24px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+    h2::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, rgba(216, 179, 106, 0.55), transparent);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(318px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      min-width: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
+      border: 1px solid rgba(216, 179, 106, 0.28);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .stage {
+      position: relative;
+      background:
+        linear-gradient(rgba(216,179,106,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(216,179,106,0.035) 1px, transparent 1px),
+        var(--panel);
+      background-size: 36px 36px;
+      padding: 8px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 300px;
+      background: var(--panel);
+    }
+    .meta {
+      padding: 12px 14px 14px;
+      border-top: 1px solid rgba(216, 179, 106, 0.2);
+    }
+    h3 {
+      margin: 0 0 7px;
+      color: var(--bright);
+      font-size: 19px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+    .method {
+      margin: 0;
+      color: var(--silk);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .source {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .warn { color: var(--red); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>金剛界手印廿七式</h1>
+    <p class="lead">Codex 別坊自運白描。依 <span class="source">docs/考據/手印體系.md</span> 題註；十二合掌諸式於本卷僅列名，凡逐指未具者以朱字標〔待核〕，不偽作定文。</p>
+  </header>
+  <main id="root"></main>
+
+  <script>
+    const C = {
+      bg: '#0d1124',
+      panel: '#121832',
+      panel2: '#171f3d',
+      gold: '#d8b36a',
+      bright: '#f2d9a4',
+      silk: '#e8e1cf',
+      red: '#b0402c',
+      muted: '#7a7f9a',
+    };
+    const LINE = {
+      bone: 2.36,
+      garment: 1.46,
+      fine: 0.92,
+    };
+
+    const sections = [
+      {
+        title: '十二合掌',
+        items: [
+          ['堅實心', '十二合掌之一；兩掌堅合，五指相著。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'solid'],
+          ['虛心', '十二合掌之一；兩掌合而掌心留空。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'hollow'],
+          ['未敷蓮', '十二合掌之一；作蓮蕾未敷之相。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'bud'],
+          ['初割蓮', '十二合掌之一；指端初開如蓮初割。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'opening'],
+          ['顯露', '十二合掌之一；蓮瓣顯露，諸指外舒。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'display'],
+          ['持水', '十二合掌之一；兩掌成掬水器。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'water'],
+          ['歸命', '金剛合掌，十指頭交叉右壓左。', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'vajraJoin'],
+          ['反叉', '十二合掌之一；反叉交指。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'reverseCross'],
+          ['反背互相著', '十二合掌之一；兩手反背互相著。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'backTouch'],
+          ['橫拄指', '十二合掌之一；橫置而諸指相拄。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'horizontalProp'],
+          ['覆手向下', '十二合掌之一；覆手而向下。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'downCover'],
+          ['覆手', '十二合掌之一；覆掌相合。〔待核：本卷列名，未載逐指〕', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'covered'],
+        ],
+      },
+      {
+        title: '六種拳',
+        items: [
+          ['金剛拳', '大指入掌餘四指握。', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'vajraFist'],
+          ['蓮華拳', '四指握大指壓頭指外側節；大指立/壓兩式〔待核定本〕。', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'lotusFist'],
+          ['內縛', '十指交於掌內。', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'innerBind'],
+          ['外縛', '十指交於掌外指頭露外。', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'outerBind'],
+          ['忿怒拳', '金剛拳豎頭指小指。', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'wrathFist'],
+          ['如來拳', '右金剛拳上、左蓮華拳下豎左大指入右拳。', '大日經疏卷十三；docs/考據/手印體系.md「印母」', 'tathagataFist'],
+        ],
+      },
+      {
+        title: '常用九印',
+        items: [
+          ['智拳印', '左金剛拳獨豎頭指；右金剛拳握之，右大指端拄左頭指端（「右小指握」之坊說為訛勿從）。', 'docs/考據/手印體系.md「常用印逐指法」', 'wisdomFist'],
+          ['法界定印', '兩手仰疊右上左下，兩大指端相拄成橢圓。', 'docs/考據/手印體系.md「常用印逐指法」', 'dharmadhatuDhyana'],
+          ['彌陀定印', '基形同定印；品位＝大指捻頭指（上）/中指（中）/無名指（下）×手勢三分。成立晚。', '新纂浄土宗大辞典九品印；docs/考據/手印體系.md「常用印逐指法」', 'amidaDhyana'],
+          ['觸地印', '右手覆膝五指垂而指端觸地，左手仰臍前。', 'docs/考據/手印體系.md「常用印逐指法」', 'earthTouch'],
+          ['與願印', '掌向外五指舒展下垂。', 'docs/考據/手印體系.md「常用印逐指法」', 'boon'],
+          ['施無畏印', '屈臂上舉掌向外五指舒伸。', 'docs/考據/手印體系.md「常用印逐指法」', 'abhaya'],
+          ['說法印', '兩手當胸，大指與頭指（或中指）相捻成環，左內右外相對。', 'docs/考據/手印體系.md「常用印逐指法」', 'teaching'],
+          ['金剛合掌', '十指頭交叉右壓左（歸命合掌）。', 'docs/考據/手印體系.md「常用印逐指法」', 'vajraJoin'],
+          ['期剋印', '金剛拳豎頭指（或頭指小指如二鈎），威嚇鈎召（tarjanī）。', 'docs/考據/手印體系.md「常用印逐指法」', 'hookFist'],
+        ],
+      },
+    ];
+
+    function esc(s) {
+      return s.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+    }
+    function mark(s) {
+      return esc(s).replace(/〔[^〕]+〕/g, m => `<span class="warn">${m}</span>`);
+    }
+
+    const root = document.getElementById('root');
+    for (const sec of sections) {
+      const section = document.createElement('section');
+      section.innerHTML = `<h2>${esc(sec.title)}</h2><div class="grid"></div>`;
+      const grid = section.querySelector('.grid');
+      for (const item of sec.items) {
+        const [name, method, source, draw] = item;
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="stage"><canvas width="360" height="360" data-draw="${draw}" aria-label="${esc(name)}"></canvas></div>
+          <div class="meta">
+            <h3>${esc(name)}</h3>
+            <p class="method">${mark(method)}</p>
+            <p class="source">出典：${mark(source)}</p>
+          </div>`;
+        grid.appendChild(card);
+      }
+      root.appendChild(section);
+    }
+
+    function setup(ctx) {
+      ctx.clearRect(0, 0, 360, 360);
+      ctx.fillStyle = C.panel;
+      ctx.fillRect(0, 0, 360, 360);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = C.gold;
+      ctx.fillStyle = C.panel;
+      ctx.shadowColor = 'rgba(242, 217, 164, 0.16)';
+      ctx.shadowBlur = 2;
+    }
+    function pathRoundRect(ctx, x, y, w, h, r) {
+      const rr = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + rr, y);
+      ctx.lineTo(x + w - rr, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + rr);
+      ctx.lineTo(x + w, y + h - rr);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+      ctx.lineTo(x + rr, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - rr);
+      ctx.lineTo(x, y + rr);
+      ctx.quadraticCurveTo(x, y, x + rr, y);
+      ctx.closePath();
+    }
+    function drawPath(ctx, pts, opt = {}) {
+      ctx.save();
+      ctx.strokeStyle = opt.color || C.gold;
+      ctx.lineWidth = opt.width || LINE.garment;
+      ctx.globalAlpha = opt.alpha == null ? 1 : opt.alpha;
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+      ctx.stroke();
+      ctx.restore();
+    }
+    function cutAndStroke(ctx, makePath, opt = {}) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      makePath();
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = opt.color || C.gold;
+      ctx.lineWidth = opt.width || LINE.bone;
+      ctx.globalAlpha = opt.alpha == null ? 1 : opt.alpha;
+      ctx.beginPath();
+      makePath();
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
+    function bez(p0, p1, p2, p3, t) {
+      const u = 1 - t;
+      return [
+        u*u*u*p0[0] + 3*u*u*t*p1[0] + 3*u*t*t*p2[0] + t*t*t*p3[0],
+        u*u*u*p0[1] + 3*u*u*t*p1[1] + 3*u*t*t*p2[1] + t*t*t*p3[1],
+      ];
+    }
+    function dbez(p0, p1, p2, p3, t) {
+      const u = 1 - t;
+      return [
+        3*u*u*(p1[0]-p0[0]) + 6*u*t*(p2[0]-p1[0]) + 3*t*t*(p3[0]-p2[0]),
+        3*u*u*(p1[1]-p0[1]) + 6*u*t*(p2[1]-p1[1]) + 3*t*t*(p3[1]-p2[1]),
+      ];
+    }
+    function finger(ctx, p0, p1, p2, p3, w0, w1, joints = 3, opt = {}) {
+      const left = [], right = [], samples = 22;
+      const depth = opt.depth == null ? 0.18 : opt.depth;
+      for (let i = 0; i <= samples; i++) {
+        const t = i / samples;
+        const p = bez(p0, p1, p2, p3, t);
+        const d = dbez(p0, p1, p2, p3, t);
+        const len = Math.hypot(d[0], d[1]) || 1;
+        const nx = -d[1] / len, ny = d[0] / len;
+        const far = 1 - depth * 0.22 * t;
+        const near = opt.nearTip ? 1 + depth * 0.26 * t : 1;
+        const w = (w0 + (w1 - w0) * t) * far * near;
+        left.push([p[0] + nx * w, p[1] + ny * w]);
+        right.push([p[0] - nx * w, p[1] - ny * w]);
+      }
+      const rightPath = right.slice().reverse();
+      cutAndStroke(ctx, () => {
+        ctx.moveTo(left[0][0], left[0][1]);
+        for (const p of left.slice(1)) ctx.lineTo(p[0], p[1]);
+        for (const p of rightPath) ctx.lineTo(p[0], p[1]);
+      }, { color: opt.color, width: opt.width || LINE.bone, alpha: opt.alpha });
+      if (joints) {
+        ctx.save();
+        ctx.lineWidth = LINE.fine;
+        ctx.strokeStyle = opt.jointColor || C.bright;
+        ctx.globalAlpha = (opt.alpha == null ? 1 : opt.alpha) * 0.68;
+        const ts = opt.jointTs || (joints === 2
+          ? [0.58 + depth * 0.08]
+          : [0.39 + depth * 0.08, 0.70 + depth * 0.07]);
+        for (const t of ts) {
+          const p = bez(p0, p1, p2, p3, t);
+          const d = dbez(p0, p1, p2, p3, t);
+          const len = Math.hypot(d[0], d[1]) || 1;
+          const nx = -d[1] / len, ny = d[0] / len;
+          const far = 1 - depth * 0.22 * t;
+          const near = opt.nearTip ? 1 + depth * 0.26 * t : 1;
+          const w = (w0 + (w1 - w0) * t) * far * near * 0.68;
+          ctx.beginPath();
+          ctx.moveTo(p[0] + nx * w, p[1] + ny * w);
+          ctx.quadraticCurveTo(p[0] + d[0] * 0.018, p[1] + d[1] * 0.018, p[0] - nx * w, p[1] - ny * w);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+    function maskStroke(ctx, pts, width = 17) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+      ctx.stroke();
+      ctx.restore();
+    }
+    function palm(ctx, x, y, w, h, side = 1, opt = {}) {
+      ctx.save();
+      ctx.globalAlpha = opt.alpha == null ? 1 : opt.alpha;
+      ctx.translate(x, y);
+      if (opt.rotate) ctx.rotate(opt.rotate);
+      const sx = side < 0 ? -1 : 1;
+      ctx.scale(sx, 1);
+      if (opt.tilt) ctx.scale(1, opt.tilt);
+      const palmPath = () => {
+        ctx.moveTo(-w * 0.38, -h * 0.48);
+        ctx.bezierCurveTo(-w * 0.58, -h * 0.2, -w * 0.53, h * 0.38, -w * 0.22, h * 0.5);
+        ctx.bezierCurveTo(w * 0.1, h * 0.63, w * 0.47, h * 0.42, w * 0.47, h * 0.05);
+        ctx.bezierCurveTo(w * 0.47, -h * 0.32, w * 0.15, -h * 0.54, -w * 0.38, -h * 0.48);
+      };
+      cutAndStroke(ctx, palmPath, { color: opt.color, width: opt.width || LINE.bone, alpha: opt.alpha });
+      ctx.globalAlpha *= 0.58;
+      ctx.lineWidth = LINE.garment;
+      ctx.strokeStyle = C.bright;
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.27, -h * 0.12);
+      ctx.bezierCurveTo(-w * 0.02, -h * 0.02, w * 0.12, h * 0.11, w * 0.22, h * 0.3);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.22, h * 0.22);
+      ctx.bezierCurveTo(-w * 0.03, h * 0.34, w * 0.16, h * 0.34, w * 0.34, h * 0.18);
+      ctx.stroke();
+      ctx.lineWidth = LINE.fine;
+      ctx.globalAlpha *= 0.72;
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.34, h * 0.02);
+      ctx.quadraticCurveTo(-w * 0.18, h * 0.05, -w * 0.02, h * 0.14);
+      ctx.stroke();
+      ctx.restore();
+    }
+    function thumb(ctx, base, tip, side = 1, opt = {}) {
+      const [x0, y0] = base, [x3, y3] = tip;
+      const dx = x3 - x0, dy = y3 - y0;
+      const p1 = [x0 + dx * 0.28 + 22 * side, y0 + dy * 0.06];
+      const p2 = [x0 + dx * 0.7 + 10 * side, y0 + dy * 0.85];
+      finger(ctx, base, p1, p2, tip, opt.w0 || 9, opt.w1 || 7, 2, opt);
+    }
+    function openHand(ctx, cx, cy, side = 1, opt = {}) {
+      const rot = opt.rot || 0;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      const alpha = opt.alpha == null ? 1 : opt.alpha;
+      const spread = opt.spread || 1;
+      const len = opt.len || 1;
+      const down = opt.down || 1;
+      const p = (x, y) => [side * x, y * down];
+      palm(ctx, 0, 30 * down, 76, 96, side, { alpha, tilt: opt.tilt || 1 });
+      const bases = [-29, -12, 5, 21];
+      const ends = [
+        [-52 * spread, -86 * len],
+        [-24 * spread, -108 * len],
+        [5 * spread, -120 * len],
+        [34 * spread, -98 * len],
+      ];
+      for (let i = 0; i < 4; i++) {
+        const b = p(bases[i], -8);
+        const e = p(ends[i][0], ends[i][1]);
+        finger(ctx, b, p(bases[i] - 4 * spread, -42 * len), p(ends[i][0] * 0.82, -74 * len), e, 8.5, 5.5, 3, { alpha });
+      }
+      thumb(ctx, p(36, 14), p(69, -48 * len), side, { alpha, w0: 8, w1: 6 });
+      ctx.restore();
+    }
+    function foldedHand(ctx, cx, cy, side = 1, opt = {}) {
+      const rot = opt.rot || 0;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      ctx.scale(side, 1);
+      const gap = opt.gap || 0;
+      palm(ctx, 4 + gap, 56, 62, 82, 1, { alpha: opt.alpha, tilt: opt.tilt || 0.94 });
+      for (let i = 0; i < 4; i++) {
+        const x = -20 + i * 12 + gap;
+        const bend = opt.curve || 0;
+        finger(ctx, [x, 16], [x + bend, -24], [x + bend * 0.6, -68], [x + opt.tipShift || x, -103 + Math.abs(i - 1.5) * 8], 7.4, 4.8, 3, { alpha: opt.alpha });
+      }
+      thumb(ctx, [28 + gap, 50], [7 + gap * 0.4, -8], 1, { alpha: opt.alpha, w0: 7, w1: 5.5 });
+      ctx.restore();
+    }
+    function joinedHands(ctx, mode) {
+      const cfg = {
+        solid: { gap: 0, curve: 0, spread: 0, open: 0 },
+        hollow: { gap: 16, curve: 14, spread: 0, open: 0 },
+        bud: { gap: 10, curve: 24, spread: -3, open: 0 },
+        opening: { gap: 10, curve: 34, spread: 12, open: 1 },
+        display: { gap: 20, curve: 42, spread: 22, open: 1 },
+      }[mode] || {};
+      if (cfg.open) {
+        foldedHand(ctx, 160 - cfg.gap * 0.4, 206, -1, { curve: -cfg.curve, tipShift: -cfg.spread });
+        foldedHand(ctx, 200 + cfg.gap * 0.4, 206, 1, { curve: cfg.curve, tipShift: cfg.spread });
+      } else {
+        foldedHand(ctx, 166 - cfg.gap / 2, 208, -1, { curve: -cfg.curve });
+        foldedHand(ctx, 194 + cfg.gap / 2, 208, 1, { curve: cfg.curve });
+      }
+      if (mode === 'hollow' || mode === 'bud') {
+        ctx.save();
+        ctx.strokeStyle = C.bright;
+        ctx.globalAlpha = 0.42;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.ellipse(180, 172, mode === 'bud' ? 22 : 31, mode === 'bud' ? 66 : 76, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+    function waterHands(ctx) {
+      palm(ctx, 130, 218, 70, 74, -1, { rotate: -0.72, alpha: 0.88, tilt: 0.86 });
+      palm(ctx, 230, 218, 70, 74, 1, { rotate: 0.72, alpha: 0.88, tilt: 0.86 });
+      for (let i = 0; i < 4; i++) {
+        const y = 190 - i * 9;
+        finger(ctx, [97 + i * 8, y], [122, y - 22], [153, y - 19], [176, y - 4], 7.5, 5.2, 3, { alpha: 0.88 });
+        finger(ctx, [263 - i * 8, y], [238, y - 22], [207, y - 19], [184, y - 4], 7.5, 5.2, 3, { alpha: 0.88 });
+      }
+      thumb(ctx, [137, 238], [179, 209], -1, { w0: 7, w1: 5 });
+      thumb(ctx, [223, 238], [181, 209], 1, { w0: 7, w1: 5 });
+      ctx.save();
+      ctx.strokeStyle = C.bright;
+      ctx.globalAlpha = 0.32;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.ellipse(180, 202, 64, 24, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+    function crossJoin(ctx, reverse = false) {
+      palm(ctx, 136, 242, 76, 82, -1, { rotate: -0.18, alpha: 0.8, tilt: 0.9 });
+      palm(ctx, 224, 242, 76, 82, 1, { rotate: 0.18, alpha: 0.8, tilt: 0.9 });
+      const leftFront = reverse;
+      for (let layer = 0; layer < 2; layer++) {
+        const drawLeft = layer === (leftFront ? 1 : 0);
+        for (let i = 0; i < 5; i++) {
+          const yy = 190 - i * 18;
+          const off = (i - 2) * 5;
+          if (drawLeft) {
+            maskStroke(ctx, [[118 + i * 6, 234], [148 + off, yy + 18], [206 - off, yy]], 16);
+            finger(ctx, [118 + i * 6, 234], [145 + off, yy + 28], [174, yy + 8], [206 - off, yy], 6.5, 4.8, 3);
+          } else {
+            maskStroke(ctx, [[242 - i * 6, 234], [212 - off, yy + 18], [154 + off, yy]], 16);
+            finger(ctx, [242 - i * 6, 234], [215 - off, yy + 28], [186, yy + 8], [154 + off, yy], 6.5, 4.8, 3);
+          }
+        }
+      }
+      ctx.save();
+      ctx.fillStyle = reverse ? C.red : C.bright;
+      ctx.globalAlpha = reverse ? 0.9 : 0.62;
+      ctx.font = '18px "Noto Serif TC", serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(reverse ? '左覆右' : '右覆左', 180, 51);
+      ctx.restore();
+    }
+    function backTouch(ctx) {
+      openHand(ctx, 136, 212, -1, { spread: 0.82, len: 0.88, alpha: 0.85, rot: -0.2 });
+      openHand(ctx, 224, 212, 1, { spread: 0.82, len: 0.88, alpha: 0.85, rot: 0.2 });
+      maskStroke(ctx, [[171, 118], [180, 246]], 14);
+      drawPath(ctx, [[180, 114], [180, 250]], { color: C.bright, alpha: 0.45, width: 1.4 });
+    }
+    function horizontalProp(ctx) {
+      palm(ctx, 112, 210, 74, 80, -1, { rotate: -1.58, alpha: 0.9, tilt: 0.72 });
+      palm(ctx, 248, 210, 74, 80, 1, { rotate: 1.58, alpha: 0.9, tilt: 0.72 });
+      for (let i = 0; i < 4; i++) {
+        const y = 164 + i * 20;
+        finger(ctx, [87, y], [124, y - 4], [151, y - 3], [179, y], 7.3, 4.8, 3);
+        finger(ctx, [273, y], [236, y - 4], [209, y - 3], [181, y], 7.3, 4.8, 3);
+      }
+      thumb(ctx, [114, 240], [174, 225], -1, { w0: 7, w1: 5 });
+      thumb(ctx, [246, 240], [186, 225], 1, { w0: 7, w1: 5 });
+    }
+    function coveredHands(ctx, mode) {
+      palm(ctx, 180, 220, 132, 76, 1, { rotate: Math.PI / 2, alpha: 0.72, tilt: 0.74 });
+      for (let i = 0; i < 4; i++) {
+        finger(ctx, [115 + i * 27, 203], [120 + i * 25, 232], [125 + i * 23, 256], [130 + i * 21, mode === 'downCover' ? 296 : 266], 7.5, 5.5, 3, { alpha: 0.72 });
+      }
+      maskStroke(ctx, [[99, 165], [265, 165], [270, 232]], 22);
+      palm(ctx, 180, 164, 132, 76, 1, { rotate: Math.PI / 2, tilt: 0.78 });
+      for (let i = 0; i < 4; i++) {
+        finger(ctx, [103 + i * 28, 150], [110 + i * 26, 177], [119 + i * 24, 206], [130 + i * 22, mode === 'downCover' ? 252 : 230], 7.6, 5.4, 3);
+      }
+      thumb(ctx, [96, 177], [139, 208], -1, { w0: 7, w1: 5 });
+      thumb(ctx, [264, 177], [221, 208], 1, { w0: 7, w1: 5 });
+    }
+    function fistBase(ctx, cx, cy, side = 1, opt = {}) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      if (opt.rot) ctx.rotate(opt.rot);
+      ctx.scale(side, 1);
+      palm(ctx, 0, 18, 91, 86, 1, { alpha: opt.alpha, tilt: opt.tilt || 0.9 });
+      for (let i = 0; i < 4; i++) {
+        const y = -14 + i * 20;
+        cutAndStroke(ctx, () => pathRoundRect(ctx, -42 + i * 5, y, 70 - i * 4, 18, 9),
+          { width: LINE.bone, alpha: opt.alpha });
+        drawPath(ctx, [[-21 + i * 4, y + 2], [-14 + i * 4, y + 15]], { color: C.bright, width: 1.1, alpha: 0.48 });
+      }
+      if (opt.thumb === 'inside') {
+        drawPath(ctx, [[28, 0], [1, 30], [-22, 44]], { color: C.bright, width: 2.2, alpha: 0.75 });
+      } else {
+        thumb(ctx, [35, 10], [-15, 47], 1, { w0: 8, w1: 6, alpha: opt.alpha });
+      }
+      ctx.restore();
+    }
+    function drawVajraFist(ctx) {
+      fistBase(ctx, 180, 186, 1, { thumb: 'inside' });
+    }
+    function drawLotusFist(ctx) {
+      fistBase(ctx, 180, 186, 1, { thumb: 'outside' });
+      drawPath(ctx, [[219, 183], [195, 164], [171, 159]], { color: C.bright, width: 2.3, alpha: 0.8 });
+    }
+    function drawWrathFist(ctx) {
+      fistBase(ctx, 180, 215, 1, { thumb: 'inside' });
+      maskStroke(ctx, [[146, 198], [142, 151], [146, 105]], 14);
+      maskStroke(ctx, [[214, 198], [236, 149], [233, 101]], 14);
+      finger(ctx, [148, 201], [139, 150], [140, 94], [151, 55], 7, 5, 3);
+      finger(ctx, [214, 201], [242, 148], [247, 98], [235, 62], 6.7, 4.7, 3);
+      drawPath(ctx, [[143, 199], [154, 199]], { color: C.bright, width: 1.1, alpha: 0.5 });
+      drawPath(ctx, [[207, 199], [220, 199]], { color: C.bright, width: 1.1, alpha: 0.5 });
+    }
+    function drawHookFist(ctx) {
+      fistBase(ctx, 180, 215, 1, { thumb: 'inside' });
+      maskStroke(ctx, [[148, 199], [144, 145], [171, 96]], 14);
+      finger(ctx, [148, 201], [141, 146], [181, 93], [165, 62], 7, 5, 3);
+      drawPath(ctx, [[170, 68], [188, 73], [190, 91]], { color: C.bright, width: 1.3, alpha: 0.65 });
+      drawPath(ctx, [[142, 199], [154, 199]], { color: C.bright, width: 1.1, alpha: 0.5 });
+    }
+    function bindHands(ctx, outer = false) {
+      palm(ctx, 134, 222, 78, 82, -1, { rotate: -0.18, alpha: 0.9, tilt: 0.88 });
+      palm(ctx, 226, 222, 78, 82, 1, { rotate: 0.18, alpha: 0.9, tilt: 0.88 });
+      for (let i = 0; i < 5; i++) {
+        const y = 184 - i * 12;
+        finger(ctx, [111 + i * 7, 221], [139, y + 24], [163, y + 14], [187, y], 7, outer ? 5.2 : 3.2, 3, { alpha: outer ? 1 : 0.65 });
+        maskStroke(ctx, [[249 - i * 7, 221], [221, y + 24], [197, y + 14], [173, y]], outer ? 13 : 19);
+        finger(ctx, [249 - i * 7, 221], [221, y + 24], [197, y + 14], [173, y], 7, outer ? 5.2 : 3.2, 3, { alpha: outer ? 1 : 0.65 });
+      }
+      if (outer) {
+        for (let i = 0; i < 5; i++) {
+          ctx.save();
+          ctx.fillStyle = C.bright;
+          ctx.globalAlpha = 0.82;
+          ctx.beginPath();
+          ctx.arc(150 + i * 15, 113 + (i % 2) * 8, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      } else {
+        ctx.save();
+        ctx.strokeStyle = C.bright;
+        ctx.globalAlpha = 0.28;
+        ctx.lineWidth = 1.4;
+        ctx.strokeRect(130, 139, 100, 66);
+        ctx.restore();
+      }
+    }
+    function tathagataFist(ctx) {
+      fistBase(ctx, 180, 232, -1, { thumb: 'outside', alpha: 0.78 });
+      finger(ctx, [178, 202], [179, 164], [181, 134], [181, 101], 9, 6.8, 2, { alpha: 0.9 });
+      maskStroke(ctx, [[120, 171], [236, 174], [229, 238]], 28);
+      fistBase(ctx, 180, 176, 1, { thumb: 'inside' });
+      drawPath(ctx, [[181, 112], [181, 151]], { color: C.bright, width: 2.5, alpha: 0.86 });
+    }
+    function wisdomFist(ctx) {
+      fistBase(ctx, 154, 222, -1, { thumb: 'inside', alpha: 0.86 });
+      finger(ctx, [174, 180], [174, 130], [174, 85], [174, 46], 8, 5.2, 3);
+      maskStroke(ctx, [[199, 158], [240, 181], [221, 245]], 28);
+      fistBase(ctx, 213, 191, 1, { thumb: 'inside' });
+      thumb(ctx, [231, 167], [178, 50], 1, { w0: 7, w1: 4.8 });
+      ctx.save();
+      ctx.fillStyle = C.bright;
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.arc(176, 48, 4.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    function dhyana(ctx, amida = false) {
+      palm(ctx, 154, 214, 118, 70, -1, { rotate: -1.5, alpha: 0.76, tilt: 0.72 });
+      palm(ctx, 206, 192, 118, 70, 1, { rotate: 1.5, tilt: 0.72 });
+      for (let i = 0; i < 4; i++) {
+        finger(ctx, [112 + i * 25, 214], [134 + i * 19, 231], [170 + i * 8, 233], [206 + i * 2, 218], 6.6, 4.7, 3, { alpha: 0.75 });
+        finger(ctx, [120 + i * 25, 184], [143 + i * 20, 166], [182 + i * 8, 165], [221 + i * 2, 181], 6.6, 4.7, 3);
+      }
+      if (amida) {
+        thumb(ctx, [143, 192], [169, 169], -1, { w0: 6.6, w1: 5 });
+        finger(ctx, [167, 179], [159, 165], [155, 156], [169, 148], 5.8, 4.5, 3);
+        thumb(ctx, [217, 205], [191, 228], 1, { w0: 6.6, w1: 5 });
+        finger(ctx, [193, 218], [201, 232], [205, 241], [191, 249], 5.8, 4.5, 3);
+      } else {
+        thumb(ctx, [139, 193], [178, 187], -1, { w0: 6.6, w1: 5 });
+        thumb(ctx, [221, 193], [182, 187], 1, { w0: 6.6, w1: 5 });
+      }
+      ctx.save();
+      ctx.strokeStyle = C.bright;
+      ctx.globalAlpha = 0.38;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.ellipse(180, 194, 52, 25, -0.08, 0, Math.PI * 2);
+      ctx.stroke();
+      if (amida) {
+        ctx.fillStyle = C.red;
+        ctx.globalAlpha = 0.92;
+        ctx.font = '16px "Noto Serif TC", serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('晚出', 180, 61);
+      }
+      ctx.restore();
+    }
+    function earthTouch(ctx) {
+      palm(ctx, 142, 206, 92, 64, -1, { rotate: -1.42, alpha: 0.9, tilt: 0.76 });
+      for (let i = 0; i < 4; i++) {
+        finger(ctx, [93 + i * 20, 198], [100 + i * 19, 223], [102 + i * 18, 256], [101 + i * 17, 298], 6.8, 4.8, 3);
+      }
+      thumb(ctx, [158, 203], [132, 252], 1, { w0: 7, w1: 5 });
+      drawPath(ctx, [[67, 306], [230, 306]], { color: C.red, width: 1.3, alpha: 0.55 });
+      palm(ctx, 225, 234, 95, 62, 1, { rotate: 1.52, alpha: 0.74, tilt: 0.74 });
+      for (let i = 0; i < 4; i++) {
+        finger(ctx, [187 + i * 18, 221], [207 + i * 15, 207], [230 + i * 8, 207], [248 + i * 3, 219], 5.8, 4.4, 3, { alpha: 0.74 });
+      }
+    }
+    function boon(ctx) {
+      openHand(ctx, 180, 150, 1, { spread: 0.72, len: 0.92, down: -1 });
+      drawPath(ctx, [[118, 305], [242, 305]], { color: C.red, width: 1.2, alpha: 0.36 });
+    }
+    function abhaya(ctx) {
+      openHand(ctx, 180, 212, 1, { spread: 0.86, len: 0.96 });
+      drawPath(ctx, [[118, 294], [147, 333]], { color: C.gold, width: 2, alpha: 0.8 });
+    }
+    function teaching(ctx) {
+      openHand(ctx, 134, 222, -1, { spread: 0.68, len: 0.78, alpha: 0.68, rot: -0.33 });
+      openHand(ctx, 226, 214, 1, { spread: 0.68, len: 0.78, rot: 0.33 });
+      maskStroke(ctx, [[128, 155], [159, 132], [185, 153]], 18);
+      thumb(ctx, [128, 168], [166, 139], -1, { w0: 6, w1: 4.5, alpha: 0.8 });
+      finger(ctx, [153, 151], [161, 136], [174, 134], [184, 150], 5.8, 4.4, 3, { alpha: 0.8 });
+      maskStroke(ctx, [[232, 150], [201, 128], [177, 153]], 18);
+      thumb(ctx, [232, 164], [194, 137], 1, { w0: 6, w1: 4.5 });
+      finger(ctx, [207, 148], [199, 133], [186, 134], [176, 150], 5.8, 4.4, 3);
+      ctx.save();
+      ctx.strokeStyle = C.bright;
+      ctx.globalAlpha = 0.6;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.ellipse(180, 145, 14, 21, Math.PI / 2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+    function drawNameSeal(ctx, short) {
+      ctx.save();
+      ctx.strokeStyle = C.red;
+      ctx.fillStyle = C.red;
+      ctx.globalAlpha = 0.56;
+      ctx.lineWidth = 1.3;
+      ctx.strokeRect(286, 286, 38, 38);
+      ctx.font = '18px "Noto Serif TC", serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(short, 305, 305);
+      ctx.restore();
+    }
+    const drawers = {
+      solid: ctx => joinedHands(ctx, 'solid'),
+      hollow: ctx => joinedHands(ctx, 'hollow'),
+      bud: ctx => joinedHands(ctx, 'bud'),
+      opening: ctx => joinedHands(ctx, 'opening'),
+      display: ctx => joinedHands(ctx, 'display'),
+      water: waterHands,
+      vajraJoin: ctx => crossJoin(ctx, false),
+      reverseCross: ctx => crossJoin(ctx, true),
+      backTouch,
+      horizontalProp,
+      downCover: ctx => coveredHands(ctx, 'downCover'),
+      covered: ctx => coveredHands(ctx, 'covered'),
+      vajraFist: drawVajraFist,
+      lotusFist: drawLotusFist,
+      innerBind: ctx => bindHands(ctx, false),
+      outerBind: ctx => bindHands(ctx, true),
+      wrathFist: drawWrathFist,
+      tathagataFist,
+      wisdomFist,
+      dharmadhatuDhyana: ctx => dhyana(ctx, false),
+      amidaDhyana: ctx => dhyana(ctx, true),
+      earthTouch,
+      boon,
+      abhaya,
+      teaching,
+      hookFist: drawHookFist,
+    };
+    document.querySelectorAll('canvas[data-draw]').forEach((canvas, i) => {
+      const ctx = canvas.getContext('2d');
+      setup(ctx);
+      ctx.save();
+      ctx.strokeStyle = C.gold;
+      ctx.globalAlpha = 0.14;
+      ctx.lineWidth = 1;
+      for (let x = 36; x < 360; x += 36) drawPath(ctx, [[x, 28], [x, 332]], { width: 1, alpha: 0.12 });
+      for (let y = 36; y < 360; y += 36) drawPath(ctx, [[28, y], [332, y]], { width: 1, alpha: 0.12 });
+      ctx.restore();
+      const draw = drawers[canvas.dataset.draw];
+      if (draw) draw(ctx);
+      drawNameSeal(ctx, String(i + 1).padStart(2, '0'));
+    });
+  </script>
+</body>
+</html>

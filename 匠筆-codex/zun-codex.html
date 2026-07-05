@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>五方佛與金剛薩埵 · Codex 白描</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d1124;
+      --panel: #10162c;
+      --panel-2: #141a31;
+      --gold: #d8b36a;
+      --silk: #e8e1cf;
+      --red: #b0402c;
+      --line-dim: rgba(216, 179, 106, 0.22);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--silk); }
+    body {
+      font-family: "Songti TC", "Noto Serif CJK TC", "Source Han Serif TC", "Hiragino Mincho ProN", serif;
+      letter-spacing: 0;
+    }
+    main {
+      min-height: 100vh;
+      padding: 28px 30px 34px;
+      background:
+        radial-gradient(circle at 8% 8%, rgba(216, 179, 106, 0.06), transparent 26%),
+        linear-gradient(180deg, rgba(232, 225, 207, 0.035), rgba(13, 17, 36, 0) 190px),
+        var(--bg);
+    }
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      max-width: 3820px;
+      margin: 0 auto 18px;
+      border-bottom: 1px solid rgba(216, 179, 106, 0.26);
+      padding-bottom: 13px;
+    }
+    h1 {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(25px, 2.4vw, 39px);
+      font-weight: 600;
+      line-height: 1.16;
+    }
+    .seal {
+      flex: 0 0 auto;
+      color: var(--red);
+      border: 1px solid rgba(176, 64, 44, 0.74);
+      padding: 5px 9px;
+      font-size: 15px;
+      line-height: 1;
+    }
+    .row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 18px;
+      overflow-x: auto;
+      padding: 3px 2px 18px;
+      max-width: 3820px;
+      margin: 0 auto;
+      scrollbar-color: rgba(216, 179, 106, 0.55) rgba(216, 179, 106, 0.08);
+    }
+    .card {
+      flex: 0 0 620px;
+      background: linear-gradient(180deg, rgba(232, 225, 207, 0.045), rgba(232, 225, 207, 0.015)), var(--panel);
+      border: 1px solid rgba(216, 179, 106, 0.24);
+      border-radius: 8px;
+      padding: 12px 12px 14px;
+      box-shadow: inset 0 0 0 1px rgba(13, 17, 36, 0.7);
+    }
+    canvas {
+      display: block;
+      width: 596px;
+      height: 660px;
+      background: var(--panel-2);
+      border: 1px solid rgba(216, 179, 106, 0.18);
+      border-radius: 4px;
+    }
+    .caption {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 12px;
+      row-gap: 4px;
+      align-items: baseline;
+      padding: 11px 4px 0;
+    }
+    .caption h2 {
+      margin: 0;
+      color: var(--gold);
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.18;
+      white-space: nowrap;
+    }
+    .meta {
+      color: rgba(232, 225, 207, 0.78);
+      font-size: 14px;
+      line-height: 1.3;
+      text-align: right;
+      min-width: 0;
+    }
+    .rule {
+      grid-column: 1 / -1;
+      color: rgba(232, 225, 207, 0.88);
+      font-size: 14px;
+      line-height: 1.45;
+      min-height: 40px;
+    }
+    @media (max-width: 720px) {
+      main { padding: 18px 12px 26px; }
+      header { align-items: start; }
+      .seal { display: none; }
+      .card { flex-basis: 520px; }
+      canvas { width: 496px; height: 556px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>金剛界五方佛與金剛薩埵</h1>
+    <div class="seal">紺紙金泥白描</div>
+  </header>
+  <section class="row" id="gallery" aria-label="六尊坐像"></section>
+</main>
+
+<script type="module">
+import { 執筆 } from '../dist/bi.js';
+
+const GOLD = '#d8b36a';
+const SILK = '#e8e1cf';
+const RED = '#b0402c';
+const SHOW_GRID = new URLSearchParams(location.search).get('grid') === '1';
+
+const DEITIES = [
+  {
+    key: 'center.k',
+    name: '大日如來',
+    form: '菩薩形',
+    mudra: '智拳印',
+    rule: '左拳豎頭指於胸前，右拳握之，頭指見一節於兩拳之隙，右拇覆壓其尖。',
+    type: 'bodhisattva',
+    action: 'chiken',
+  },
+  {
+    key: 'east.k',
+    name: '阿閦如來',
+    form: '如來形',
+    mudra: '觸地印',
+    rule: '左手腹前握衣端，右手垂下手背向外，指尖觸地。',
+    type: 'buddha',
+    action: 'earth',
+  },
+  {
+    key: 'south.k',
+    name: '寶生如來',
+    form: '如來形',
+    mudra: '與願印',
+    rule: '左手腹前握衣端，右掌向前下垂。',
+    type: 'buddha',
+    action: 'boon',
+  },
+  {
+    key: 'west.k',
+    name: '阿彌陀如來',
+    form: '如來形',
+    mudra: '彌陀定印',
+    rule: '兩手膝上相疊禪定，成身會作定印。',
+    type: 'buddha',
+    action: 'meditation',
+  },
+  {
+    key: 'north.k',
+    name: '不空成就如來',
+    form: '如來形',
+    mudra: '施無畏印',
+    rule: '左手腹前握衣端，右手舉胸前掌向外。',
+    type: 'buddha',
+    action: 'abhaya',
+  },
+  {
+    key: 'fugen.k',
+    name: '金剛薩埵',
+    form: '菩薩形',
+    mudra: '執杵鈴',
+    rule: '右手斜執五鈷杵當胸，左手執五鈷鈴安於左膝。〔待核〕',
+    type: 'bodhisattva',
+    action: 'vajra-bell',
+  },
+];
+
+const gallery = document.getElementById('gallery');
+for (const deity of DEITIES) {
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.innerHTML = `
+    <canvas width="596" height="660" data-deity="${deity.key}" aria-label="${deity.name}"></canvas>
+    <div class="caption">
+      <h2>${deity.name}</h2>
+      <div class="meta">${deity.mudra} · ${deity.form}</div>
+      <div class="rule">${deity.rule}</div>
+    </div>`;
+  gallery.appendChild(card);
+}
+
+function drawAll() {
+  for (const canvas of document.querySelectorAll('canvas[data-deity]')) {
+    const deity = DEITIES.find(d => d.key === canvas.dataset.deity);
+    drawCard(canvas, deity);
+  }
+}
+
+function drawCard(canvas, deity) {
+  const cssW = canvas.clientWidth || canvas.width;
+  const cssH = canvas.clientHeight || canvas.height;
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+  ctx.fillStyle = '#10162c';
+  ctx.fillRect(0, 0, cssW, cssH);
+  texture(ctx, cssW, cssH);
+
+  const cx = cssW / 2;
+  const cy = cssH * 0.47;
+  const R = Math.min(cssW * 0.535, cssH * 0.49);
+  ctx.save();
+  ctx.translate(cx, cy);
+  const b = 執筆(ctx, R);
+  ctx.strokeStyle = GOLD;
+  ctx.fillStyle = GOLD;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  moon(ctx, b, R);
+  if (SHOW_GRID) grid(ctx, b, R);
+  drawHalo(b);
+  lotus(b);
+  backDrapery(b, deity);
+  lowerBody(b, deity);
+  torso(b, deity);
+  head(b, deity);
+  if (deity.type === 'bodhisattva') ornaments(b, deity);
+  frontDrapery(b, deity);
+  armsAndMudra(b, deity);
+  ctx.restore();
+}
+
+function texture(ctx, w, h) {
+  ctx.save();
+  ctx.globalAlpha = 0.075;
+  ctx.fillStyle = SILK;
+  for (let i = 0; i < 90; i++) {
+    const x = (i * 37) % w;
+    const y = (i * 71) % h;
+    ctx.fillRect(x, y, 0.8, 0.8);
+  }
+  ctx.restore();
+}
+
+function moon(ctx, b, R) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(216, 179, 106, 0.54)';
+  ctx.lineWidth = Math.max(1, R * 0.006);
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 0.93, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = 0.08;
+  ctx.fillStyle = SILK;
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 0.93, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function grid(ctx, b, R) {
+  const anchors = [[12, '白毫'], [20, '頦'], [36, '心窩'], [48, '臍'], [64, '盤線'], [68, '座面']];
+  ctx.save();
+  ctx.strokeStyle = RED;
+  ctx.fillStyle = RED;
+  ctx.globalAlpha = 0.48;
+  ctx.lineWidth = Math.max(1, R * 0.0045);
+  for (const [z] of anchors) {
+    ctx.beginPath();
+    ctx.moveTo(-31 * b.u, b.Y(z));
+    ctx.lineTo(31 * b.u, b.Y(z));
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.moveTo(-26 * b.u, b.Y(64));
+  ctx.lineTo(26 * b.u, b.Y(64));
+  ctx.stroke();
+  ctx.globalAlpha = 0.72;
+  ctx.font = `${Math.round(R * 0.032)}px "Songti TC", serif`;
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (const [z, label] of anchors) ctx.fillText(`${label} ${z}`, -32.5 * b.u, b.Y(z));
+  ctx.restore();
+}
+
+function drawHalo(b) {
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(216, 179, 106, 0.72)';
+  ctx.lineWidth = b.W_IN * 0.62;
+  b.E(0, 15.8, 13.5, 14.8, 0);
+  ctx.globalAlpha = 0.28;
+  b.E(0, 15.8, 16.2, 17.4, 0);
+  ctx.restore();
+}
+
+function lotus(b) {
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.strokeStyle = GOLD;
+  ctx.lineWidth = b.W_OUT * 0.26;
+  b.B(-31, 72.2, -22, 68.3, 22, 68.3, 31, 72.2);
+  b.B(-30, 75.5, -16, 81.8, 16, 81.8, 30, 75.5);
+  for (let i = -4; i <= 4; i++) {
+    const x = i * 7.1;
+    petal(b, x, 71.4, 4.6, 7.3, i * 0.055);
+  }
+  for (let i = -3; i <= 3; i++) {
+    const x = i * 8.4;
+    petal(b, x, 77.2, 5.2, 6.3, Math.PI + i * 0.04);
+  }
+  b.thin(() => {
+    b.B(-23, 73.5, -14, 75, 14, 75, 23, 73.5);
+    b.B(-19, 78.8, -7, 80.2, 7, 80.2, 19, 78.8);
+  });
+  ctx.restore();
+}
+
+function petal(b, x, z, rx, rz, rot) {
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.translate(x * b.u, b.Y(z));
+  ctx.rotate(rot);
+  ctx.beginPath();
+  ctx.moveTo(0, -rz * b.u);
+  ctx.bezierCurveTo(rx * b.u, -rz * 0.15 * b.u, rx * 0.78 * b.u, rz * 0.76 * b.u, 0, rz * b.u);
+  ctx.bezierCurveTo(-rx * 0.78 * b.u, rz * 0.76 * b.u, -rx * b.u, -rz * 0.15 * b.u, 0, -rz * b.u);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function backDrapery(b, deity) {
+  if (deity.type !== 'bodhisattva') return;
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.lineWidth = b.W_IN * 0.74;
+  ctx.globalAlpha = 0.84;
+  b.B(-12, 26, -25, 39, -31, 51, -27, 65);
+  b.B(12, 26, 27, 39, 31, 52, 26, 65);
+  b.B(-16, 32, -26, 46, -25, 57, -18, 68);
+  b.B(16, 32, 26, 46, 25, 57, 18, 68);
+  ctx.restore();
+}
+
+function lowerBody(b, deity) {
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.lineWidth = b.W_OUT * 0.34;
+  const robeLift = deity.type === 'bodhisattva' ? 1.4 : 0;
+
+  b.B(-7, 51, -14, 54, -23, 57.2, -26, 63.7);
+  b.B(7, 51, 14, 54, 23, 57.2, 26, 63.7);
+  b.B(-26, 63.7, -15, 67.2, 10, 67.2, 26, 63.7);
+  b.B(-23, 59.5, -10, 56, 5, 57.2, 21, 62.1);
+  b.B(23, 59.5, 10, 56.2, -5, 57.2, -21, 62.1);
+
+  foot(b, 13, 59.2 - robeLift, -0.12, false);
+  foot(b, -13, 59.6 - robeLift, 0.12, true);
+  soleMarks(b, 13, 59.2 - robeLift, -0.12);
+  soleMarks(b, -13, 59.6 - robeLift, 0.12);
+
+  b.thin(() => {
+    b.B(-24, 63, -18, 60, -14, 59, -7, 59.2);
+    b.B(24, 63, 18, 60, 14, 59, 7, 59.2);
+    b.B(-20, 65.2, -9, 62.4, 9, 62.4, 20, 65.2);
+    for (let i = 0; i < 3; i++) {
+      const off = i * 2.1;
+      b.B(-22 + off, 58.4 + i * 0.7, -16 + off, 60.7, -12 + off, 62.7, -8 + off, 64.4);
+      b.B(22 - off, 58.4 + i * 0.7, 16 - off, 60.7, 12 - off, 62.7, 8 - off, 64.4);
+    }
+  });
+  ctx.restore();
+}
+
+function foot(b, x, z, rot, mirror) {
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.lineWidth = b.W_OUT * 0.32;
+  b.E(x, z, 7.8, 2.55, rot);
+  const toeDir = mirror ? -1 : 1;
+  b.thin(() => {
+    for (let i = 0; i < 5; i++) {
+      const tx = x + toeDir * (4.4 + i * 0.72);
+      const tz = z - 1.5 + i * 0.13;
+      b.E(tx, tz, 0.55, 0.82, rot + toeDir * 0.12);
+    }
+  });
+  ctx.restore();
+}
+
+function soleMarks(b, x, z, rot) {
+  b.thin(() => {
+    b.E(x - 1.2, z + 0.1, 1.3, 0.82, rot);
+    b.E(x + 1.7, z + 0.05, 1.1, 0.7, rot);
+  });
+}
+
+function torso(b, deity) {
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.lineWidth = b.W_OUT * 0.34;
+  if (deity.type === 'bodhisattva') {
+    b.B(-11.6, 27.5, -12.6, 35, -10.2, 42.5, -6.2, 49);
+    b.B(11.7, 27.5, 10.4, 36, 8.8, 43, 5.4, 49);
+    b.B(-6.2, 49, -2, 51.1, 2, 51.1, 5.4, 49);
+    b.thin(() => {
+      b.B(-8.8, 36.2, -3.5, 34.9, 4.5, 35.2, 9, 37);
+      b.B(-5.8, 41.8, -2, 44, 3.4, 44, 7, 42.8);
+      b.A(0.8, 48, 0.48);
+    });
+  } else {
+    b.B(-12.3, 27.2, -13.2, 36.8, -10, 45, -6.2, 51.2);
+    b.B(12.3, 27.2, 10.8, 36.8, 9, 45.2, 5.8, 51.2);
+    b.B(-6.2, 51.2, -2.2, 53.4, 2.2, 53.4, 5.8, 51.2);
+    robe(b, deity);
+  }
+  neck(b);
+  ctx.restore();
+}
+
+function neck(b) {
+  b.B(-3.2, 20.2, -3.8, 22.7, -3.2, 25, -1.9, 26.8);
+  b.B(3.2, 20.2, 3.8, 22.7, 3.2, 25, 1.9, 26.8);
+  b.thin(() => {
+    b.B(-3, 22.4, -1.2, 23.2, 1.2, 23.2, 3, 22.4);
+    b.B(-2.7, 24.1, -1, 24.8, 1, 24.8, 2.7, 24.1);
+  });
+}
+
+function robe(b, deity) {
+  b.thin(() => {
+    b.B(-11.8, 29, -8.6, 35.2, -6.6, 43.3, -5.7, 52.6);
+    b.B(-3.2, 30.5, 1.2, 38.3, 5.9, 46.4, 9.2, 55.2);
+    b.B(-4.8, 28.5, -6.2, 36.6, -5.7, 44, -3.3, 52.4);
+    for (let i = 0; i < 4; i++) {
+      b.B(-9 + i * 2.2, 42 + i * 1.2, -4 + i * 1.3, 43.8 + i * 1.0, 2.4 + i * 0.7, 46.5 + i * 1.05);
+    }
+  });
+  if (deity.action === 'earth' || deity.action === 'boon' || deity.action === 'abhaya') {
+    b.B(-5.5, 42, -2.2, 44.2, 1.6, 44.2, 4.7, 42.4);
+  }
+}
+
+function head(b, deity) {
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.lineWidth = b.W_OUT * 0.32;
+  if (deity.type === 'bodhisattva') {
+    hairMass(b);
+    b.E(0, 16.3, 4.8, 6.15, 0);
+    face(b);
+    bodhiCrown(b, deity.action === 'vajra-bell');
+    earrings(b);
+  } else {
+    b.E(0, 16.2, 4.7, 6.05, 0);
+    b.B(-3.7, 10.8, -2, 7.9, 2, 7.9, 3.7, 10.8);
+    b.B(-4.3, 11.4, -2.3, 9.2, 2.3, 9.2, 4.3, 11.4);
+    b.thin(() => {
+      for (let i = -3; i <= 3; i++) {
+        b.A(i * 1.1, 11.7 + Math.abs(i) * 0.08, 0.42, Math.PI, Math.PI * 2);
+      }
+    });
+    face(b);
+  }
+  ctx.restore();
+}
+
+function hairMass(b) {
+  b.B(-4.7, 11.8, -7, 14.3, -6.5, 18.6, -4.7, 21);
+  b.B(4.7, 11.8, 7, 14.3, 6.5, 18.6, 4.7, 21);
+  b.thin(() => {
+    b.B(-6, 16, -8, 20, -6.6, 25, -4.2, 29);
+    b.B(6, 16, 8, 20, 6.6, 25, 4.2, 29);
+  });
+}
+
+function bodhiCrown(b, fiveBuddhas) {
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.lineWidth = b.W_OUT * 0.28;
+  b.B(-7.2, 10.6, -3.6, 8.6, 3.6, 8.6, 7.2, 10.6);
+  for (let i = -2; i <= 2; i++) {
+    const x = i * 3.15;
+    b.B(x - 1.35, 10.2, x - 0.9, 7.2 - Math.abs(i) * 0.45, x + 0.9, 7.2 - Math.abs(i) * 0.45, x + 1.35, 10.2);
+    b.dot(x, 9.25 - Math.abs(i) * 0.32, 0.24);
+    if (fiveBuddhas) {
+      b.E(x, 8.35 - Math.abs(i) * 0.36, 0.55, 0.7, 0);
+      b.A(x, 8.05 - Math.abs(i) * 0.36, 0.26, Math.PI, Math.PI * 2);
+    }
+  }
+  b.thin(() => {
+    b.B(-6.4, 11.2, -2.6, 12.2, 2.6, 12.2, 6.4, 11.2);
+    b.B(-5.8, 12.3, -2, 13.1, 2, 13.1, 5.8, 12.3);
+  });
+  ctx.restore();
+}
+
+function face(b) {
+  b.thin(() => {
+    b.B(-3.4, 14.1, -2.2, 13.3, -1.1, 13.4, -0.35, 14.1);
+    b.B(3.4, 14.1, 2.2, 13.3, 1.1, 13.4, 0.35, 14.1);
+    b.B(-3.0, 15.1, -2, 15.55, -1.05, 15.5, -0.45, 15.08);
+    b.B(3.0, 15.1, 2, 15.55, 1.05, 15.5, 0.45, 15.08);
+    b.dot(-1.65, 15.12, 0.17);
+    b.dot(1.65, 15.12, 0.17);
+    b.dot(0, 12, 0.33);
+    b.B(0.15, 15.6, -0.25, 16.45, -0.18, 17.05, 0.35, 17.3);
+    b.B(-1.65, 18.05, -0.5, 18.58, 0.72, 18.54, 1.68, 18.0);
+    b.B(-1.7, 19.35, -0.6, 19.9, 0.6, 19.9, 1.7, 19.35);
+  });
+}
+
+function earrings(b) {
+  b.E(-5.5, 18.4, 1.0, 1.65, 0.08);
+  b.E(5.5, 18.4, 1.0, 1.65, -0.08);
+}
+
+function armsAndMudra(b, deity) {
+  if (deity.action === 'chiken') chiken(b);
+  else if (deity.action === 'earth') earthTouch(b);
+  else if (deity.action === 'boon') boon(b);
+  else if (deity.action === 'meditation') meditation(b);
+  else if (deity.action === 'abhaya') abhaya(b);
+  else if (deity.action === 'vajra-bell') vajraBell(b);
+}
+
+function drawArm(b, side, shoulder, elbow, wrist, sleeve = false) {
+  const s = side;
+  b.B(s * shoulder[0], shoulder[1], s * elbow[0], elbow[1], s * (wrist[0] + 1.1), wrist[1] - 1.2, s * wrist[0], wrist[1]);
+  b.B(s * (shoulder[0] - 2.1), shoulder[1] + 1.6, s * (elbow[0] - 2.0), elbow[1] + 1.8, s * (wrist[0] - 1.7), wrist[1] + 1.2, s * (wrist[0] - 0.9), wrist[1] + 2.0);
+  if (sleeve) {
+    b.thin(() => b.B(s * (shoulder[0] - 2.6), shoulder[1] + 3.2, s * (elbow[0] - 1.5), elbow[1] + 5, s * (wrist[0] - 2), wrist[1] + 5, s * (wrist[0] - 3.2), wrist[1] + 3.6));
+  }
+}
+
+function fist(b, x, z, scale = 1, rot = 0) {
+  b.E(x, z, 2.25 * scale, 2.05 * scale, rot);
+  b.thin(() => {
+    for (let i = -1; i <= 2; i++) {
+      b.B(x - 1.45 * scale + i * 0.8 * scale, z - 1.1 * scale,
+        x - 1.2 * scale + i * 0.74 * scale, z - 0.15 * scale,
+        x - 1.1 * scale + i * 0.7 * scale, z + 0.85 * scale,
+        x - 0.9 * scale + i * 0.68 * scale, z + 1.18 * scale);
+    }
+  });
+}
+
+function openPalm(b, x, z, rot, scale = 1, upward = false) {
+  b.E(x, z, 2.1 * scale, 3.0 * scale, rot);
+  b.thin(() => {
+    const a = upward ? -1 : 1;
+    for (let i = -2; i <= 2; i++) {
+      const dx = i * 0.82 * scale;
+      b.B(x + dx * Math.cos(rot) - a * 0.6 * Math.sin(rot), z - a * 1.8 * scale,
+        x + dx * Math.cos(rot) - a * 1.0 * Math.sin(rot), z - a * 3.0 * scale,
+        x + dx * Math.cos(rot) - a * 1.2 * Math.sin(rot), z - a * 4.0 * scale,
+        x + dx * Math.cos(rot) - a * 0.9 * Math.sin(rot), z - a * 5.0 * scale);
+    }
+    b.B(x - 1.5 * scale, z + a * 0.4 * scale, x - 2.7 * scale, z + a * 0.7 * scale, x - 3.0 * scale, z + a * 2.2 * scale, x - 2.0 * scale, z + a * 2.6 * scale);
+  });
+}
+
+function graspCloth(b, x, z) {
+  fist(b, x, z, 0.86, 0.12);
+  b.thin(() => {
+    b.B(x - 2.2, z + 1, x - 1, z + 3.4, x + 1.5, z + 3.4, x + 2.3, z + 1.2);
+    b.B(x - 1.7, z + 2.3, x - 0.4, z + 4.6, x + 1.1, z + 4.2, x + 1.9, z + 2.1);
+  });
+}
+
+function chiken(b) {
+  drawArm(b, -1, [10.5, 29], [12.6, 36.8], [3.3, 39.3], false);
+  drawArm(b, 1, [10.5, 29], [12.8, 36.8], [1.5, 38.4], false);
+  b.B(-4.3, 38.2, -2.3, 36.7, -0.7, 36.9, 0.2, 38.7);
+  b.B(4.6, 38.1, 2.4, 36.2, 0.2, 36.3, -0.6, 38.5);
+  fist(b, -1.25, 39.5, 1.0, -0.12);
+  fist(b, 2.05, 38.8, 1.0, 0.16);
+  b.B(-0.85, 40.0, -1.0, 37.7, -0.78, 34.6, -0.38, 32.1);
+  b.B(0.42, 39.8, 0.32, 37.9, 0.42, 35.0, 0.72, 32.9);
+  b.thin(() => {
+    b.B(0.65, 33.0, 1.1, 33.6, 1.2, 34.35, 0.78, 35.0);
+    b.B(2.8, 37.0, 2.2, 35.4, 1.2, 34.7, 0.55, 34.4);
+    b.B(1.0, 37.5, 2.1, 37.1, 2.7, 36.5, 3.1, 35.7);
+  });
+}
+
+function earthTouch(b) {
+  drawArm(b, -1, [10.8, 30.2], [9.4, 38.4], [3.6, 43.6], true);
+  graspCloth(b, -3.8, 44.2);
+  drawArm(b, 1, [10.8, 29.8], [16.6, 42], [21.5, 61.8], true);
+  b.B(19.2, 60.2, 22.4, 60.5, 24.2, 63.3, 23.0, 66.2);
+  b.B(20.1, 60.6, 20.8, 63.4, 20.5, 65.7, 20.0, 67.6);
+  b.thin(() => {
+    for (let i = 0; i < 4; i++) b.B(20.5 + i * 0.75, 61.0, 21.2 + i * 0.7, 63.2, 21.0 + i * 0.55, 65.7, 20.7 + i * 0.45, 67.5);
+    b.B(19.8, 62.3, 18.9, 63.6, 18.8, 65, 19.4, 66.0);
+  });
+}
+
+function boon(b) {
+  drawArm(b, -1, [10.8, 30.2], [9.5, 38.3], [3.6, 43.4], true);
+  graspCloth(b, -3.7, 44.2);
+  drawArm(b, 1, [10.8, 29.8], [16.4, 41.5], [20.8, 57.2], true);
+  openPalm(b, 21.1, 59.4, 0.05, 0.88, false);
+}
+
+function meditation(b) {
+  drawArm(b, -1, [10.8, 30.4], [12.8, 42], [5.0, 55.3], true);
+  drawArm(b, 1, [10.8, 30.4], [12.8, 42], [5.0, 55.3], true);
+  b.E(0, 55.1, 5.8, 2.0, 0);
+  b.E(0, 57.2, 5.2, 1.9, 0);
+  b.thin(() => {
+    for (let i = -3; i <= 3; i++) b.B(i * 1.1, 54.1, i * 1.1, 55.2, i * 1.05, 56.2, i * 0.96, 57.0);
+    b.B(-2.4, 53.9, -0.8, 52.8, 0.8, 52.8, 2.4, 53.9);
+  });
+}
+
+function abhaya(b) {
+  drawArm(b, -1, [10.8, 30.2], [9.5, 38.3], [3.6, 43.4], true);
+  graspCloth(b, -3.8, 44.3);
+  drawArm(b, 1, [10.8, 29.8], [17.2, 33.8], [15.0, 39.4], true);
+  openPalm(b, 16.0, 36.0, -0.13, 0.88, true);
+}
+
+function vajraBell(b) {
+  drawArm(b, 1, [10.8, 29.2], [12.4, 34.8], [4.2, 39.0], false);
+  fist(b, 4.2, 39.1, 0.78, -0.42);
+  vajra(b, -1.8, 41.2, 9.8, 35.2);
+  drawArm(b, -1, [10.7, 30], [15.6, 44.6], [13.6, 57.0], false);
+  fist(b, 13.1, 56.8, 0.76, 0.18);
+  bell(b, 15.2, 59.3);
+}
+
+function vajra(b, x1, z1, x2, z2) {
+  b.B(x1, z1, x1 + 3, z1 - 2.5, x2 - 3, z2 + 2.5, x2, z2);
+  b.thin(() => {
+    for (const [x, z, s] of [[x1, z1, -1], [x2, z2, 1]]) {
+      b.B(x, z, x + s * 1.7, z - 1.1, x + s * 2.6, z - 1.6, x + s * 3.4, z - 2.7);
+      b.B(x, z, x + s * 1.9, z - 0.15, x + s * 3.0, z - 0.15, x + s * 4.0, z - 0.55);
+      b.B(x, z, x + s * 1.7, z + 1.1, x + s * 2.6, z + 1.6, x + s * 3.4, z + 2.7);
+      b.dot(x + s * 0.7, z, 0.26);
+    }
+  });
+}
+
+function bell(b, x, z) {
+  b.thin(() => {
+    b.B(x, z - 6.1, x - 1, z - 5.1, x - 1, z - 4.2, x, z - 3.2);
+    b.B(x, z - 6.1, x + 1, z - 5.1, x + 1, z - 4.2, x, z - 3.2);
+  });
+  b.B(x - 2.2, z - 2.9, x - 2.9, z - 0.5, x - 3.1, z + 1.7, x - 3.6, z + 3.8);
+  b.B(x + 2.2, z - 2.9, x + 2.9, z - 0.5, x + 3.1, z + 1.7, x + 3.6, z + 3.8);
+  b.B(x - 3.8, z + 3.8, x - 1.6, z + 4.9, x + 1.6, z + 4.9, x + 3.8, z + 3.8);
+  b.thin(() => {
+    b.B(x - 2.4, z - 1.1, x - 0.9, z - 0.4, x + 0.9, z - 0.4, x + 2.4, z - 1.1);
+    b.B(x - 3.2, z + 2.2, x - 1.2, z + 2.9, x + 1.2, z + 2.9, x + 3.2, z + 2.2);
+  });
+}
+
+function frontDrapery(b, deity) {
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.lineWidth = b.W_IN * 0.74;
+  if (deity.type === 'bodhisattva') {
+    b.B(-9.5, 30.8, -17.5, 43.5, -21.8, 55.7, -18.5, 67.2);
+    b.B(9.5, 30.8, 17.5, 43.5, 21.8, 55.7, 18.5, 67.2);
+    b.B(-11, 56.5, -4, 62.5, 8, 62.5, 17.2, 57);
+    b.B(11, 56.5, 3.5, 64.5, -8, 64.5, -17.2, 57.2);
+  } else {
+    b.B(-9, 30, -11, 42, -13, 53.5, -20, 65.8);
+    b.B(10.5, 31, 8.5, 43, 10.5, 54, 18.8, 65.8);
+    b.B(-18.5, 66.2, -8, 70, 7.5, 70, 18.5, 66.2);
+  }
+  ctx.restore();
+}
+
+function ornaments(b, deity) {
+  const ctx = b.ctx;
+  ctx.save();
+  ctx.lineWidth = b.W_IN * 0.78;
+  b.B(-5.6, 28.1, -2.6, 32.6, 2.6, 32.6, 5.6, 28.1);
+  b.B(-7.4, 30.4, -3, 36.5, 3.2, 36.5, 7.4, 30.4);
+  for (let i = -4; i <= 4; i++) b.dot(i * 1.45, 31.0 + Math.abs(i) * 0.32, 0.22);
+  b.E(-11.6, 35.2, 1.55, 0.7, -0.35);
+  b.E(11.6, 35.2, 1.55, 0.7, 0.35);
+  b.E(-12.5, 44.6, 1.2, 0.52, 0.36);
+  b.E(12.5, 44.6, 1.2, 0.52, -0.36);
+  b.B(-6.8, 37, -12, 49, -18, 55, -24, 62.5);
+  b.B(6.8, 37, 12, 49, 18, 55, 24, 62.5);
+  ctx.restore();
+}
+
+drawAll();
+window.addEventListener('resize', () => requestAnimationFrame(drawAll));
+window.__zunCodexReady = true;
+</script>
+</body>
+</html>

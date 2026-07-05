@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>金剛界成身會三十七尊三昧耶形 · Codex 白描</title>
+  <style>
+    :root {
+      --bg: #0d1124;
+      --panel: #111735;
+      --panel-2: #151c3b;
+      --gold: #d8b36a;
+      --gold-hi: #f2d9a4;
+      --silk: #e8e1cf;
+      --red: #b0402c;
+      --muted: #7a7f9a;
+      --line: rgba(216, 179, 106, 0.24);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(242, 217, 164, 0.08), transparent 28rem),
+        var(--bg);
+      color: var(--silk);
+      font-family: "Noto Serif TC", "Songti TC", "STSong", "PMingLiU", serif;
+      letter-spacing: 0;
+    }
+    main {
+      width: min(1540px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      padding: 0 0 18px;
+      margin-bottom: 22px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      color: var(--gold-hi);
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 600;
+      line-height: 1.18;
+    }
+    .lead {
+      margin: 0;
+      max-width: 980px;
+      color: rgba(232, 225, 207, 0.82);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .legend span {
+      border: 1px solid var(--line);
+      padding: 4px 8px;
+      background: rgba(17, 23, 53, 0.62);
+    }
+    section { margin-top: 34px; }
+    h2 {
+      margin: 0 0 14px;
+      color: var(--gold-hi);
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(328px, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+    article {
+      min-width: 0;
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      min-width: 300px;
+      aspect-ratio: 1 / 1;
+      border-radius: 6px;
+      background:
+        linear-gradient(rgba(216, 179, 106, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(216, 179, 106, 0.045) 1px, transparent 1px),
+        #0d1124;
+      background-size: 30px 30px;
+    }
+    .caption {
+      min-height: 132px;
+      padding-top: 10px;
+    }
+    .name {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 9px;
+      align-items: baseline;
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+    .honor {
+      color: var(--gold-hi);
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .object {
+      color: var(--gold);
+      font-size: 15px;
+    }
+    p {
+      margin: 4px 0;
+      font-size: 13px;
+      line-height: 1.58;
+      color: rgba(232, 225, 207, 0.84);
+    }
+    .source {
+      color: var(--muted);
+    }
+    .red {
+      color: #e26a55;
+      font-weight: 600;
+    }
+    @media (max-width: 720px) {
+      main { width: min(100% - 18px, 1540px); padding-top: 16px; }
+      .grid { grid-template-columns: 1fr; }
+      article { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>金剛界成身會三十七尊三昧耶形</h1>
+      <p class="lead">依 <code>docs/考據/三昧耶形.md</code> 逐尊形制，以紺紙金泥白描作器仗。諸器悉置蓮華座上；杵具把、鬼目、蓮弁帯、中鈷、脇鈷之分；〔待核〕〔闕〕不補作，題註朱書。</p>
+      <div class="legend">
+        <span>線色：金泥 #d8b36a</span>
+        <span>明線：#f2d9a4</span>
+        <span>朱注：待核／闕</span>
+        <span>canvas 每卡 360px 邏輯畫布</span>
+      </div>
+    </header>
+    <div id="root"></div>
+  </main>
+
+  <script>
+    const GOLD = '#d8b36a';
+    const HI = '#f2d9a4';
+    const RED = '#b0402c';
+    const DIM = '#7a7f9a';
+    const BONE = 2.7;
+    const STRUCT = 1.65;
+    const FINE = 0.92;
+    const HAIR = 0.72;
+
+    const sections = [
+      ['五佛', [
+        ['大日如來', '塔（寶塔）', '單層寶塔：塔身、方蓋屋根、相輪竿頭；非五鈷杵。', 'コトバンク大日如來；三昧耶形條；T0872 塔統三十七尊', 'tower'],
+        ['阿閦如來', '五鈷金剛杵', '豎立五鈷杵：把、鬼目、蓮弁帯、中鈷直、四脇鈷內彎。', '阿閦如來條；神魔精妖名辞典', 'vajra5'],
+        ['寶生如來', '三弁寶珠', '三顆摩尼聚為三瓣，尖頂出火焰，下承蓮座。', '寶生如來條；兩界曼荼羅五佛表', 'tripleGem'],
+        ['阿彌陀如來', '開敷蓮華', '金剛界開敷蓮華，多層圓瓣，具莖。瓣數〔闕〕。', '阿彌陀如來條；神魔精妖名辞典', 'openLotus', ['瓣數〔闕〕']],
+        ['不空成就如來', '羯磨金剛', '二支三鈷杵十字交叉，四臂各三鋒。', '不空成就如來條；五佛表', 'karma'],
+      ]],
+      ['四波羅蜜', [
+        ['金剛波羅蜜', '金剛杵（五鈷）', '豎五鈷杵；五鈷明細為現代層。', 'T0865 生大金剛形；T0871 持金剛杵', 'vajra5'],
+        ['寶波羅蜜', '寶珠（函上）', '摩尼寶珠安於函上，函之細部單源。', 'T0865 金剛寶形；T0871 大摩尼寶；神魔精妖名辞典', 'gemBox', ['函〔待核〕']],
+        ['法波羅蜜', '蓮華（函上，獨鈷為莖）', '未敷蓮華以獨鈷杵作莖，安函上。', 'T0865 金剛蓮花形；T0871 大蓮華', 'lotusBox', ['獨鈷莖〔待核〕', '函〔待核〕']],
+        ['業波羅蜜', '羯磨杵（篋上）', '十字羯磨安篋或板上。', 'T0865 大羯磨金剛形；T0871 羯磨金剛', 'karmaBox'],
+      ]],
+      ['十六大菩薩', [
+        ['金剛薩埵', '五鈷杵', '橫五鈷杵上豎立五鈷杵，五峯表五智。', 'T0865 五峯光明；T0871 五智金剛杵', 'vajraCrossBase'],
+        ['金剛王', '雙金剛鉤', '二鉤並立，獨鈷柄，鋒端內彎單曲。', 'T0871 雙金剛鉤；T0865 金剛大鉤形', 'doubleHook'],
+        ['金剛愛', '箭', '一枝羽箭，鏃、笴、羽三段；弓可旁示。', 'T0865 大金剛箭形；T0871 大悲之箭', 'arrow'],
+        ['金剛喜', '二拳彈指', '二金剛拳並置，頭指與大指相捻作彈指勢。', 'T0865 大歡喜形；T0871 歡喜印', 'snapFists'],
+        ['金剛寶', '摩尼寶珠（光焰）', '蔥頭形寶珠，尖頂，周匝火焰。', 'T0865 金剛寶形；T0871 摩尼寶珠', 'flameGem'],
+        ['金剛光', '日輪', '正圓日輪，外放射光芒。', 'T0865 金剛日形；T0871 金剛光明之日', 'sun'],
+        ['金剛幢', '如意幢幡', '竿、竿頭飾、頂珠、吹流幡帛。', 'T0865 金剛幢形；T0871 如意寶珠幢', 'banner'],
+        ['金剛笑', '笑杵', '二支三鈷杵相疊，間示笑口。', 'T0865 金剛笑形；T0871 口上表喜笑；仏寺めぐり大阪', 'smileVajra', ['笑杵〔待核〕']],
+        ['金剛法', '蓮華', '開敷蓮上立獨鈷杵，傍置未敷蕾。', 'T0865 大蓮華形；T0871 蓮華印；仏寺めぐり大阪', 'lotusVajra', ['瓣數〔闕〕']],
+        ['金剛利', '劍', '直身雙刃劍豎立；柄鐔之制無經據。', 'T0865 金剛釰形；T0871 智劍', 'sword', ['柄鐔〔闕〕']],
+        ['金剛因', '輪（法輪）', '輪具轂、輻、輞；八輻為圖像現代層。', 'T0865 金剛輪形；T0871 金剛輪器杖', 'wheel', ['八輻為圖像層']],
+        ['金剛語', '舌（金剛舌）', '舌形孤立；三鈷與螺之添飾單源，今不補。', 'T0871 金剛舌；T0865 金剛念誦形', 'tongue', ['三鈷螺〔待核〕']],
+        ['金剛業', '羯磨杵', '二三鈷杵十字交叉，四臂各三鋒。', 'T0865 羯磨金剛形；T0871 羯磨金剛杵', 'karma'],
+        ['金剛護', '甲冑', '胸甲之形，甲片制度不詳。', 'T0865 大金剛甲冑形；T0871 精進鎧甲', 'armor', ['甲片〔闕〕']],
+        ['金剛牙', '牙（二利牙）', '橫杵上並立二利牙，兩側半三鈷。', 'T0865 金剛牙形；T0871 金剛牙', 'teethVajra', ['橫杵細部〔待核〕']],
+        ['金剛拳', '拳（金剛縛）', '金剛拳：大指入掌，四指握；異說另有橫杵十字獨鈷。', 'T0865 金剛縛形；T0871 金剛拳密印智', 'boundFist'],
+      ]],
+      ['八供養', [
+        ['金剛嬉', '三鈷杵（微曲）', '一支三鈷杵，鈷刃微彎以表嬉戲。', 'T0871 三鈷之杵；楽詩舎白描解說', 'curvedVajra3'],
+        ['金剛鬘', '華鬘（寶鬘）', '花珠連綴之環鬘，兩端如手張持。', 'T0871 寶鬘；供養會解說', 'garland'],
+        ['金剛歌', '箜篌', '弓形豎箜篌：曲弧響胴、出棹、平行弦列。', 'T0871 箜篌印；楽詩舎；コトバンク', 'harp', ['弦數〔闕〕']],
+        ['金剛舞', '羯磨杵', '十字羯磨，描形單源；經軌僅言舞儀舞印。', '楽詩舎 羯磨杵；T0865 金剛舞儀；T0871 舞印', 'karma', ['羯磨杵〔待核〕']],
+        ['金剛香', '香爐（寶香爐）', '有足火舍形坐爐，爐口出香煙。', '摩利支天 三形；祈りの刻跡；T0866 燒香契', 'incense', ['爐式〔待核〕']],
+        ['金剛華', '盛華器', '淺盤鉢中盛滿花，非空盤。', '摩利支天 三形；供養會解說', 'flowerBowl'],
+        ['金剛燈', '燈器（寶燈燭）', '捧燈盞，上出火焰；非高燭台。', '摩利支天 三形；T0865 供養燈', 'lamp'],
+        ['金剛塗', '塗香器', '小形有蓋香盒，旁示塗勢；塗香貝無據。', '摩利支天 三形；祈りの刻跡；T0866 塗香供養', 'perfume', ['塗香貝〔闕〕']],
+      ]],
+      ['四攝', [
+        ['金剛鉤', '金剛鉤', '杵柄頂出單曲內彎鉤鋒。', 'T0866 鉤招集；T0865 金剛鉤', 'hook', ['倒刺鈷數〔闕〕']],
+        ['金剛索', '羂索', '繩索一條成環，結與環之制不定。', 'T0866 金剛羂索；東博銅器', 'rope', ['結環〔闕〕']],
+        ['金剛鎖', '金剛鎖', '鎖鏈兩端接三鈷；另有豎三鈷添環說。', 'T0866 金剛鎖；神魔精妖名辞典；仏寺めぐり大阪', 'chainVajra', ['細部〔待核〕', '環數〔闕〕']],
+        ['金剛鈴', '金剛鈴（五鈷鈴）', '鐘形鈴身內垂舌，柄作半截五鈷杵。', 'T0866 金剛磬；T0871 光明磬；金剛鈴條', 'bell', ['五鈷鈴為現代層']],
+      ]],
+    ];
+
+    function fitCanvas(c) {
+      const size = Math.max(300, Math.round(c.getBoundingClientRect().width));
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      c.width = Math.round(size * dpr);
+      c.height = Math.round(size * dpr);
+      const ctx = c.getContext('2d');
+      ctx.setTransform(dpr * size / 360, 0, 0, dpr * size / 360, 0, 0);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      return ctx;
+    }
+    function clearCurrentPath(ctx, width, fill = false) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      if (fill) ctx.fill();
+      else {
+        ctx.lineWidth = width;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    function stroke(ctx, color = GOLD, width = STRUCT, occlude = true) {
+      if (occlude) clearCurrentPath(ctx, width + 3.2, false);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.stroke();
+    }
+    function fillStroke(ctx, fill = 'rgba(216,179,106,0.04)', color = GOLD, width = BONE) {
+      clearCurrentPath(ctx, width + 2, true);
+      ctx.fillStyle = fill;
+      ctx.fill();
+      stroke(ctx, color, width);
+    }
+    function path(ctx, pts, close = false) {
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+      if (close) ctx.closePath();
+    }
+    function ellipse(ctx, x, y, rx, ry, rot = 0, color = GOLD, width = STRUCT, occlude = true) {
+      ctx.beginPath();
+      ctx.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2);
+      stroke(ctx, color, width, occlude);
+    }
+    function arcEllipse(ctx, x, y, rx, ry, rot, a0, a1, color = GOLD, width = STRUCT, occlude = true) {
+      ctx.beginPath();
+      ctx.ellipse(x, y, rx, ry, rot, a0, a1);
+      stroke(ctx, color, width, occlude);
+    }
+    function petal(ctx, x, y, w, h, rot = 0) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.beginPath();
+      ctx.moveTo(0, -h / 2);
+      ctx.bezierCurveTo(w / 2, -h / 5, w / 2, h / 3, 0, h / 2);
+      ctx.bezierCurveTo(-w / 2, h / 3, -w / 2, -h / 5, 0, -h / 2);
+      fillStroke(ctx, 'rgba(216,179,106,0.025)', GOLD, STRUCT);
+      ctx.restore();
+    }
+    function flame(ctx, x, y, s = 1) {
+      ctx.beginPath();
+      ctx.moveTo(x, y - 34 * s);
+      ctx.bezierCurveTo(x + 16 * s, y - 19 * s, x + 10 * s, y - 2 * s, x, y + 8 * s);
+      ctx.bezierCurveTo(x - 18 * s, y - 3 * s, x - 10 * s, y - 18 * s, x, y - 34 * s);
+      stroke(ctx, HI, STRUCT);
+      ctx.beginPath();
+      ctx.moveTo(x, y - 22 * s);
+      ctx.bezierCurveTo(x + 8 * s, y - 12 * s, x + 5 * s, y - 3 * s, x, y + 2 * s);
+      ctx.bezierCurveTo(x - 8 * s, y - 4 * s, x - 5 * s, y - 12 * s, x, y - 22 * s);
+      stroke(ctx, GOLD, FINE);
+    }
+    function lotusSeat(ctx) {
+      ctx.save();
+      ctx.globalAlpha = 0.28;
+      ellipse(ctx, 180, 166, 92, 92, 0, DIM, FINE, false);
+      ctx.globalAlpha = 1;
+      for (let i = -4; i <= 4; i++) petal(ctx, 180 + i * 19, 260 - Math.abs(i) * 4, 24, 56, i * 0.18);
+      for (let i = -3; i <= 3; i++) petal(ctx, 180 + i * 23, 246 - Math.abs(i) * 3, 21, 45, i * 0.12);
+      ctx.beginPath();
+      ctx.ellipse(180, 267, 92, 13, 0, 0, Math.PI * 2);
+      stroke(ctx, GOLD, BONE);
+      ctx.beginPath();
+      ctx.moveTo(96, 270);
+      ctx.bezierCurveTo(122, 287, 238, 287, 264, 270);
+      stroke(ctx, GOLD, STRUCT);
+      ctx.restore();
+    }
+    function jewel(ctx, x, y, s = 1, flaming = false) {
+      if (flaming) {
+        ctx.save();
+        ctx.globalAlpha = 0.72;
+        flame(ctx, x, y - 15 * s, s * 1.05);
+        ctx.restore();
+      }
+      ctx.beginPath();
+      ctx.moveTo(x, y - 34 * s);
+      ctx.bezierCurveTo(x + 28 * s, y - 16 * s, x + 23 * s, y + 28 * s, x, y + 33 * s);
+      ctx.bezierCurveTo(x - 23 * s, y + 28 * s, x - 28 * s, y - 16 * s, x, y - 34 * s);
+      fillStroke(ctx, 'rgba(216,179,106,0.035)', GOLD, BONE);
+      ellipse(ctx, x, y + 5 * s, 11 * s, 18 * s, 0, HI, FINE, false);
+    }
+    function box(ctx, x = 180, y = 230, w = 86, h = 34) {
+      path(ctx, [[x - w / 2, y], [x + w / 2, y], [x + w / 2 - 10, y + h], [x - w / 2 + 10, y + h]], true);
+      fillStroke(ctx, 'rgba(216,179,106,0.03)', GOLD, STRUCT);
+      ctx.beginPath();
+      ctx.moveTo(x - w / 2 + 8, y + 10);
+      ctx.lineTo(x + w / 2 - 8, y + 10);
+      stroke(ctx, HI, FINE, false);
+    }
+    function vajraCore(ctx, length = 160, prongs = 5, curve = 1) {
+      const L = length / 2;
+      ctx.beginPath();
+      ctx.moveTo(-L + 52, 0);
+      ctx.lineTo(L - 52, 0);
+      stroke(ctx, HI, STRUCT);
+      ellipse(ctx, 0, 0, 18, 10, 0, GOLD, BONE);
+      ellipse(ctx, 0, 0, 8, 4, 0, HI, FINE, false);
+      for (const sx of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(sx * 19, -14);
+        ctx.lineTo(sx * 34, -8);
+        ctx.lineTo(sx * 34, 8);
+        ctx.lineTo(sx * 19, 14);
+        stroke(ctx, GOLD, STRUCT);
+        for (let i = -1; i <= 1; i++) {
+          petal(ctx, sx * (43 + Math.abs(i) * 2), i * 8, 12, 22, sx * Math.PI / 2 + i * 0.32);
+        }
+        ctx.beginPath();
+        ctx.moveTo(sx * 43, 0);
+        ctx.lineTo(sx * (L - 8), 0);
+        stroke(ctx, GOLD, BONE);
+        ctx.beginPath();
+        ctx.moveTo(sx * (L - 30), -7);
+        ctx.lineTo(sx * (L - 5), 0);
+        ctx.lineTo(sx * (L - 30), 7);
+        stroke(ctx, HI, STRUCT);
+        const offsets = prongs === 1 ? [] : (prongs === 3 ? [18] : [15, 27]);
+        for (const off of offsets) {
+          for (const yy of [-off, off]) {
+            ctx.beginPath();
+            ctx.moveTo(sx * 43, yy * 0.35);
+            ctx.bezierCurveTo(sx * (L - 56), yy * 1.08 * curve, sx * (L - 24), yy * 0.9 * curve, sx * (L - 5), 0);
+            stroke(ctx, GOLD, STRUCT);
+            ctx.beginPath();
+            ctx.moveTo(sx * (L - 42), yy * 0.72 * curve);
+            ctx.bezierCurveTo(sx * (L - 28), yy * 0.4 * curve, sx * (L - 16), yy * 0.2 * curve, sx * (L - 5), 0);
+            stroke(ctx, HI, HAIR, false);
+          }
+        }
+      }
+    }
+    function vajra(ctx, x = 180, y = 164, angle = -Math.PI / 2, length = 165, prongs = 5, curve = 1) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      vajraCore(ctx, length, prongs, curve);
+      ctx.restore();
+    }
+    function karma(ctx, x = 180, y = 161, scale = 1) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+      vajra(ctx, 0, 0, 0, 154, 3);
+      vajra(ctx, 0, 0, Math.PI / 2, 154, 3);
+      ellipse(ctx, 0, 0, 18, 18, 0, HI, STRUCT);
+      ctx.restore();
+    }
+    function openLotus(ctx, cx = 180, cy = 191, s = 1, bud = false) {
+      if (bud) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - 52 * s);
+        ctx.bezierCurveTo(cx + 28 * s, cy - 22 * s, cx + 18 * s, cy + 22 * s, cx, cy + 32 * s);
+        ctx.bezierCurveTo(cx - 18 * s, cy + 22 * s, cx - 28 * s, cy - 22 * s, cx, cy - 52 * s);
+        fillStroke(ctx, 'rgba(216,179,106,0.025)', GOLD, BONE);
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - 46 * s);
+        ctx.bezierCurveTo(cx - 7 * s, cy - 8 * s, cx - 5 * s, cy + 18 * s, cx, cy + 30 * s);
+        ctx.moveTo(cx, cy - 46 * s);
+        ctx.bezierCurveTo(cx + 7 * s, cy - 8 * s, cx + 5 * s, cy + 18 * s, cx, cy + 30 * s);
+        stroke(ctx, HI, FINE, false);
+        return;
+      }
+      const back = [-62, -42, -22, 0, 22, 42, 62];
+      for (const deg of back) {
+        const a = (-90 + deg) * Math.PI / 180;
+        petal(ctx, cx + Math.sin(deg * Math.PI / 180) * 20 * s, cy - 12 * s + Math.abs(deg) * 0.05 * s, 24 * s, 72 * s, a);
+      }
+      const mid = [-48, -24, 0, 24, 48];
+      for (const deg of mid) {
+        const a = (-90 + deg) * Math.PI / 180;
+        petal(ctx, cx + Math.sin(deg * Math.PI / 180) * 30 * s, cy + 8 * s, 27 * s, 63 * s, a);
+      }
+      for (let i = -3; i <= 3; i++) petal(ctx, cx + i * 18 * s, cy + 30 * s - Math.abs(i) * 3 * s, 25 * s, 48 * s, i * 0.18);
+      ellipse(ctx, cx, cy + 18 * s, 25 * s, 13 * s, 0, HI, STRUCT);
+      ctx.beginPath();
+      ctx.moveTo(cx - 26 * s, cy + 18 * s);
+      ctx.bezierCurveTo(cx - 9 * s, cy + 3 * s, cx + 9 * s, cy + 3 * s, cx + 26 * s, cy + 18 * s);
+      stroke(ctx, HI, FINE, false);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 31 * s);
+      ctx.bezierCurveTo(cx - 7 * s, cy + 48 * s, cx - 5 * s, cy + 60 * s, cx - 2 * s, cy + 70 * s);
+      stroke(ctx, GOLD, STRUCT);
+    }
+    function tower(ctx) {
+      path(ctx, [[136, 221], [224, 221], [216, 244], [144, 244]], true);
+      fillStroke(ctx, 'rgba(216,179,106,0.03)', GOLD, STRUCT);
+      path(ctx, [[146, 132], [214, 132], [214, 219], [146, 219]], true);
+      fillStroke(ctx, 'rgba(216,179,106,0.025)', GOLD, BONE);
+      ellipse(ctx, 180, 176, 23, 42, 0, HI, FINE, false);
+      path(ctx, [[122, 131], [180, 91], [238, 131]], false);
+      stroke(ctx, HI, BONE);
+      ctx.beginPath();
+      ctx.moveTo(132, 145); ctx.lineTo(228, 145);
+      ctx.moveTo(142, 158); ctx.lineTo(218, 158);
+      stroke(ctx, GOLD, STRUCT);
+      ctx.beginPath();
+      ctx.moveTo(180, 92); ctx.lineTo(180, 42);
+      stroke(ctx, GOLD, BONE);
+      for (let i = 0; i < 5; i++) ellipse(ctx, 180, 79 - i * 8, 20 - i * 3, 3.2, 0, GOLD, FINE);
+      jewel(ctx, 180, 30, 0.28, false);
+    }
+    function tripleGem(ctx) {
+      jewel(ctx, 180, 152, 0.78, true);
+      jewel(ctx, 145, 188, 0.64, false);
+      jewel(ctx, 215, 188, 0.64, false);
+    }
+    function drawWithSeat(ctx, fn) {
+      ctx.clearRect(0, 0, 360, 360);
+      lotusSeat(ctx);
+      ctx.save();
+      fn(ctx);
+      ctx.restore();
+    }
+    const drawings = {
+      tower: ctx => tower(ctx),
+      vajra5: ctx => vajra(ctx, 180, 158, -Math.PI / 2, 172, 5),
+      tripleGem,
+      openLotus: ctx => openLotus(ctx, 180, 187, 1.05),
+      karma: ctx => karma(ctx, 180, 159, 0.95),
+      gemBox: ctx => { box(ctx); jewel(ctx, 180, 169, 0.82, true); },
+      lotusBox: ctx => { box(ctx); vajra(ctx, 180, 179, -Math.PI / 2, 86, 1); openLotus(ctx, 180, 139, 0.68, true); },
+      karmaBox: ctx => { box(ctx); karma(ctx, 180, 176, 0.62); },
+      vajraCrossBase: ctx => { vajra(ctx, 180, 216, 0, 168, 5); vajra(ctx, 180, 151, -Math.PI / 2, 158, 5); },
+      doubleHook: ctx => {
+        for (const x of [156, 204]) {
+          vajra(ctx, x, 193, -Math.PI / 2, 95, 1);
+          ctx.beginPath();
+          ctx.moveTo(x, 129);
+          ctx.bezierCurveTo(x + 7, 89, x + 44, 91, x + 35, 128);
+          ctx.bezierCurveTo(x + 29, 145, x + 10, 143, x + 16, 126);
+          stroke(ctx, GOLD, BONE);
+          ctx.beginPath();
+          ctx.moveTo(x + 31, 126); ctx.lineTo(x + 45, 116); ctx.lineTo(x + 36, 137);
+          stroke(ctx, HI, FINE);
+        }
+      },
+      arrow: ctx => {
+        ctx.beginPath(); ctx.moveTo(102, 212); ctx.lineTo(250, 104); stroke(ctx, GOLD, BONE);
+        path(ctx, [[250,104],[224,109],[238,130]], true); fillStroke(ctx, 'rgba(216,179,106,0.03)', HI, STRUCT);
+        for (const side of [-1, 1]) {
+          ctx.beginPath();
+          ctx.moveTo(106, 209);
+          ctx.lineTo(82, 218 + side * 16);
+          ctx.lineTo(119, 201 + side * 8);
+          stroke(ctx, GOLD, STRUCT);
+        }
+        ctx.globalAlpha = 0.55;
+        ctx.beginPath(); ctx.arc(169, 160, 89, -2.2, 0.86); stroke(ctx, GOLD, STRUCT, false);
+        ctx.globalAlpha = 1;
+      },
+      snapFists: ctx => {
+        fist(ctx, 152, 180, -0.14, true);
+        fist(ctx, 210, 180, 0.14, true);
+      },
+      flameGem: ctx => jewel(ctx, 180, 173, 1.02, true),
+      sun: ctx => {
+        for (let i = 0; i < 24; i++) {
+          const a = i * Math.PI * 2 / 24;
+          ctx.beginPath();
+          ctx.moveTo(180 + Math.cos(a) * 57, 164 + Math.sin(a) * 57);
+          ctx.lineTo(180 + Math.cos(a) * 82, 164 + Math.sin(a) * 82);
+          stroke(ctx, i % 2 ? GOLD : HI, STRUCT);
+        }
+        ellipse(ctx, 180, 164, 52, 52, 0, GOLD, BONE);
+        ellipse(ctx, 180, 164, 31, 31, 0, HI, FINE, false);
+      },
+      banner: ctx => {
+        ctx.beginPath(); ctx.moveTo(152, 238); ctx.lineTo(152, 96); stroke(ctx, GOLD, BONE);
+        jewel(ctx, 152, 70, 0.38, false);
+        ellipse(ctx, 152, 99, 17, 10, 0, HI, STRUCT);
+        ctx.beginPath();
+        ctx.moveTo(156, 103);
+        ctx.bezierCurveTo(205, 91, 223, 134, 185, 153);
+        ctx.bezierCurveTo(211, 173, 183, 196, 156, 178);
+        stroke(ctx, GOLD, BONE);
+        ctx.beginPath(); ctx.moveTo(166, 112); ctx.bezierCurveTo(190, 123, 193, 139, 177, 151); stroke(ctx, HI, FINE, false);
+      },
+      smileVajra: ctx => {
+        vajra(ctx, 180, 137, 0, 138, 3);
+        vajra(ctx, 180, 196, 0, 138, 3);
+        ctx.beginPath(); ctx.moveTo(143, 163); ctx.bezierCurveTo(163, 188, 199, 188, 218, 163); stroke(ctx, HI, BONE);
+        ctx.beginPath(); ctx.moveTo(153, 159); ctx.bezierCurveTo(170, 174, 193, 174, 207, 159); stroke(ctx, RED, STRUCT, false);
+      },
+      lotusVajra: ctx => {
+        openLotus(ctx, 180, 189, 0.9);
+        vajra(ctx, 180, 139, -Math.PI / 2, 96, 1);
+        openLotus(ctx, 226, 200, 0.42, true);
+      },
+      sword: ctx => {
+        path(ctx, [[180,65],[199,150],[185,224],[175,224],[161,150]], true);
+        fillStroke(ctx, 'rgba(216,179,106,0.025)', GOLD, BONE);
+        ctx.beginPath(); ctx.moveTo(180, 72); ctx.lineTo(180, 220); stroke(ctx, HI, FINE, false);
+        ctx.beginPath(); ctx.moveTo(143, 224); ctx.lineTo(217, 224); stroke(ctx, GOLD, BONE + 0.8);
+        ctx.beginPath(); ctx.moveTo(180, 224); ctx.lineTo(180, 253); stroke(ctx, GOLD, BONE);
+        ellipse(ctx, 180, 256, 12, 5, 0, HI, STRUCT);
+      },
+      wheel: ctx => {
+        ellipse(ctx, 180, 165, 78, 78, 0, GOLD, BONE);
+        ellipse(ctx, 180, 165, 56, 56, 0, GOLD, STRUCT);
+        ellipse(ctx, 180, 165, 16, 16, 0, HI, STRUCT);
+        for (let i = 0; i < 8; i++) {
+          const a = i * Math.PI / 4;
+          ctx.beginPath();
+          ctx.moveTo(180 + Math.cos(a) * 18, 165 + Math.sin(a) * 18);
+          ctx.lineTo(180 + Math.cos(a) * 73, 165 + Math.sin(a) * 73);
+          stroke(ctx, GOLD, STRUCT);
+        }
+      },
+      tongue: ctx => {
+        ctx.beginPath();
+        ctx.moveTo(180, 91);
+        ctx.bezierCurveTo(225, 119, 221, 220, 180, 235);
+        ctx.bezierCurveTo(139, 220, 135, 119, 180, 91);
+        fillStroke(ctx, 'rgba(176,64,44,0.05)', GOLD, BONE);
+        ctx.beginPath(); ctx.moveTo(180, 112); ctx.bezierCurveTo(170, 162, 172, 206, 180, 228); stroke(ctx, HI, FINE, false);
+      },
+      armor: ctx => {
+        path(ctx, [[128,139],[161,105],[199,105],[232,139],[218,232],[142,232]], true);
+        fillStroke(ctx, 'rgba(216,179,106,0.03)', GOLD, BONE);
+        path(ctx, [[128,139],[108,162],[132,177],[151,142]], true);
+        fillStroke(ctx, 'rgba(216,179,106,0.022)', GOLD, STRUCT);
+        path(ctx, [[232,139],[252,162],[228,177],[209,142]], true);
+        fillStroke(ctx, 'rgba(216,179,106,0.022)', GOLD, STRUCT);
+        path(ctx, [[162,106],[180,126],[198,106],[193,153],[167,153]], true);
+        fillStroke(ctx, 'rgba(216,179,106,0.018)', HI, STRUCT);
+        ctx.beginPath();
+        ctx.moveTo(146, 159); ctx.bezierCurveTo(164, 168, 196, 168, 214, 159);
+        ctx.moveTo(143, 184); ctx.bezierCurveTo(163, 194, 197, 194, 217, 184);
+        ctx.moveTo(140, 209); ctx.bezierCurveTo(163, 221, 197, 221, 220, 209);
+        stroke(ctx, HI, STRUCT, false);
+        for (let r = 0; r < 3; r++) {
+          for (let i = -2; i <= 2; i++) {
+            const x = 180 + i * 14 + (r % 2 ? 7 : 0);
+            const y = 164 + r * 25;
+            ctx.beginPath();
+            ctx.moveTo(x - 6, y);
+            ctx.lineTo(x + 6, y);
+            ctx.lineTo(x + 4, y + 14);
+            ctx.lineTo(x - 4, y + 14);
+            ctx.closePath();
+            stroke(ctx, GOLD, HAIR, false);
+          }
+        }
+        ctx.beginPath();
+        ctx.moveTo(180, 128); ctx.lineTo(180, 229);
+        stroke(ctx, GOLD, STRUCT);
+      },
+      teethVajra: ctx => {
+        vajra(ctx, 180, 226, 0, 158, 3);
+        ellipse(ctx, 180, 213, 52, 12, 0, GOLD, STRUCT);
+        for (const [x, lean] of [[156, -1], [204, 1]]) {
+          ctx.beginPath();
+          ctx.moveTo(x, 86);
+          ctx.bezierCurveTo(x + 26 * lean, 116, x + 22 * lean, 163, x + 4 * lean, 203);
+          ctx.bezierCurveTo(x - 8 * lean, 212, x - 23 * lean, 211, x - 28 * lean, 200);
+          ctx.bezierCurveTo(x - 8 * lean, 163, x - 13 * lean, 118, x, 86);
+          fillStroke(ctx, 'rgba(216,179,106,0.028)', GOLD, BONE);
+          ctx.beginPath();
+          ctx.moveTo(x + 2 * lean, 103);
+          ctx.bezierCurveTo(x + 9 * lean, 140, x + 6 * lean, 174, x - 5 * lean, 198);
+          stroke(ctx, HI, FINE, false);
+        }
+      },
+      boundFist: ctx => fist(ctx, 180, 180, 0, false),
+      curvedVajra3: ctx => vajra(ctx, 180, 161, -Math.PI / 2, 168, 3, 1.35),
+      garland: ctx => {
+        ctx.beginPath();
+        ctx.moveTo(100, 121);
+        ctx.bezierCurveTo(124, 230, 236, 230, 260, 121);
+        stroke(ctx, GOLD, BONE);
+        for (let i = 0; i <= 18; i++) {
+          const t = i / 18;
+          const x = 100 * (1 - t) * (1 - t) + 2 * 180 * (1 - t) * t + 260 * t * t;
+          const y = 121 * (1 - t) * (1 - t) + 2 * 235 * (1 - t) * t + 121 * t * t;
+          petal(ctx, x, y, 11, 17, i * 0.4);
+        }
+        ellipse(ctx, 100, 121, 10, 16, -0.5, HI, STRUCT);
+        ellipse(ctx, 260, 121, 10, 16, 0.5, HI, STRUCT);
+      },
+      harp: ctx => {
+        ctx.beginPath();
+        ctx.moveTo(137, 234);
+        ctx.bezierCurveTo(104, 145, 133, 77, 221, 80);
+        ctx.bezierCurveTo(186, 113, 186, 184, 225, 231);
+        stroke(ctx, GOLD, BONE);
+        ctx.beginPath(); ctx.moveTo(137, 234); ctx.lineTo(225, 231); stroke(ctx, GOLD, STRUCT);
+        for (let i = 0; i < 7; i++) {
+          ctx.beginPath(); ctx.moveTo(151 + i * 11, 219); ctx.lineTo(211 - i * 2, 92 + i * 13); stroke(ctx, HI, HAIR, false);
+        }
+        ellipse(ctx, 179, 235, 50, 13, 0, GOLD, STRUCT);
+      },
+      incense: ctx => {
+        path(ctx, [[126,185],[234,185],[220,233],[140,233]], true);
+        fillStroke(ctx, 'rgba(216,179,106,0.03)', GOLD, BONE);
+        ellipse(ctx, 180, 184, 58, 15, 0, HI, STRUCT);
+        ctx.beginPath(); ctx.moveTo(148, 233); ctx.lineTo(138, 249); ctx.moveTo(212, 233); ctx.lineTo(222, 249); stroke(ctx, GOLD, STRUCT);
+        for (const x of [162, 180, 199]) {
+          ctx.beginPath(); ctx.moveTo(x, 174); ctx.bezierCurveTo(x - 17, 149, x + 17, 135, x, 109); stroke(ctx, DIM, FINE, false);
+        }
+      },
+      flowerBowl: ctx => {
+        ellipse(ctx, 180, 215, 72, 18, 0, GOLD, BONE);
+        ctx.beginPath(); ctx.moveTo(112, 216); ctx.bezierCurveTo(130, 249, 230, 249, 248, 216); stroke(ctx, GOLD, BONE);
+        for (let i = 0; i < 13; i++) {
+          const x = 126 + i * 9;
+          petal(ctx, x + (i % 2) * 8, 178 - (i % 3) * 9, 14, 29, (i - 6) * 0.14);
+        }
+      },
+      lamp: ctx => {
+        ellipse(ctx, 180, 222, 58, 17, 0, GOLD, BONE);
+        ctx.beginPath(); ctx.moveTo(130, 224); ctx.bezierCurveTo(148, 250, 212, 250, 230, 224); stroke(ctx, GOLD, STRUCT);
+        ctx.beginPath(); ctx.moveTo(180, 220); ctx.lineTo(180, 179); stroke(ctx, GOLD, FINE);
+        flame(ctx, 180, 177, 1.05);
+      },
+      perfume: ctx => {
+        ellipse(ctx, 180, 201, 47, 28, 0, GOLD, BONE);
+        ellipse(ctx, 180, 180, 35, 12, 0, HI, STRUCT);
+        path(ctx, [[157,172],[180,151],[203,172]], false); stroke(ctx, GOLD, STRUCT);
+        ctx.beginPath(); ctx.moveTo(221, 151); ctx.bezierCurveTo(244, 166, 230, 196, 207, 199); stroke(ctx, RED, STRUCT);
+        ctx.beginPath(); ctx.moveTo(235, 160); ctx.lineTo(246, 156); ctx.moveTo(233, 176); ctx.lineTo(248, 179); stroke(ctx, RED, FINE, false);
+      },
+      hook: ctx => {
+        vajra(ctx, 162, 202, -Math.PI / 2, 113, 3);
+        ctx.beginPath(); ctx.moveTo(162, 126); ctx.bezierCurveTo(175, 70, 250, 82, 230, 145); ctx.bezierCurveTo(221, 174, 188, 164, 201, 136); stroke(ctx, GOLD, BONE);
+        ctx.beginPath(); ctx.moveTo(228, 144); ctx.lineTo(247, 132); ctx.lineTo(234, 159); stroke(ctx, HI, FINE);
+      },
+      rope: ctx => {
+        ctx.beginPath(); ctx.ellipse(180, 158, 67, 88, -0.15, 0, Math.PI * 2); stroke(ctx, GOLD, BONE);
+        ctx.beginPath(); ctx.moveTo(143, 229); ctx.bezierCurveTo(158, 252, 203, 250, 218, 229); stroke(ctx, GOLD, STRUCT);
+        for (let i = 0; i < 13; i++) {
+          const a = i * Math.PI * 2 / 13;
+          ctx.beginPath();
+          ctx.moveTo(180 + Math.cos(a) * 62, 158 + Math.sin(a) * 82);
+          ctx.lineTo(180 + Math.cos(a + 0.18) * 70, 158 + Math.sin(a + 0.18) * 90);
+          stroke(ctx, HI, HAIR, false);
+        }
+      },
+      chainVajra: ctx => {
+        const links = Array.from({ length: 10 }, (_, i) => ({
+          x: 116 + i * 14,
+          y: 169 + Math.sin(i * 0.8) * 16,
+          r: i * 0.75,
+          front: i % 2 ? [Math.PI * 0.08, Math.PI * 1.08] : [Math.PI * 1.08, Math.PI * 2.08],
+        }));
+        for (const l of links) {
+          arcEllipse(ctx, l.x, l.y, 12, 7, l.r, l.front[1], l.front[0] + Math.PI * 2, GOLD, STRUCT, false);
+        }
+        for (const l of links) {
+          arcEllipse(ctx, l.x, l.y, 12, 7, l.r, l.front[0], l.front[1], HI, STRUCT, true);
+        }
+        vajra(ctx, 86, 180, 0.12, 62, 3);
+        vajra(ctx, 270, 166, 0.12, 62, 3);
+      },
+      bell: ctx => {
+        vajra(ctx, 180, 102, -Math.PI / 2, 92, 5);
+        ctx.beginPath();
+        ctx.moveTo(143, 142);
+        ctx.bezierCurveTo(143, 185, 129, 211, 115, 238);
+        ctx.lineTo(245, 238);
+        ctx.bezierCurveTo(231, 211, 217, 185, 217, 142);
+        ctx.closePath();
+        fillStroke(ctx, 'rgba(216,179,106,0.025)', GOLD, BONE);
+        ellipse(ctx, 180, 238, 67, 15, 0, HI, STRUCT);
+        ctx.beginPath(); ctx.moveTo(180, 214); ctx.lineTo(180, 246); stroke(ctx, GOLD, STRUCT, false);
+        ellipse(ctx, 180, 249, 8, 6, 0, GOLD, STRUCT);
+        ellipse(ctx, 180, 142, 37, 10, 0, HI, STRUCT);
+      },
+    };
+    function fist(ctx, cx, cy, rot = 0, snap = false) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      ctx.scale(0.94, 0.94);
+      ctx.beginPath();
+      ctx.moveTo(-43, -2);
+      ctx.bezierCurveTo(-38, -35, -4, -50, 34, -35);
+      ctx.bezierCurveTo(54, -20, 54, 22, 29, 36);
+      ctx.bezierCurveTo(2, 50, -43, 36, -46, 5);
+      ctx.bezierCurveTo(-47, 2, -45, 0, -43, -2);
+      fillStroke(ctx, 'rgba(216,179,106,0.026)', GOLD, BONE);
+      for (let i = 0; i < 4; i++) {
+        const x = -31 + i * 17;
+        ctx.beginPath();
+        ctx.moveTo(x, -32 + Math.abs(i - 1.5) * 2);
+        ctx.bezierCurveTo(x - 7, -12, x - 4, 12, x + 1, 32);
+        stroke(ctx, HI, FINE, false);
+        ctx.beginPath();
+        ctx.moveTo(x + 2, -34 + Math.abs(i - 1.5) * 2);
+        ctx.bezierCurveTo(x + 10, -32, x + 14, -22, x + 11, -10);
+        stroke(ctx, GOLD, HAIR, false);
+      }
+      if (snap) {
+        ctx.beginPath();
+        ctx.moveTo(22, -24);
+        ctx.bezierCurveTo(48, -53, 67, -28, 39, -5);
+        stroke(ctx, GOLD, BONE);
+        ctx.beginPath();
+        ctx.moveTo(-3, 15);
+        ctx.bezierCurveTo(12, -5, 28, -11, 40, -7);
+        stroke(ctx, HI, STRUCT);
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(33, 23);
+        ctx.bezierCurveTo(12, 12, -7, 8, -30, 18);
+        stroke(ctx, HI, STRUCT);
+        ctx.beginPath();
+        ctx.moveTo(34, -8);
+        ctx.bezierCurveTo(13, -3, 2, 9, -2, 24);
+        stroke(ctx, GOLD, STRUCT);
+      }
+      ctx.restore();
+    }
+
+    function renderCard(item, sectionName) {
+      const [honor, object, form, source, drawing, notes = []] = item;
+      const article = document.createElement('article');
+      const canvas = document.createElement('canvas');
+      canvas.setAttribute('aria-label', `${honor} ${object}`);
+      const caption = document.createElement('div');
+      caption.className = 'caption';
+      caption.innerHTML = `
+        <div class="name"><span class="honor">${honor}</span><span class="object">${object}</span></div>
+        <p>${form}</p>
+        <p class="source">${source}</p>
+        ${notes.length ? `<p>${notes.map(n => `<span class="red">${n}</span>`).join('　')}</p>` : ''}
+      `;
+      article.dataset.section = sectionName;
+      article.dataset.name = honor;
+      article.append(canvas, caption);
+      requestAnimationFrame(() => drawWithSeat(fitCanvas(canvas), drawings[drawing]));
+      return article;
+    }
+
+    function renderAll() {
+      const root = document.getElementById('root');
+      root.textContent = '';
+      for (const [title, items] of sections) {
+        const section = document.createElement('section');
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        for (const item of items) grid.append(renderCard(item, title));
+        section.append(h2, grid);
+        root.append(section);
+      }
+    }
+    renderAll();
+    let resizeTimer = 0;
+    addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        for (const canvas of document.querySelectorAll('canvas')) {
+          const itemName = canvas.closest('article').dataset.name;
+          const flat = sections.flatMap(s => s[1]);
+          const item = flat.find(x => x[0] === itemName);
+          drawWithSeat(fitCanvas(canvas), drawings[item[4]]);
+        }
+      }, 120);
+    });
+  </script>
+</body>
+</html>
