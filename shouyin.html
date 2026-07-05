@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>粉本 · 手印譜</title>
+<style>
+  :root {
+    --紺紙: #0d1124;
+    --紺深: #080b19;
+    --金泥: #d8b36a;
+    --金明: #f2d9a4;
+    --金暗: #8a7448;
+    --朱: #b0402c;
+    --絹: #e8e1cf;
+    --墨淡: #7a7f9a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scrollbar-color: var(--金暗) var(--紺深); }
+  body {
+    background:
+      radial-gradient(1200px 800px at 70% -10%, #141a38 0%, transparent 60%),
+      radial-gradient(900px 900px at 0% 100%, #10142c 0%, transparent 55%),
+      var(--紺紙);
+    color: var(--絹);
+    font-family: "Noto Serif TC", "Songti TC", "Source Han Serif TC", "Yu Mincho", "Hiragino Mincho ProN", serif;
+    line-height: 1.9;
+    min-height: 100vh;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+  .卷 { position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; padding: 56px 32px 90px; }
+
+  header { display: flex; gap: 42px; align-items: flex-start; margin-bottom: 56px; }
+  .題 {
+    writing-mode: vertical-rl; font-size: clamp(44px, 6vw, 72px); line-height: 1.14;
+    letter-spacing: .22em; color: var(--金明); font-weight: 600;
+    text-shadow: 0 0 26px rgba(216, 179, 106, .28);
+    border-right: 1px solid rgba(216, 179, 106, .35); padding-right: 24px;
+  }
+  .題 small { font-size: .32em; letter-spacing: .5em; color: var(--金泥); margin-top: 1.6em; }
+  .引 { max-width: 640px; }
+  .八字 { font-size: 20px; letter-spacing: .4em; color: var(--金泥); margin-bottom: 14px; }
+  .引 p { color: var(--墨淡); font-size: 14px; text-align: justify; }
+  .引 p b { color: var(--絹); font-weight: 500; }
+  .引 a { color: var(--金泥); text-decoration: none; }
+  .引 a:hover { color: var(--金明); }
+
+  h2 {
+    font-weight: 500; font-size: 20px; letter-spacing: .3em; color: var(--金明);
+    border-bottom: 1px solid rgba(216, 179, 106, .28); padding-bottom: 12px; margin: 56px 0 10px;
+    display: flex; align-items: baseline; gap: 16px;
+  }
+  h2 small { font-size: 12px; letter-spacing: .18em; color: var(--墨淡); }
+  .列 { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px 26px; padding: 18px 0; }
+
+  .印卡 {
+    background: linear-gradient(160deg, rgba(23, 29, 58, .55), rgba(10, 13, 28, .35));
+    border: 1px solid rgba(216, 179, 106, .16); border-radius: 6px;
+    padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .印卡:hover { border-color: rgba(216, 179, 106, .38); }
+  .圖 {
+    background: radial-gradient(circle at 50% 46%, #171d3a 0%, #0c1022 78%);
+    border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(216, 179, 106, .1);
+  }
+  .圖 canvas { width: 100%; height: auto; display: block; }
+  .印名 { font-size: 17px; letter-spacing: .14em; color: var(--絹); font-weight: 500; }
+  .印名 small { font-size: 11px; color: var(--墨淡); letter-spacing: .06em; margin-left: 8px; }
+  .法 { font-size: 12.5px; color: var(--墨淡); }
+  .法 b { color: var(--金泥); font-weight: 400; letter-spacing: .3em; margin-right: 6px; }
+  .注 { font-size: 11.5px; color: var(--朱); opacity: .85; }
+  .典 { font-size: 11px; color: var(--墨淡); opacity: .75; border-top: 1px solid rgba(216,179,106,.12); padding-top: 8px; }
+
+  footer {
+    margin-top: 80px; padding-top: 24px; border-top: 1px solid rgba(216, 179, 106, .2);
+    font-size: 12px; color: var(--墨淡); letter-spacing: .1em;
+    display: flex; flex-wrap: wrap; gap: 8px 30px; justify-content: space-between;
+  }
+  footer a { color: var(--金泥); text-decoration: none; }
+  footer a:hover { color: var(--金明); }
+  @media (max-width: 720px) {
+    header { flex-direction: column; gap: 26px; }
+    .題 { writing-mode: horizontal-tb; border-right: none; border-bottom: 1px solid rgba(216,179,106,.35); padding: 0 0 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="卷">
+
+  <header>
+    <div class="題">手印譜<small>MUDRĀ</small></div>
+    <div class="引">
+      <div class="八字">印母為字 · 諸印為文</div>
+      <p><b>手印</b>者，肢體之表法語言也。左手定・理・月，右手慧・智・日；十指即十度
+      ——檀慧（兩小）戒方（兩無名）忍願（兩中）進力（兩頭）禪智（兩大）；五指配五大，
+      一手即一五輪。<b>十二合掌</b>與<b>六種拳</b>為印母（《大日經疏》卷十三），諸印自
+      印母而生。此譜逐印逐指親筆，諸尊結印自此取本。歸 <a href="index.html">諸尊陳列</a>。</p>
+    </div>
+  </header>
+
+  <main id="譜"></main>
+
+  <footer>
+    <span>粉本 fenben · 手印譜 · CC BY-NC-SA 4.0</span>
+    <span>印母為字 · 諸印為文 · 表法在身</span>
+  </footer>
+</div>
+
+<script type="module">
+import { 執筆 } from './dist/bi.js';
+import { 手印目 } from './dist/bujian/shouyin.js';
+
+const dpr = Math.min(window.devicePixelRatio || 1, 2);
+const 邊 = 320;
+
+function 描(canvas, 條) {
+  canvas.width = canvas.height = 邊 * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.translate(邊 / 2, 邊 / 2);
+  const 色 = getComputedStyle(document.documentElement).getPropertyValue('--金泥').trim() || '#d8b36a';
+  ctx.strokeStyle = 色; ctx.fillStyle = 色;
+  const bi = 執筆(ctx, 邊 / 2);
+  條.筆(bi, 0, 39, 條.展比);   // z=39 ≈ 幅心（Y 錨自頂 −0.565R）
+}
+
+const 譜 = document.getElementById('譜');
+const 類序 = [
+  ['十二合掌', '印母 · 其一——大日經疏卷十三'],
+  ['六種拳', '印母 · 其二——疏文原數六'],
+  ['常用印', '常用九印——逐指法錄考據卷'],
+];
+for (const [類, 註] of 類序) {
+  const h2 = document.createElement('h2');
+  h2.innerHTML = `${類} <small>${註}</small>`;
+  譜.appendChild(h2);
+  const 列 = document.createElement('div');
+  列.className = '列';
+  for (const 條 of 手印目.filter(c => c.類 === 類)) {
+    const 卡 = document.createElement('figure');
+    卡.className = '印卡';
+    const 圖 = document.createElement('div'); 圖.className = '圖';
+    const c = document.createElement('canvas');
+    描(c, 條);
+    圖.appendChild(c); 卡.appendChild(圖);
+    const 名 = document.createElement('div'); 名.className = '印名';
+    名.textContent = 條.名;
+    if (條.梵) { const s = document.createElement('small'); s.textContent = 條.梵; 名.appendChild(s); }
+    卡.appendChild(名);
+    const 法 = document.createElement('div'); 法.className = '法';
+    法.innerHTML = '<b>法</b>'; 法.append(條.法);
+    卡.appendChild(法);
+    if (條.注) { const 注 = document.createElement('div'); 注.className = '注'; 注.textContent = '注：' + 條.注; 卡.appendChild(注); }
+    const 典 = document.createElement('div'); 典.className = '典'; 典.textContent = '典：' + 條.典;
+    卡.appendChild(典);
+    列.appendChild(卡);
+  }
+  譜.appendChild(列);
+}
+</script>
+</body>
+</html>

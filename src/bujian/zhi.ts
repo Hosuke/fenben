@@ -1,0 +1,150 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// 部件 · 指之機——逐指逐節之共法（手印庫之骨，2026-07-05 立）
+//
+// 指鏈：自根循節角而屈，得節點列（純幾何，局部座標）；佈：仿射入格網（心・比・鏡）；
+// 畫指：雙緣成指——腹微凸、梢圓收，一筆貫氣（左緣→梢帽→右緣）；節紋橫過而
+// 微弓向梢，甲施於伸側之梢（大圖乃施，比小則略）。
+// 出典：指節之數——拇二節餘四指三節（解剖定數，手印體系考「指節之度」）；
+// 掌廣五指・中指五指・巨指四指兩節（T1419 p.0943c10–16）；逐指幾何屬繪畫層自運，
+// 勿反推入量度層（同卷之誡）。
+// ─────────────────────────────────────────────────────────────────────────────
+import type { 筆具, 運筆具 } from '../bi.js';
+import { 運筆 } from '../bi.js';
+
+export type 點 = [number, number];
+
+// 指鏈：根 (x,z) 起向 θ0（0＝向右，π/2＝向下），節長逐節前行，節角[i] 於第 i 節前累加
+export function 指鏈(x0: number, z0: number, θ0: number, 節長: number[], 節角: number[] = []): 點[] {
+  const 列: 點[] = [[x0, z0]];
+  let x = x0, z = z0, θ = θ0;
+  for (let i = 0; i < 節長.length; i++) {
+    θ += 節角[i] ?? 0;
+    x += Math.cos(θ) * 節長[i];
+    z += Math.sin(θ) * 節長[i];
+    列.push([x, z]);
+  }
+  return 列;
+}
+
+// 佈：局部點列 → 格網（心 (x,z)、比、鏡＝-1 則左右翻轉，手性隨翻）
+export function 佈(列: 點[], x: number, z: number, 比: number, 鏡 = 1): 點[] {
+  return 列.map(([a, b]) => [x + a * 比 * 鏡, z + b * 比] as 點);
+}
+
+export interface 指相 {
+  紋?: boolean;          // 節紋（橫過指身微弓向梢）
+  甲?: boolean;          // 指甲（伸側之梢一弧）
+  腹?: number;           // 指腹之凸（對指寬之比，預設 0.11）
+  斂?: boolean;          // 梢斂（收尖略甚，天女之指）
+}
+
+// 畫指：鏈上雙緣立形。w根/w梢＝全寬（格網單位，呼者自乘比）。
+// 主契約：契約線起於根之兩緣（開口，沒入掌郭——端必有著是呼者之責）。
+export function 畫指(運: 運筆具, 鏈: 點[], w根: number, w梢: number, 相: 指相 = {}): void {
+  const n = 鏈.length - 1;
+  if (n < 1) return;
+  const { M, Qk, C, S, 細 } = 運;
+  // 各段行向
+  const dir: number[] = [];
+  for (let i = 0; i < n; i++) dir.push(Math.atan2(鏈[i + 1][1] - 鏈[i][1], 鏈[i + 1][0] - 鏈[i][0]));
+  // 各點切向（鄰段角均，繞角安全）與半寬
+  const φ: number[] = [];
+  for (let i = 0; i <= n; i++) {
+    const a = dir[Math.max(0, i - 1)], b = dir[Math.min(n - 1, i)];
+    φ.push(a + Math.atan2(Math.sin(b - a), Math.cos(b - a)) / 2);
+  }
+  const 梢w = 相.斂 ? w梢 * 0.82 : w梢;
+  const hw = (i: number) => (w根 + (梢w - w根) * (i / n)) / 2;
+  const 左: 點[] = [], 右: 點[] = [];
+  for (let i = 0; i <= n; i++) {
+    const nx = Math.cos(φ[i] + Math.PI / 2), nz = Math.sin(φ[i] + Math.PI / 2);
+    左.push([鏈[i][0] + nx * hw(i), 鏈[i][1] + nz * hw(i)]);
+    右.push([鏈[i][0] - nx * hw(i), 鏈[i][1] - nz * hw(i)]);
+  }
+  const 腹 = 相.腹 ?? 0.11;
+  // 一筆貫氣：左緣（腹凸向外）→ 梢帽（圓收）→ 右緣歸根
+  M(左[0][0], 左[0][1]);
+  for (let i = 0; i < n; i++) {
+    const nx = Math.cos(dir[i] + Math.PI / 2), nz = Math.sin(dir[i] + Math.PI / 2);
+    const 凸 = 腹 * (hw(i) + hw(i + 1));
+    Qk((左[i][0] + 左[i + 1][0]) / 2 + nx * 凸, (左[i][1] + 左[i + 1][1]) / 2 + nz * 凸,
+       左[i + 1][0], 左[i + 1][1]);
+  }
+  {
+    const tx = Math.cos(dir[n - 1]), tz = Math.sin(dir[n - 1]), r = hw(n) * 1.25;
+    C(左[n][0] + tx * r, 左[n][1] + tz * r, 右[n][0] + tx * r, 右[n][1] + tz * r, 右[n][0], 右[n][1]);
+  }
+  for (let i = n; i > 0; i--) {
+    const nx = Math.cos(dir[i - 1] + Math.PI / 2), nz = Math.sin(dir[i - 1] + Math.PI / 2);
+    const 凸 = 腹 * 0.55 * (hw(i) + hw(i - 1));
+    Qk((右[i][0] + 右[i - 1][0]) / 2 - nx * 凸, (右[i][1] + 右[i - 1][1]) / 2 - nz * 凸,
+       右[i - 1][0], 右[i - 1][1]);
+  }
+  S();
+  // 節紋與甲：細筆
+  if (相.紋 !== false || 相.甲) 細(() => {
+    if (相.紋 !== false) for (let i = 1; i < n; i++) {
+      const tx = Math.cos(φ[i]), tz = Math.sin(φ[i]);
+      const nx = Math.cos(φ[i] + Math.PI / 2), nz = Math.sin(φ[i] + Math.PI / 2);
+      const r = hw(i) * 0.66, 弓 = hw(i) * 0.5;
+      M(鏈[i][0] + nx * r, 鏈[i][1] + nz * r);
+      Qk(鏈[i][0] + tx * 弓, 鏈[i][1] + tz * 弓, 鏈[i][0] - nx * r, 鏈[i][1] - nz * r);
+      S();
+    }
+    if (相.甲) {
+      const tx = Math.cos(dir[n - 1]), tz = Math.sin(dir[n - 1]);
+      const nx = Math.cos(dir[n - 1] + Math.PI / 2), nz = Math.sin(dir[n - 1] + Math.PI / 2);
+      const bx = 鏈[n][0] - tx * hw(n) * 1.05, bz = 鏈[n][1] - tz * hw(n) * 1.05, r = hw(n) * 0.58;
+      M(bx + nx * r, bz + nz * r);
+      Qk(bx - tx * hw(n) * 0.42, bz - tz * hw(n) * 0.42, bx - nx * r, bz - nz * r);
+      S();
+    }
+  });
+}
+
+// 指寬之度（格網單位，未乘比）：掌廣五指析四指得指身之寬，拇指稍豐
+export const 指寬 = { 根: 0.95, 梢: 0.72, 拇根: 1.18, 拇梢: 0.92, 小根: 0.8, 小梢: 0.6 } as const;
+
+// ── 手勢：一印之座架——心 (x,z)・比・鏡（左右手互出）之仿射筆 ────────────────
+// 局部座標作圖（單位＝指），此座架代為入格網；鏡＝-1 時點翻、弧角翻、手性隨翻。
+export interface 手勢具 {
+  運: 運筆具;
+  w: (v: number) => number;                       // 局部寬 → 格網寬（×比）
+  M: (a: number, b: number) => void;
+  L: (a: number, b: number) => void;
+  Qk: (ca: number, cb: number, a: number, b: number) => void;
+  C: (c1a: number, c1b: number, c2a: number, c2b: number, a: number, b: number) => void;
+  S: () => void;
+  骨: (fn: () => void) => void;
+  衣: (fn: () => void) => void;
+  細: (fn: () => void) => void;
+  逸: (fn: () => void) => void;
+  弧: (a: number, b: number, r: number, a0?: number, a1?: number) => void;
+  指: (x0: number, z0: number, θ0: number, 節長: number[], 節角?: number[]) => 點[];
+  畫: (鏈點: 點[], w根: number, w梢: number, 相?: 指相) => void;
+}
+
+// 比可為負：負比＝點旋半周（上式倒為下式之用），弧角隨旋、寬取其絕
+export function 手勢(bi: 筆具, x: number, z: number, 比: number, 鏡 = 1): 手勢具 {
+  const 運 = 運筆(bi);
+  const 絕 = Math.abs(比);
+  const tx = (a: number) => x + a * 比 * 鏡;
+  const tz = (b: number) => z + b * 比;
+  return {
+    運,
+    w: v => v * 絕,
+    M: (a, b) => 運.M(tx(a), tz(b)),
+    L: (a, b) => 運.L(tx(a), tz(b)),
+    Qk: (ca, cb, a, b) => 運.Qk(tx(ca), tz(cb), tx(a), tz(b)),
+    C: (c1a, c1b, c2a, c2b, a, b) => 運.C(tx(c1a), tz(c1b), tx(c2a), tz(c2b), tx(a), tz(b)),
+    S: () => 運.S(),
+    骨: 運.骨, 衣: 運.衣, 細: 運.細, 逸: 運.逸,
+    弧: (a, b, r, a0 = 0, a1 = 7) => {
+      const 旋 = 比 < 0 ? Math.PI : 0;   // 負比＝半周之旋
+      if (鏡 === 1) bi.A(tx(a), tz(b), r * 絕, a0 + 旋, a1 + 旋);
+      else bi.A(tx(a), tz(b), r * 絕, Math.PI - a1 + 旋, Math.PI - a0 + 旋);
+    },
+    指: (x0, z0, θ0, 節長, 節角) => 佈(指鏈(x0, z0, θ0, 節長, 節角), x, z, 比, 鏡),
+    畫: (鏈點, w根, w梢, 相) => 畫指(運, 鏈點, w根 * 絕, w梢 * 絕, 相),
+  };
+}
