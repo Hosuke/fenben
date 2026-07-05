@@ -46,6 +46,15 @@
   }
   .卷 { position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; padding: 56px 32px 90px; }
 
+  /* ── 諸頁之航 ── */
+  nav.諸頁 {
+    display: flex; gap: 22px; justify-content: flex-end; font-size: 13px;
+    letter-spacing: .22em; margin-bottom: 34px;
+  }
+  nav.諸頁 a { color: var(--墨淡); text-decoration: none; }
+  nav.諸頁 a:hover { color: var(--金明); }
+  nav.諸頁 a.今 { color: var(--金泥); border-bottom: 1px solid rgba(216,179,106,.5); padding-bottom: 2px; }
+
   /* ── 卷首 ── */
   header { display: flex; gap: 48px; align-items: flex-start; margin-bottom: 72px; }
   .題 {
@@ -175,6 +184,12 @@
 </head>
 <body>
 <div class="卷">
+
+  <nav class="諸頁">
+    <a href="index.html" class="今">諸尊陳列</a>
+    <a href="shouyin.html">手印譜</a>
+    <a href="sanmaya.html">三昧耶譜</a>
+  </nav>
 
   <header>
     <div class="題">粉本<small>FENBEN</small></div>

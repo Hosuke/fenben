@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>粉本 · 手印譜</title>
+<title>粉本 · 三昧耶譜</title>
 <style>
   :root {
     --紺紙: #0d1124;
@@ -43,7 +43,7 @@
 
   header { display: flex; gap: 42px; align-items: flex-start; margin-bottom: 56px; }
   .題 {
-    writing-mode: vertical-rl; font-size: clamp(44px, 6vw, 72px); line-height: 1.14;
+    writing-mode: vertical-rl; font-size: clamp(40px, 5.5vw, 64px); line-height: 1.14;
     letter-spacing: .22em; color: var(--金明); font-weight: 600;
     text-shadow: 0 0 26px rgba(216, 179, 106, .28);
     border-right: 1px solid rgba(216, 179, 106, .35); padding-right: 24px;
@@ -76,7 +76,7 @@
   }
   .圖 canvas { width: 100%; height: auto; display: block; }
   .印名 { font-size: 17px; letter-spacing: .14em; color: var(--絹); font-weight: 500; }
-  .印名 small { font-size: 11px; color: var(--墨淡); letter-spacing: .06em; margin-left: 8px; }
+  .印名 small { font-size: 12px; color: var(--金泥); letter-spacing: .1em; margin-left: 10px; }
   .法 { font-size: 12.5px; color: var(--墨淡); }
   .法 b { color: var(--金泥); font-weight: 400; letter-spacing: .3em; margin-right: 6px; }
   .注 { font-size: 11.5px; color: var(--朱); opacity: .85; }
@@ -100,32 +100,33 @@
 
   <nav class="諸頁">
     <a href="index.html">諸尊陳列</a>
-    <a href="shouyin.html" class="今">手印譜</a>
-    <a href="sanmaya.html">三昧耶譜</a>
+    <a href="shouyin.html">手印譜</a>
+    <a href="sanmaya.html" class="今">三昧耶譜</a>
   </nav>
 
   <header>
-    <div class="題">手印譜<small>MUDRĀ</small></div>
+    <div class="題">三昧耶譜<small>SAMAYA</small></div>
     <div class="引">
-      <div class="八字">印母為字 · 諸印為文</div>
-      <p><b>手印</b>者，肢體之表法語言也。左手定・理・月，右手慧・智・日；十指即十度
-      ——檀慧（兩小）戒方（兩無名）忍願（兩中）進力（兩頭）禪智（兩大）；五指配五大，
-      一手即一五輪。<b>十二合掌</b>與<b>六種拳</b>為印母（《大日經疏》卷十三），諸印自
-      印母而生。此譜逐印逐指親筆，諸尊結印自此取本。歸 <a href="index.html">諸尊陳列</a>。</p>
+      <div class="八字">器即是尊 · 誓願之形身</div>
+      <p><b>三昧耶形</b>者，以器顯尊之本誓——尊之誓願智用凝為一物，觀器即觀尊。
+      經文程式（金剛頂經 T0865）曰「生◯◯形，住佛掌中」：尊即是器，非後世附會。
+      金剛界成身會三十七尊之器歸十三類，諸器皆置<b>蓮華座上月輪中</b>（現図之制）。
+      朱注者〔待核〕〔闕〕之處，寧缺毋誤。考據全卷見
+      <a href="https://github.com/Hosuke/fenben/blob/main/docs/%E8%80%83%E6%93%9A/%E4%B8%89%E6%98%A7%E8%80%B6%E5%BD%A2.md">三昧耶形考</a>。</p>
     </div>
   </header>
 
   <main id="譜"></main>
 
   <footer>
-    <span>粉本 fenben · 手印譜 · CC BY-NC-SA 4.0</span>
-    <span>印母為字 · 諸印為文 · 表法在身</span>
+    <span>粉本 fenben · 三昧耶譜 · CC BY-NC-SA 4.0</span>
+    <span>器即是尊 · 太虛流注</span>
   </footer>
 </div>
 
 <script type="module">
 import { 執筆 } from './dist/bi.js';
-import { 手印目 } from './dist/bujian/shouyin.js';
+import { 三昧耶目 } from './dist/bujian/sanmaya.js';
 
 const dpr = Math.min(window.devicePixelRatio || 1, 2);
 const 邊 = 320;
@@ -138,14 +139,16 @@ function 描(canvas, 條) {
   const 色 = getComputedStyle(document.documentElement).getPropertyValue('--金泥').trim() || '#d8b36a';
   ctx.strokeStyle = 色; ctx.fillStyle = 色;
   const bi = 執筆(ctx, 邊 / 2);
-  條.筆(bi, 0, 39, 條.展比);   // z=39 ≈ 幅心（Y 錨自頂 −0.565R）
+  條.筆(bi, 0, 37, 條.展比);   // z=37：器帶蓮座，心微上
 }
 
 const 譜 = document.getElementById('譜');
 const 類序 = [
-  ['十二合掌', '印母 · 其一——大日經疏卷十三'],
-  ['六種拳', '印母 · 其二——疏文原數六'],
-  ['常用印', '常用九印——逐指法錄考據卷'],
+  ['五佛', '塔・杵・寶・蓮・羯磨——五智之器'],
+  ['四波羅蜜', '大日四方月輪，各承其部主之器'],
+  ['十六大菩薩', 'T0865「生◯◯形住佛掌中」十六條俱全'],
+  ['八供養', '內四外四，天女之供物'],
+  ['四攝', '鉤召・引入・縛住・遍入'],
 ];
 for (const [類, 註] of 類序) {
   const h2 = document.createElement('h2');
@@ -153,7 +156,7 @@ for (const [類, 註] of 類序) {
   譜.appendChild(h2);
   const 列 = document.createElement('div');
   列.className = '列';
-  for (const 條 of 手印目.filter(c => c.類 === 類)) {
+  for (const 條 of 三昧耶目.filter(c => c.類 === 類)) {
     const 卡 = document.createElement('figure');
     卡.className = '印卡';
     const 圖 = document.createElement('div'); 圖.className = '圖';
@@ -161,11 +164,11 @@ for (const [類, 註] of 類序) {
     描(c, 條);
     圖.appendChild(c); 卡.appendChild(圖);
     const 名 = document.createElement('div'); 名.className = '印名';
-    名.textContent = 條.名;
-    if (條.梵) { const s = document.createElement('small'); s.textContent = 條.梵; 名.appendChild(s); }
+    名.textContent = 條.尊;
+    const s = document.createElement('small'); s.textContent = 條.器; 名.appendChild(s);
     卡.appendChild(名);
     const 法 = document.createElement('div'); 法.className = '法';
-    法.innerHTML = '<b>法</b>'; 法.append(條.法);
+    法.innerHTML = '<b>形</b>'; 法.append(條.法);
     卡.appendChild(法);
     if (條.注) { const 注 = document.createElement('div'); 注.className = '注'; 注.textContent = '注：' + 條.注; 卡.appendChild(注); }
     const 典 = document.createElement('div'); 典.className = '典'; 典.textContent = '典：' + 條.典;
