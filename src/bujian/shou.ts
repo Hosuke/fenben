@@ -55,6 +55,56 @@ export function 握拳覆(bi: 筆具, x: number, z: number, 比 = 1, 輕 = false
   });
 }
 
+// 側拳：側觀之拳（承四佛腹前握拳之形，2026-07-06 掛旋鏡蔽法為部件）——
+// 郭圓渾成丘、指背三稜、拇指橫抱；θ＝旋（+a 軸向腕側前臂），鏡＝-1 左右互換。
+// 先蔽後勒：掛臂即斷底線（條帛・軀幹線沒於拳後——線描無遮擋之律）。
+export function 側拳(bi: 筆具, x: number, z: number, θ = 0, 比 = 1, 鏡: 1 | -1 = 1): void {
+  const { M, Qk, C, S, 衣, 細 } = 運筆(bi);
+  const cos = Math.cos(θ), sin = Math.sin(θ);
+  const P = (a: number, b: number): [number, number] =>
+    [x + (a * 鏡 * cos - b * sin) * 比, z + (a * 鏡 * sin + b * cos) * 比];
+  // 蔽：拳丘之塊（郭之內縮多邊形）
+  {
+    const { ctx, u, Y } = bi;
+    const 郭點: Array<[number, number]> = [[-1.5, -1.25], [-2.3, -0.55], [-2.45, 0.3], [-1.8, 1.05],
+      [-1.0, 1.95], [0.7, 2.15], [1.5, 1.35], [2.25, 0.55], [2.1, -0.75], [1.2, -1.25], [-0.1, -1.75]];
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    郭點.forEach(([a, b], i) => {
+      const [px, pz] = P(a, b);
+      if (i) ctx.lineTo(px * u, Y(pz)); else ctx.moveTo(px * u, Y(pz));
+    });
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+  const 至M = (a: number, b: number) => { const [px, pz] = P(a, b); M(px, pz); };
+  const 至Q = (ca: number, cb: number, a: number, b: number) => {
+    const [cx, cz] = P(ca, cb), [px, pz] = P(a, b); Qk(cx, cz, px, pz);
+  };
+  const 至C = (c1a: number, c1b: number, c2a: number, c2b: number, a: number, b: number) => {
+    const [x1, z1] = P(c1a, c1b), [x2, z2] = P(c2a, c2b), [px, pz] = P(a, b);
+    C(x1, z1, x2, z2, px, pz);
+  };
+  衣(() => {
+    // 拳郭：閉而圓（弧不露稜）
+    至M(-1.5, -1.25); 至C(-2.25, -0.75, -2.45, 0.25, -1.8, 1.05);
+    至C(-1.0, 1.95, 0.7, 2.15, 1.5, 1.35);
+    至C(2.25, 0.55, 2.1, -0.75, 1.2, -1.25);
+    至Q(-0.1, -1.8, -1.5, -1.25); S();
+    細(() => {
+      // 指背三稜
+      for (const t of [0, 1, 2]) {
+        至M(-1.6 + t * 0.95, -1.2 + t * 0.12);
+        至Q(-1.85 + t * 0.95, -0.45 + t * 0.15, -1.45 + t * 0.95, 0.35 + t * 0.18); S();
+      }
+      // 拇指橫抱
+      至M(-1.2, 1.35); 至Q(-0.2, 1.7, 0.8, 1.5); S();
+    });
+  });
+}
+
 // 執杵手：右手橫執杵軸（軸傾 θ），拳背向觀者——四指裹軸逐見其節，
 // 拇指反扣軸下，指梢與拇指尖相就（飛天之柔：指帶微弧不僵直）
 export function 執杵手(bi: 筆具, x: number, z: number, θ = 0, 比 = 1): void {
