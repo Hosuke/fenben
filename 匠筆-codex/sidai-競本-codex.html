@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>四題競本 · Codex 匠坊白描</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0d12;
+      --ink: #e8ddbf;
+      --muted: rgba(232, 221, 191, 0.68);
+      --rule: rgba(232, 221, 191, 0.18);
+      --panel: #101217;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); }
+    body {
+      font-family: "Songti TC", "Noto Serif TC", "Source Han Serif TC", "Hiragino Mincho ProN", serif;
+      letter-spacing: 0;
+    }
+    main {
+      min-height: 100vh;
+      padding: 20px 16px 24px;
+      background:
+        linear-gradient(180deg, rgba(232, 221, 191, 0.035), transparent 220px),
+        var(--bg);
+    }
+    header, footer {
+      width: min(1480px, 100%);
+      margin: 0 auto;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 10px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 38px);
+      font-weight: 600;
+      line-height: 1.16;
+    }
+    .meta, figcaption, footer {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .meta { margin-top: 6px; }
+    .grid {
+      width: min(1480px, 100%);
+      margin: 16px auto 0;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+    figure { margin: 0; min-width: 0; }
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 360 / 430;
+      border: 1px solid var(--rule);
+      background:
+        linear-gradient(rgba(232, 221, 191, 0.032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232, 221, 191, 0.028) 1px, transparent 1px),
+        var(--panel);
+      background-size: 32px 32px;
+    }
+    figcaption { padding-top: 8px; min-height: 58px; }
+    footer {
+      margin-top: 16px;
+      border-top: 1px solid var(--rule);
+      border-bottom: 0;
+      padding-top: 10px;
+      padding-bottom: 0;
+    }
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      main { padding: 12px 10px 18px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>四題競本</h1>
+    <div class="meta">Codex 匠坊自足單檔 canvas 白描。格網錨以碼自證；線身比約 1:140-200；無填色。</div>
+  </header>
+
+  <section class="grid" aria-label="四題白描並列">
+    <figure>
+      <canvas id="mudra" aria-label="智拳印獨幅"></canvas>
+      <figcaption>一、智拳印獨幅：左拳立頭指，右拳握之，右拇端拄左頭指端；逐指逐節。</figcaption>
+    </figure>
+    <figure>
+      <canvas id="vairocana" aria-label="大日如來金剛界坐像"></canvas>
+      <figcaption>二、大日如來金剛界坐像：菩薩形，五智寶冠，智拳印，月輪，蓮座。</figcaption>
+    </figure>
+    <figure>
+      <canvas id="vajrasattva" aria-label="金剛薩埵坐像"></canvas>
+      <figcaption>三、金剛薩埵：右執五鈷杵當胸，左執五鈷鈴安左股，五佛冠。</figcaption>
+    </figure>
+    <figure>
+      <canvas id="vajra" aria-label="五鈷杵三昧耶形"></canvas>
+      <figcaption>四、五鈷杵三昧耶形：把、鬼目、蓮弁帯、中鈷直、脇鈷嘴形內彎，蓮座上。</figcaption>
+    </figure>
+  </section>
+
+  <footer>畫序即遮擋序：後者先落，前者以 destination-out 鑿去下線再落筆。不讀 src 座標；不 commit。</footer>
+</main>
+
+<script>
+(() => {
+  const W = 360;
+  const H = 430;
+  const U = 4.7;
+  const TOP = 46;
+  const CX = 180;
+  const INK = '#e8ddbf';
+  const SHOW_GRID = new URLSearchParams(location.search).get('grid') === '1';
+  const EPS = 1e-6;
+  const LW = {
+    bone: 2.3,
+    robe: 1.9,
+    fine: 1.6,
+    erase: 7.8
+  };
+
+  const y = z => TOP + z * U;
+  const anchors = name => {
+    const A = {
+      name,
+      top: y(0),
+      urna: y(12),
+      chin: y(20),
+      heart: y(36),
+      navel: y(48),
+      lap: y(64),
+      seat: y(68),
+      kneeL: CX - 26 * U,
+      kneeR: CX + 26 * U
+    };
+    console.assert(Math.abs(A.top - (TOP + 0 * U)) < EPS, `${name}: 頂0 anchor broken`);
+    console.assert(Math.abs(A.urna - A.top - 12 * U) < EPS, `${name}: 白毫12 anchor broken`);
+    console.assert(Math.abs(A.chin - A.top - 20 * U) < EPS, `${name}: 頦20 anchor broken`);
+    console.assert(Math.abs(A.heart - A.top - 36 * U) < EPS, `${name}: 心窩36 anchor broken`);
+    console.assert(Math.abs(A.navel - A.top - 48 * U) < EPS, `${name}: 臍48 anchor broken`);
+    console.assert(Math.abs(A.lap - A.top - 64 * U) < EPS, `${name}: 盤線64 anchor broken`);
+    console.assert(Math.abs(A.seat - A.top - 68 * U) < EPS, `${name}: 座面68 anchor broken`);
+    console.assert(Math.abs(A.kneeR - A.kneeL - 52 * U) < EPS, `${name}: 膝寬52 anchor broken`);
+    return A;
+  };
+
+  function resize(canvas, draw) {
+    const box = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.round(box.width * dpr);
+    canvas.height = Math.round(box.width * H / W * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    draw(ctx, anchors(canvas.id));
+  }
+
+  function stroke(ctx, width, fn, cap = 'round', join = 'round') {
+    ctx.save();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = width;
+    ctx.lineCap = cap;
+    ctx.lineJoin = join;
+    ctx.beginPath();
+    fn();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function cut(ctx, width, fn) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    fn();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function m(ctx, x0, y0) { ctx.moveTo(x0, y0); }
+  function l(ctx, x1, y1) { ctx.lineTo(x1, y1); }
+  function q(ctx, x1, y1, x2, y2) { ctx.quadraticCurveTo(x1, y1, x2, y2); }
+  function b(ctx, x1, y1, x2, y2, x3, y3) { ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3); }
+  function oval(ctx, cx, cy, rx, ry, w = LW.bone, s = 0, e = Math.PI * 2) {
+    stroke(ctx, w, () => ctx.ellipse(cx, cy, rx, ry, 0, s, e));
+  }
+  function line(ctx, x0, y0, x1, y1, w = LW.fine) {
+    stroke(ctx, w, () => { m(ctx, x0, y0); l(ctx, x1, y1); });
+  }
+
+  function showGrid(ctx, A) {
+    if (!SHOW_GRID) return;
+    stroke(ctx, 0.8, () => {
+      for (const yy of [A.top, A.urna, A.chin, A.heart, A.navel, A.lap, A.seat]) {
+        m(ctx, 26, yy); l(ctx, W - 26, yy);
+      }
+      m(ctx, CX, 26); l(ctx, CX, H - 26);
+      m(ctx, A.kneeL, A.seat + 10); l(ctx, A.kneeR, A.seat + 10);
+    }, 'butt', 'miter');
+  }
+
+  function drawLotus(ctx, A, y0 = A.seat + 3, wide = 246) {
+    const left = CX - wide / 2;
+    const right = CX + wide / 2;
+    stroke(ctx, LW.robe, () => {
+      m(ctx, left + 10, y0 + 2);
+      b(ctx, left + 46, y0 + 28, right - 46, y0 + 28, right - 10, y0 + 2);
+      m(ctx, left + 22, y0 + 28);
+      b(ctx, left + 72, y0 + 48, right - 72, y0 + 48, right - 22, y0 + 28);
+    });
+    for (let i = -5; i <= 5; i++) {
+      const px = CX + i * wide / 11;
+      const lean = i * 2.4;
+      stroke(ctx, LW.fine, () => {
+        m(ctx, px - 9, y0 + 2);
+        q(ctx, px + lean, y0 + 25, px + 9, y0 + 2);
+      });
+    }
+    for (let i = -4; i <= 4; i++) {
+      const px = CX + i * wide / 10;
+      stroke(ctx, LW.fine, () => {
+        m(ctx, px - 10, y0 + 28);
+        q(ctx, px, y0 + 48, px + 10, y0 + 28);
+      });
+    }
+    line(ctx, left + 28, y0 + 52, right - 28, y0 + 52, LW.robe);
+  }
+
+  function face(ctx, A, crown = true) {
+    oval(ctx, CX, A.urna + 11, 28, 38, LW.bone);
+    stroke(ctx, LW.fine, () => {
+      m(ctx, CX - 16, A.urna + 2); q(ctx, CX - 9, A.urna - 1, CX - 3, A.urna + 1);
+      m(ctx, CX + 3, A.urna + 1); q(ctx, CX + 9, A.urna - 1, CX + 16, A.urna + 2);
+      m(ctx, CX - 12, A.urna + 10); q(ctx, CX - 6, A.urna + 13, CX - 1, A.urna + 10);
+      m(ctx, CX + 1, A.urna + 10); q(ctx, CX + 6, A.urna + 13, CX + 12, A.urna + 10);
+      m(ctx, CX, A.urna + 8); q(ctx, CX - 2, A.urna + 18, CX - 5, A.urna + 23);
+      m(ctx, CX - 8, A.chin - 2); q(ctx, CX, A.chin + 3, CX + 8, A.chin - 2);
+    });
+    oval(ctx, CX, A.urna, 1.9, 1.9, LW.fine);
+    if (crown) {
+      const base = A.top + 27;
+      stroke(ctx, LW.fine, () => {
+        m(ctx, CX - 42, base); q(ctx, CX, base + 10, CX + 42, base);
+      });
+      for (let i = -2; i <= 2; i++) {
+        const x = CX + i * 19;
+        const h = i === 0 ? 30 : i % 2 === 0 ? 22 : 25;
+        stroke(ctx, LW.fine, () => {
+          m(ctx, x - 10, base + 1);
+          q(ctx, x, base - h, x + 10, base + 1);
+          m(ctx, x - 5, base - 5);
+          q(ctx, x, base - h + 7, x + 5, base - 5);
+        });
+      }
+    }
+  }
+
+  function commonBody(ctx, A, withMoon) {
+    if (withMoon) oval(ctx, CX, A.heart - 36, 115, 115, LW.fine);
+
+    stroke(ctx, LW.bone, () => {
+      m(ctx, CX - 48, A.chin + 16);
+      b(ctx, CX - 64, A.heart - 42, CX - 58, A.navel - 4, CX - 76, A.lap - 10);
+      m(ctx, CX + 48, A.chin + 16);
+      b(ctx, CX + 64, A.heart - 42, CX + 58, A.navel - 4, CX + 76, A.lap - 10);
+      m(ctx, CX - 58, A.heart - 15);
+      q(ctx, CX, A.heart - 3, CX + 58, A.heart - 15);
+      m(ctx, CX - 28, A.chin + 14);
+      q(ctx, CX, A.chin + 30, CX + 28, A.chin + 14);
+    });
+
+    stroke(ctx, LW.robe, () => {
+      m(ctx, CX - 30, A.chin + 34); b(ctx, CX - 42, A.heart + 10, CX - 42, A.navel + 18, CX - 16, A.lap - 8);
+      m(ctx, CX + 28, A.chin + 34); b(ctx, CX + 20, A.heart + 20, CX + 34, A.navel + 12, CX + 14, A.lap - 2);
+      m(ctx, CX - 36, A.heart + 16); q(ctx, CX, A.navel + 2, CX + 34, A.heart + 22);
+      m(ctx, CX - 18, A.navel - 6); q(ctx, CX - 8, A.navel + 18, CX + 18, A.lap - 3);
+      m(ctx, CX + 46, A.heart + 4); q(ctx, CX + 20, A.navel + 22, CX + 66, A.lap - 9);
+    });
+
+    stroke(ctx, LW.bone, () => {
+      m(ctx, A.kneeL, A.lap + 13);
+      b(ctx, A.kneeL + 26, A.lap - 30, CX - 42, A.lap - 4, CX - 12, A.lap + 18);
+      m(ctx, A.kneeR, A.lap + 13);
+      b(ctx, A.kneeR - 26, A.lap - 30, CX + 42, A.lap - 4, CX + 12, A.lap + 18);
+      m(ctx, A.kneeL + 12, A.seat - 2);
+      q(ctx, CX, A.seat + 19, A.kneeR - 12, A.seat - 2);
+    });
+    for (let i = -3; i <= 3; i++) {
+      stroke(ctx, LW.fine, () => {
+        m(ctx, CX + i * 16, A.lap - 8);
+        q(ctx, CX + i * 22, A.lap + 14, CX + i * 26, A.seat - 3);
+      });
+    }
+  }
+
+  function drawFinger(ctx, x, yTop, len, side = 1) {
+    const w = 10;
+    stroke(ctx, LW.bone, () => {
+      m(ctx, x - w / 2, yTop + len);
+      q(ctx, x - w * 0.72, yTop + len * 0.66, x - w / 2, yTop + 5);
+      q(ctx, x, yTop - 5, x + w / 2, yTop + 5);
+      q(ctx, x + w * 0.72, yTop + len * 0.66, x + w / 2, yTop + len);
+    });
+    for (const t of [0.34, 0.62]) {
+      stroke(ctx, LW.fine, () => {
+        m(ctx, x - w / 2 + 1, yTop + len * t);
+        q(ctx, x + side * 1.7, yTop + len * t + 2, x + w / 2 - 1, yTop + len * t);
+      });
+    }
+  }
+
+  function drawWisdomMudraLarge(ctx, A, grid = true) {
+    if (grid) showGrid(ctx, A);
+    const tipY = A.urna + 8;
+    const baseY = A.heart + 26;
+    const ix = CX - 6;
+
+    drawFinger(ctx, ix, tipY, baseY - tipY, 1);
+    stroke(ctx, LW.bone, () => {
+      m(ctx, CX - 52, A.heart + 64);
+      q(ctx, CX - 80, A.heart + 20, CX - 42, A.heart - 3);
+      q(ctx, CX - 17, A.heart - 10, CX + 5, A.heart + 18);
+      q(ctx, CX + 8, A.heart + 50, CX - 22, A.heart + 73);
+      q(ctx, CX - 41, A.heart + 80, CX - 52, A.heart + 64);
+    });
+    for (let i = 0; i < 4; i++) {
+      const y0 = A.heart + 7 + i * 15;
+      stroke(ctx, LW.fine, () => {
+        m(ctx, CX - 70 + i * 3, y0);
+        q(ctx, CX - 42, y0 + 7, CX - 20 + i * 2, y0 + 2);
+      });
+    }
+
+    cut(ctx, LW.erase + 3, () => {
+      m(ctx, CX - 6, A.heart - 4);
+      l(ctx, CX + 68, A.heart - 1);
+      m(ctx, CX - 7, A.heart + 19);
+      l(ctx, CX + 70, A.heart + 23);
+      m(ctx, CX - 4, A.heart + 43);
+      l(ctx, CX + 60, A.heart + 50);
+    });
+
+    stroke(ctx, LW.bone, () => {
+      m(ctx, CX + 33, A.heart + 69);
+      q(ctx, CX + 78, A.heart + 56, CX + 78, A.heart + 18);
+      q(ctx, CX + 77, A.heart - 18, CX + 38, A.heart - 17);
+      q(ctx, CX + 11, A.heart - 14, CX + 5, A.heart + 22);
+      q(ctx, CX + 4, A.heart + 54, CX + 33, A.heart + 69);
+    });
+    for (let i = 0; i < 4; i++) {
+      const y0 = A.heart - 9 + i * 18;
+      stroke(ctx, LW.bone, () => {
+        m(ctx, CX + 2, y0);
+        b(ctx, CX + 24, y0 - 4, CX + 54, y0 - 2, CX + 73, y0 + 8);
+      });
+      stroke(ctx, LW.fine, () => {
+        m(ctx, CX + 24, y0 - 2);
+        q(ctx, CX + 30, y0 + 5, CX + 38, y0 - 1);
+        m(ctx, CX + 47, y0);
+        q(ctx, CX + 53, y0 + 7, CX + 60, y0 + 3);
+      });
+    }
+
+    cut(ctx, LW.erase, () => {
+      m(ctx, CX + 38, tipY + 7);
+      q(ctx, CX + 18, tipY + 14, ix, tipY + 5);
+    });
+    stroke(ctx, LW.bone, () => {
+      m(ctx, CX + 76, A.heart + 3);
+      b(ctx, CX + 58, A.heart - 33, CX + 24, A.urna + 17, ix + 5, tipY + 3);
+    });
+    stroke(ctx, LW.fine, () => {
+      m(ctx, CX + 52, A.heart - 13);
+      q(ctx, CX + 42, A.heart - 5, CX + 34, A.heart - 16);
+      m(ctx, ix + 12, tipY + 6);
+      q(ctx, ix + 6, tipY - 1, ix + 1, tipY + 2);
+    });
+  }
+
+  function drawWisdomMudraSmall(ctx, A, x = CX, y0 = A.heart + 10, scale = 0.54) {
+    ctx.save();
+    ctx.translate(x - CX, y0 - (A.heart + 10));
+    ctx.scale(scale, scale);
+    ctx.translate(CX * (1 / scale - 1), (A.heart + 10) * (1 / scale - 1));
+    drawWisdomMudraLarge(ctx, A, false);
+    ctx.restore();
+  }
+
+  function drawVairocana(ctx, A) {
+    showGrid(ctx, A);
+    commonBody(ctx, A, true);
+    face(ctx, A, true);
+
+    cut(ctx, LW.erase, () => {
+      m(ctx, CX - 84, A.heart + 15);
+      q(ctx, CX - 34, A.heart + 9, CX - 12, A.heart + 18);
+      m(ctx, CX + 84, A.heart + 15);
+      q(ctx, CX + 34, A.heart + 9, CX + 12, A.heart + 18);
+    });
+    stroke(ctx, LW.bone, () => {
+      m(ctx, CX - 72, A.heart - 4);
+      b(ctx, CX - 54, A.heart + 8, CX - 36, A.heart + 20, CX - 18, A.heart + 27);
+      m(ctx, CX + 72, A.heart - 4);
+      b(ctx, CX + 54, A.heart + 8, CX + 36, A.heart + 20, CX + 18, A.heart + 27);
+    });
+    drawWisdomMudraSmall(ctx, A, CX, A.heart + 22, 0.32);
+
+    for (const dx of [-42, 42]) {
+      stroke(ctx, LW.fine, () => {
+        m(ctx, CX + dx, A.heart - 4);
+        q(ctx, CX + dx * 0.72, A.navel - 8, CX + dx * 0.28, A.lap - 4);
+      });
+    }
+    drawLotus(ctx, A);
+  }
+
+  function vajraHead(ctx, x, y, s = 1, up = true) {
+    const dir = up ? -1 : 1;
+    stroke(ctx, LW.fine, () => {
+      m(ctx, x, y); l(ctx, x, y + dir * 34 * s);
+      m(ctx, x - 9 * s, y + dir * 1 * s);
+      q(ctx, x - 26 * s, y + dir * 18 * s, x - 12 * s, y + dir * 31 * s);
+      m(ctx, x + 9 * s, y + dir * 1 * s);
+      q(ctx, x + 26 * s, y + dir * 18 * s, x + 12 * s, y + dir * 31 * s);
+      m(ctx, x - 18 * s, y + dir * 3 * s);
+      q(ctx, x - 36 * s, y + dir * 15 * s, x - 23 * s, y + dir * 26 * s);
+      m(ctx, x + 18 * s, y + dir * 3 * s);
+      q(ctx, x + 36 * s, y + dir * 15 * s, x + 23 * s, y + dir * 26 * s);
+    });
+  }
+
+  function smallVajra(ctx, x, y, angle = 0, s = 0.58) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    line(ctx, -30 * s, 0, 30 * s, 0, LW.fine);
+    oval(ctx, 0, 0, 5 * s, 4 * s, LW.fine);
+    for (const side of [-1, 1]) {
+      stroke(ctx, LW.fine, () => {
+        m(ctx, side * 14 * s, -5 * s); q(ctx, side * 31 * s, -16 * s, side * 43 * s, -4 * s);
+        m(ctx, side * 14 * s, 5 * s); q(ctx, side * 31 * s, 16 * s, side * 43 * s, 4 * s);
+        m(ctx, side * 14 * s, 0); l(ctx, side * 48 * s, 0);
+      });
+    }
+    ctx.restore();
+  }
+
+  function bell(ctx, x, y, s = 1) {
+    stroke(ctx, LW.fine, () => {
+      m(ctx, x, y - 42 * s); l(ctx, x, y - 18 * s);
+      m(ctx, x - 8 * s, y - 38 * s); q(ctx, x, y - 52 * s, x + 8 * s, y - 38 * s);
+      m(ctx, x - 16 * s, y - 18 * s);
+      q(ctx, x - 25 * s, y + 6 * s, x - 19 * s, y + 28 * s);
+      q(ctx, x, y + 35 * s, x + 19 * s, y + 28 * s);
+      q(ctx, x + 25 * s, y + 6 * s, x + 16 * s, y - 18 * s);
+      m(ctx, x - 22 * s, y + 24 * s); q(ctx, x, y + 34 * s, x + 22 * s, y + 24 * s);
+      m(ctx, x - 8 * s, y + 31 * s); q(ctx, x, y + 42 * s, x + 8 * s, y + 31 * s);
+    });
+  }
+
+  function drawVajrasattva(ctx, A) {
+    showGrid(ctx, A);
+    commonBody(ctx, A, false);
+    face(ctx, A, true);
+    oval(ctx, CX, A.heart - 36, 108, 108, LW.fine);
+
+    stroke(ctx, LW.bone, () => {
+      m(ctx, CX - 72, A.heart - 8);
+      b(ctx, CX - 52, A.heart + 0, CX - 40, A.heart + 9, CX - 30, A.heart + 15);
+      m(ctx, CX + 67, A.heart - 2);
+      b(ctx, CX + 88, A.navel + 8, CX + 70, A.lap - 10, CX + 46, A.lap + 10);
+    });
+
+    cut(ctx, LW.erase + 1, () => {
+      m(ctx, CX - 47, A.heart + 8);
+      q(ctx, CX - 24, A.heart + 1, CX - 5, A.heart + 7);
+      m(ctx, CX + 50, A.lap + 6);
+      q(ctx, CX + 71, A.lap + 16, CX + 91, A.lap + 9);
+    });
+    smallVajra(ctx, CX - 18, A.heart + 4, -0.2, 0.8);
+    stroke(ctx, LW.fine, () => {
+      m(ctx, CX - 45, A.heart + 14);
+      q(ctx, CX - 28, A.heart + 20, CX - 12, A.heart + 13);
+      m(ctx, CX - 38, A.heart + 20);
+      q(ctx, CX - 25, A.heart + 25, CX - 15, A.heart + 18);
+    });
+
+    bell(ctx, CX + 72, A.lap - 5, 0.86);
+    stroke(ctx, LW.fine, () => {
+      m(ctx, CX + 49, A.lap + 4);
+      q(ctx, CX + 65, A.lap + 12, CX + 83, A.lap + 7);
+      m(ctx, CX + 54, A.lap + 13);
+      q(ctx, CX + 68, A.lap + 19, CX + 85, A.lap + 15);
+    });
+    drawLotus(ctx, A);
+  }
+
+  function drawFiveProngVajra(ctx, A) {
+    showGrid(ctx, A);
+    const x = CX;
+    const top = A.urna - 22;
+    const bottom = A.lap - 4;
+    const waist = (top + bottom) / 2;
+
+    stroke(ctx, LW.bone, () => {
+      m(ctx, x, top + 64); l(ctx, x, bottom - 64);
+      m(ctx, x - 13, waist - 34); q(ctx, x, waist - 44, x + 13, waist - 34);
+      m(ctx, x - 13, waist + 34); q(ctx, x, waist + 44, x + 13, waist + 34);
+    });
+    oval(ctx, x, waist - 47, 11, 8, LW.fine);
+    oval(ctx, x, waist + 47, 11, 8, LW.fine);
+    oval(ctx, x, waist, 16, 13, LW.fine);
+    for (const yy of [waist - 31, waist + 31]) {
+      for (let i = -3; i <= 3; i++) {
+        stroke(ctx, LW.fine, () => {
+          m(ctx, x + i * 7 - 4, yy);
+          q(ctx, x + i * 7, yy + (yy < waist ? -14 : 14), x + i * 7 + 4, yy);
+        });
+      }
+    }
+    vajraHead(ctx, x, top + 69, 1.14, true);
+    vajraHead(ctx, x, bottom - 69, 1.14, false);
+    stroke(ctx, LW.fine, () => {
+      m(ctx, x - 34, top + 68); q(ctx, x - 58, top + 87, x - 38, top + 108);
+      m(ctx, x + 34, top + 68); q(ctx, x + 58, top + 87, x + 38, top + 108);
+      m(ctx, x - 34, bottom - 68); q(ctx, x - 58, bottom - 87, x - 38, bottom - 108);
+      m(ctx, x + 34, bottom - 68); q(ctx, x + 58, bottom - 87, x + 38, bottom - 108);
+    });
+
+    cut(ctx, LW.erase, () => {
+      m(ctx, x - 52, bottom + 8);
+      q(ctx, x, bottom + 21, x + 52, bottom + 8);
+    });
+    drawLotus(ctx, A, A.seat + 6, 210);
+  }
+
+  const draws = {
+    mudra: drawWisdomMudraLarge,
+    vairocana: drawVairocana,
+    vajrasattva: drawVajrasattva,
+    vajra: drawFiveProngVajra
+  };
+
+  function redrawAll() {
+    for (const [id, draw] of Object.entries(draws)) resize(document.getElementById(id), draw);
+  }
+  window.addEventListener('resize', redrawAll);
+  redrawAll();
+})();
+</script>
+<!--
+自驗：
+1. 只新作本檔；未改 src、dist、docs 或既有匠筆檔。
+2. 每幅 canvas 皆走 anchors(name)，console.assert 直證：頂0、白毫12、頦20、心窩36、臍48、盤線64、座面68、膝寬52。
+3. U=4.7，頂至座面 68U=319.6；骨線 2.3 約 1:139，衣線 1.9 約 1:168，細線 1.6 約 1:200。
+4. canvas 畫面未用 fill；形體、蓮座、月輪、法器皆以 stroke 白描成之。
+5. 遮擋處用 cut()，其 globalCompositeOperation='destination-out'；後線先落，前物落筆前先鑿下線。
+6. 面部簡筆：眉、瞼、鼻、口、白毫，頰不施繁線。
+7. 智拳印逐指逐節；五鈷杵列把、鬼目、蓮弁帯、中鈷直與脇鈷內彎。
+-->
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>諸家競本評卷廳 · 粉本</title>
+<style>
+  :root { --紙: #0d1124; --金: #d8b36a; --硃: #b0402c; --灰: #6b7186; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--紙); color: var(--金); font-family: "Songti TC", "Noto Serif TC", serif; padding: 2rem 3vw 4rem; }
+  h1 { font-size: 1.5rem; letter-spacing: .3em; text-align: center; margin: .5rem 0 .2rem; }
+  .註 { text-align: center; color: var(--灰); font-size: .85rem; margin-bottom: 2rem; }
+  h2 { font-size: 1.1rem; letter-spacing: .2em; margin: 2.2rem 0 1rem; border-left: 3px solid var(--硃); padding-left: .6em; }
+  .廳 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1rem; }
+  .卷 { border: 1px solid #2a3050; border-radius: 6px; overflow: hidden; background: #0a0e1d; }
+  .卷 header { display: flex; justify-content: space-between; padding: .45em .8em; font-size: .9rem; border-bottom: 1px solid #2a3050; }
+  .卷 header small { color: var(--灰); }
+  .卷 iframe { width: 100%; height: 520px; border: 0; background: #0a0e1d; }
+  .卷.闕 .空 { height: 520px; display: flex; align-items: center; justify-content: center; color: var(--灰); letter-spacing: .3em; }
+  .卷 canvas { display: block; margin: 0 auto; }
+  a { color: var(--金); }
+  .評 { margin-top: .8rem; color: var(--灰); font-size: .85rem; line-height: 1.7; }
+</style>
+</head>
+<body>
+<h1>諸家競本評卷廳</h1>
+<div class="註">同題自運・並排評卷——主坊（Fable 親筆）／匠坊（Codex）／Opus 4.8／Sonnet 5／Haiku 4.5。
+各卷皆自足活渲，缺者候卷自到。評卷五準：錨中・杆勢・褶隨體・遮擋自治・氣韻。</div>
+
+<h2>題一 · 藥師如來坐像</h2>
+<div class="廳" id="藥師廳"></div>
+<div class="評">主坊評匠坊之卷（先行一役）：<a href="匠筆-codex/評-yakushi-競本.md">評-yakushi-競本.md</a>——蔽法已行而錨未中，授「錨以碼自證」之課。諸家新卷皆已承此課而後筆。</div>
+
+<h2>題二 · 四題（智拳印・大日金剛界・金剛薩埵・五鈷杵三昧耶）</h2>
+<div class="廳" id="四題廳"></div>
+
+<script type="module">
+// 主坊藥師：庫內活渲為照
+const 主坊格 = document.createElement('div');
+主坊格.className = '卷';
+主坊格.innerHTML = '<header><b>主坊 · Fable 親筆</b><small>庫內 yakushi|h 活渲</small></header>';
+const cv = document.createElement('canvas');
+cv.width = cv.height = 520;
+主坊格.appendChild(cv);
+document.getElementById('藥師廳').appendChild(主坊格);
+try {
+  const { 依號 } = await import('./dist/yigui.js');
+  const { 白描 } = await import('./dist/baimiao.js');
+  const x = cv.getContext('2d');
+  x.fillStyle = '#0a0e1d'; x.fillRect(0, 0, 520, 520);
+  x.translate(260, 245);
+  x.strokeStyle = '#d8b36a'; x.fillStyle = '#d8b36a';
+  白描(x, 242, 依號['yakushi'].h, 'yakushi|h');
+} catch (e) { console.error(e); }
+
+const 席 = (廳id, 名, 註, 檔) => {
+  const 格 = document.createElement('div');
+  格.className = '卷';
+  格.innerHTML = `<header><b>${名}</b><small>${註}</small></header>`;
+  fetch(檔, { method: 'HEAD' }).then(r => {
+    if (r.ok) {
+      const f = document.createElement('iframe');
+      f.src = 檔; f.loading = 'lazy'; f.title = 名;
+      格.appendChild(f);
+    } else throw 0;
+  }).catch(() => {
+    格.classList.add('闕');
+    格.insertAdjacentHTML('beforeend', '<div class="空">候 卷</div>');
+  });
+  document.getElementById(廳id).appendChild(格);
+};
+
+席('藥師廳', '匠坊 · Codex', '首役之卷（評已出）', '匠筆-codex/yakushi-競本.html');
+席('藥師廳', 'Opus 4.8', '觀二家後自運', '匠筆-codex/yakushi-競本-opus.html');
+席('藥師廳', 'Sonnet 5', '觀二家後自運', '匠筆-codex/yakushi-競本-sonnet.html');
+席('藥師廳', 'Haiku 4.5', '觀二家後自運', '匠筆-codex/yakushi-競本-haiku.html');
+
+席('四題廳', '匠坊 · Codex', '四題一卷', '匠筆-codex/sidai-競本-codex.html');
+席('四題廳', 'Opus 4.8', '四題一卷', '匠筆-codex/sidai-競本-opus.html');
+席('四題廳', 'Sonnet 5', '四題一卷', '匠筆-codex/sidai-競本-sonnet.html');
+席('四題廳', 'Haiku 4.5', '四題一卷', '匠筆-codex/sidai-競本-haiku.html');
+</script>
+</body>
+</html>
