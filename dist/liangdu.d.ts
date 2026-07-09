@@ -71,6 +71,7 @@ export declare const 搩度: {
     readonly 菩薩: 10;
     readonly 佛母: 9;
     readonly 忿怒: 8;
+    readonly 天部: 10;
     readonly 矮身: 6;
 };
 export type 尊格 = keyof typeof 搩度;
