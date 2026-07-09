@@ -6,7 +6,7 @@
   "license": "CC-BY-NC-SA-4.0",
   "private": true,
   "scripts": {
-    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc && node tools/牒.cjs",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc && node tools/牒.cjs && node tools/型制.cjs",
     "check": "tsc --noEmit",
     "牒": "node tools/牒.cjs",
     "回填": "node tools/回填.cjs"
