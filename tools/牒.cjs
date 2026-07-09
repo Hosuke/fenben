@@ -14,7 +14,7 @@ const { join } = require('path');
   const { 落筆簿, 候審筆 } = await import('../dist/zun/index.js');
   const 條目 = [];
   for (const g of 儀軌) {
-    for (const 側 of ['t', 'k']) {
+    for (const 側 of ['t', 'k', 'h']) {
       const f = g[側];
       if (!f) continue;
       const 鍵 = `${g.id}|${側}`;

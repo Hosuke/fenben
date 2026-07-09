@@ -319,6 +319,9 @@ const 帖目 = [
     { 名: '外四供養', 目: [['g-ko','金剛香'],['g-ke','金剛華'],['g-to','金剛燈'],['g-zu','金剛塗']] },
     { 名: '四攝', 目: [['s-ko','金剛鉤'],['s-saku','金剛索'],['s-sa','金剛鎖'],['s-rei','金剛鈴']] },
   ]},
+  { 帖: '漢傳 · 橫三世', 註: '三寶佛（面南觀之：左西彌陀・中釋迦・右東藥師）——豎三世諸題候波', 側: 'h', 組: [
+    { 名: '橫三世佛', 目: [['mida','阿彌陀如來'],['shaka','釋迦牟尼佛'],['yakushi','藥師如來']] },
+  ]},
   { 帖: '胎藏 · 中臺', 註: '中臺八葉院滿——諸院候波', 側: 't', 組: [
     { 名: '五佛', 目: [['center','大日如來'],['east','寶幢如來'],['south','開敷華王如來'],['west','無量壽如來'],['north','天鼓雷音如來']] },
     { 名: '八葉四菩薩', 目: [['fugen','普賢菩薩'],['monju','文殊師利菩薩'],['kannon','觀自在菩薩'],['miroku','彌勒菩薩']] },
@@ -487,7 +490,7 @@ function 開帖(id, 側, 名, face) {
   帖文.textContent = '';
   const h4 = document.createElement('h4'); h4.textContent = 名;
   const 側名 = document.createElement('div'); 側名.className = '側名';
-  側名.textContent = (側 === 't' ? '胎藏界' : '金剛界') + ` · ${id} · 信＝${face.信}`;
+  側名.textContent = (側 === 't' ? '胎藏界' : 側 === 'h' ? '漢傳' : '金剛界') + ` · ${id} · 信＝${face.信}`;
   帖文.appendChild(h4); 帖文.appendChild(側名);
   const dl = document.createElement('dl');
   行(dl, '形', face.形);

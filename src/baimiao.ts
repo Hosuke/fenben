@@ -14,7 +14,7 @@
 import { 錨點, 坐像 } from './liangdu.js';
 import { 執筆, type 筆具 } from './bi.js';
 import { 落筆簿, 候審筆 } from './zun/index.js';
-import { 依號 } from './yigui.js';
+import { 依號, type 側 } from './yigui.js';
 import type { 面 } from './yigui.js';
 import { 三昧耶目 } from './bujian/sanmaya.js';
 
@@ -261,7 +261,7 @@ export function 通形(bi: 筆具, face: 面): void {
 // 三戒同持乃得上壇：儀軌信已核・落筆簿有專筆（通形示意不上壇）・筆非候審
 // （新筆必經主人過目）。不滿則 null——壇城遇 null 守其現行佔位，寧缺毋誤。
 // 還 { 面, 鍵 } 而非獨面：白描必得鍵乃走專筆（獨傳面則退通形——契約之陷，Codex 審所指）。
-export function 上壇之(id: string, side: 't' | 'k'): { 面: 面; 鍵: string } | null {
+export function 上壇之(id: string, side: 側): { 面: 面; 鍵: string } | null {
   const g = 依號[id];
   const f = g && g[side];
   if (!f || f.信 !== '已核') return null;
