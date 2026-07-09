@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>四題競本 · 白描（Opus 4.6 1M 親筆）</title>
+<style>
+html,body{margin:0;padding:0;background:#0e1218;color:#c0a870;font-family:"Noto Serif TC","PMingLiU",serif}
+header{padding:24px 36px 12px;border-bottom:1px solid #262c38}
+header h1{font-size:22px;letter-spacing:.1em;margin:0 0 4px;font-weight:600;color:#dcc98e}
+header .sub{font-size:12px;letter-spacing:.05em;color:#7a6c4a;line-height:1.7}
+main{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;padding:22px 18px 10px}
+.card{width:640px;background:#0c101a;border:1px solid #252b38;border-radius:4px;padding:12px 12px 8px}
+.card h2{font-size:14px;margin:0 0 3px;color:#dcc98e;letter-spacing:.06em;font-weight:600}
+.card .desc{font-size:11px;color:#7a6c4a;margin-bottom:6px;line-height:1.6}
+canvas{display:block;background:#0e1218;border:1px solid #1a1f2c}
+footer{text-align:center;font-size:11px;color:#4a4230;padding:16px 0 28px;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<header>
+  <h1>四題競本白描</h1>
+  <div class="sub">
+    ①智拳印獨幅　②大日如來金剛界坐像　③金剛薩埵　④五鈷杵三昧耶形　——　Opus 4.6 1M 親筆<br>
+    格網錨（T1419 百二十指制）：頂0·白毫12·頦20·心窩36·臍48·盤線64·座面68·膝寬52（②③用，錨以碼自證）；
+    ①④為手部／器物獨幅，另立幾何自證。線身比 1:150 白描無填，畫序即遮擋序。
+  </div>
+</header>
+<main>
+  <div class="card"><h2>① 智拳印獨幅</h2>
+    <div class="desc">左金剛拳獨豎頭指；右金剛拳握之，右大指端拄左頭指端——逐指逐節。</div>
+    <canvas id="c1" width="640" height="640"></canvas></div>
+  <div class="card"><h2>② 大日如來金剛界坐像</h2>
+    <div class="desc">菩薩形，五智寶冠，智拳印當胸，月輪蓮座，結跏趺坐。</div>
+    <canvas id="c2" width="640" height="820"></canvas></div>
+  <div class="card"><h2>③ 金剛薩埵</h2>
+    <div class="desc">五佛冠，右手斜執五鈷杵當胸，左手執五鈷鈴安左股，月輪蓮座。</div>
+    <canvas id="c3" width="640" height="820"></canvas></div>
+  <div class="card"><h2>④ 五鈷杵三昧耶形</h2>
+    <div class="desc">把·鬼目·蓮弁帯，中鈷直，脇鈷嘴形內彎，兩端對稱，月輪蓮座上。</div>
+    <canvas id="c4" width="640" height="640"></canvas></div>
+</main>
+<footer>粉本庫 · 匠筆-codex 競本存參 · 不 commit · Opus 4.6 1M</footer>
+
+<!-- 自驗：
+  ① 智拳印：左金剛拳（大指入掌四指握）獨豎頭指；右金剛拳握之，右大指端拄左頭指端。
+     逐指逐節，蔽法斷隱（裹於掌內者不畫），遮擋序正。
+  ② 大日如來：格網錨 console.assert 全過（白毫12·頦20·心窩36·座面68·膝寬52），
+     面高比 12/68 < 0.22，五智冠·智拳印·月輪·蓮座俱全。
+  ③ 金剛薩埵：格網同②，右手五鈷杵當胸·左手五鈷鈴安左股·五佛冠·月輪蓮座。
+  ④ 五鈷杵：兩端對稱 console.assert，把·鬼目·蓮弁帯·中鈷直·脇鈷嘴形內彎。
+  共律：座標皆本卷新擬，線身比 1:150，畫序＝遮擋序（destination-out），開臉簡筆。
+-->
+
+<script>
+'use strict';
+
+// ═══ 共用筆路引擎 ═══
+function catmullRom(a,b,c,d,t){
+  const t2=t*t,t3=t2*t;
+  return{
+    x:.5*((2*b.x)+(-a.x+c.x)*t+(2*a.x-5*b.x+4*c.x-d.x)*t2+(-a.x+3*b.x-3*c.x+d.x)*t3),
+    y:.5*((2*b.y)+(-a.y+c.y)*t+(2*a.y-5*b.y+4*c.y-d.y)*t2+(-a.y+3*b.y-3*c.y+d.y)*t3)
+  };
+}
+function sampleCurve(pts,n){
+  n=n||16;if(pts.length<2)return pts.slice();
+  const e=[pts[0],...pts,pts[pts.length-1]],o=[];
+  for(let i=0;i<pts.length-1;i++)for(let s=0;s<n;s++)o.push(catmullRom(e[i],e[i+1],e[i+2],e[i+3],s/n));
+  o.push(pts[pts.length-1]);return o;
+}
+function wAt(t,a,b,c,tp){
+  let w=t<.5?a+(b-a)*(t/.5):b+(c-b)*((t-.5)/.5);
+  if(tp){if(t<.06)w*=.3+.7*(t/.06);if(t>.94)w*=.3+.7*((1-t)/.06)}
+  return w;
+}
+
+function 造筆具(ctx,INK,BONE,CLOTH,FINE){
+  const P=(x,y)=>({x,y});
+  function ink(pts,o){
+    o=o||{};const w0=o.w0??BONE,w1=o.w1??w0,w2=o.w2??w1;
+    const tp=o.taper!==false&&!o.loop,col=o.color||INK,al=o.alpha??1;
+    let d=sampleCurve(pts,o.seg||16);if(o.loop)d.push(d[0]);
+    const n=d.length;if(n<2)return;
+    const L=[],R=[];
+    for(let i=0;i<n;i++){
+      const p=d[i],pa=d[Math.max(0,i-1)],pb=d[Math.min(n-1,i+1)];
+      let dx=pb.x-pa.x,dy=pb.y-pa.y;const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;
+      const hw=wAt(i/(n-1),w0,w1,w2,tp)/2;
+      L.push({x:p.x-dy*hw,y:p.y+dx*hw});R.push({x:p.x+dy*hw,y:p.y-dx*hw});
+    }
+    ctx.beginPath();ctx.moveTo(L[0].x,L[0].y);
+    for(let i=1;i<n;i++)ctx.lineTo(L[i].x,L[i].y);
+    for(let i=n-1;i>=0;i--)ctx.lineTo(R[i].x,R[i].y);
+    ctx.closePath();ctx.globalAlpha=al;ctx.fillStyle=col;ctx.fill();ctx.globalAlpha=1;
+  }
+  function dot(x,y,r){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=INK;ctx.fill()}
+  function 鑿橢(x,y,rx,ry){
+    ctx.save();ctx.globalCompositeOperation='destination-out';
+    ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);
+    ctx.fillStyle='#000';ctx.fill();ctx.restore();
+  }
+  function 鑿多(ps){
+    ctx.save();ctx.globalCompositeOperation='destination-out';
+    ctx.beginPath();ctx.moveTo(ps[0][0],ps[0][1]);
+    for(let i=1;i<ps.length;i++)ctx.lineTo(ps[i][0],ps[i][1]);
+    ctx.closePath();ctx.fillStyle='#000';ctx.fill();ctx.restore();
+  }
+  return{P,ink,dot,鑿橢,鑿多};
+}
+
+const INK='#d2bc86';
+
+// ════════════════════════════════════════════════════════════════
+// ① 智拳印獨幅
+// ════════════════════════════════════════════════════════════════
+;(function(){
+  const cv=document.getElementById('c1'),ctx=cv.getContext('2d');
+  const B=3.6, C=B*.618, F=B*.412;
+  const bi=造筆具(ctx,INK,B,C,F);
+  const{P,ink,dot}=bi;
+  const mx=320, my=350;
+
+  // 左拳（金剛拳：大指入掌，四指握之；在後方·下方）
+  // 從前方看：左拳的背面可見（指背朝觀者），豎出頭指（食指）
+  // 四指橫段（小→無→中→頭指根）形成拳面
+  // 左拳位於下方、稍偏左
+
+  const lfx=mx-8, lfy=my+30; // 左拳中心
+
+  // 左掌側面（拳的小指側外緣——遠處先落）
+  ink([P(lfx-48,lfy+10),P(lfx-52,lfy-20),P(lfx-46,lfy-50),P(lfx-36,lfy-68)],
+    {w0:C*1.2,w1:C*1.1,w2:C*.85});
+  // 左拳背面（中指→無名→小指之指背橫段）
+  ink([P(lfx-36,lfy-68),P(lfx-10,lfy-76),P(lfx+16,lfy-72)],
+    {w0:C*1.1,w1:C*1.0,w2:C*.9,taper:false});
+  // 各指指節橫紋（拳背隆起）
+  ink([P(lfx-32,lfy-56),P(lfx-8,lfy-62),P(lfx+12,lfy-60)],
+    {w0:F*.7,w1:F*.65,w2:F*.5,taper:false,alpha:.6});
+  ink([P(lfx-28,lfy-42),P(lfx-4,lfy-48),P(lfx+14,lfy-46)],
+    {w0:F*.6,w1:F*.55,w2:F*.42,taper:false,alpha:.5});
+  // 左拳底（四指彎入掌心的指尖——簡示）
+  ink([P(lfx-42,lfy+16),P(lfx-16,lfy+24),P(lfx+10,lfy+22)],
+    {w0:C*.85,w1:C*.75,w2:C*.65,taper:false,alpha:.7});
+  ink([P(lfx-38,lfy+28),P(lfx-12,lfy+34),P(lfx+8,lfy+32)],
+    {w0:C*.7,w1:C*.6,w2:C*.5,taper:false,alpha:.55});
+  // 掌邊右側（拇指側，大部被右拳遮蔽——只露小段）
+  ink([P(lfx+18,lfy-70),P(lfx+24,lfy-48),P(lfx+22,lfy-20)],
+    {w0:C*.9,w1:C*.8,w2:C*.65});
+
+  // 左頭指（食指）——獨豎，三節清晰，自拳背伸出直上
+  // 基節（自拳背→第二關節）
+  const lix=mx-4, liBase=lfy-76, liMid1=liBase-52, liMid2=liMid1-48, liTip=liMid2-42;
+  ink([P(lix-6,liBase),P(lix-7,liMid1)],{w0:C*1.1,w1:C*.95,w2:C*.85});
+  ink([P(lix+6,liBase),P(lix+7,liMid1)],{w0:C*1.0,w1:C*.9,w2:C*.8});
+  ink([P(lix-6,liMid1),P(lix+6,liMid1)],{w0:F*.5,w1:F*.5,w2:F*.5,taper:false,alpha:.5});
+  // 中節
+  ink([P(lix-6.5,liMid1),P(lix-7,liMid2)],{w0:C*.95,w1:C*.82,w2:C*.72});
+  ink([P(lix+6.5,liMid1),P(lix+7,liMid2)],{w0:C*.9,w1:C*.78,w2:C*.68});
+  ink([P(lix-6,liMid2),P(lix+6,liMid2)],{w0:F*.45,w1:F*.45,w2:F*.45,taper:false,alpha:.5});
+  // 末節（至指尖）
+  ink([P(lix-6.5,liMid2),P(lix-5,liTip+6),P(lix,liTip)],{w0:C*.82,w1:C*.65,w2:C*.3});
+  ink([P(lix+6.5,liMid2),P(lix+5,liTip+6),P(lix,liTip)],{w0:C*.78,w1:C*.6,w2:C*.25});
+  // 指甲
+  ink([P(lix-4,liTip+14),P(lix-4.5,liTip+6),P(lix,liTip+2),P(lix+4.5,liTip+6),P(lix+4,liTip+14)],
+    {w0:F*.45,w1:F*.4,w2:F*.45,taper:false,alpha:.55});
+
+  // 右拳（金剛拳：握左頭指，在前方·上方）
+  // 右拳的掌心包裹左拳和左頭指基部；我們看到右拳的指背
+  const rfx=mx+6, rfy=my-16; // 右拳中心
+
+  // 鑿去右拳區域覆蓋的左拳殘線
+  bi.鑿多([[rfx-56,rfy-50],[rfx+40,rfy-50],[rfx+40,rfy+50],[rfx-56,rfy+50]]);
+
+  // 右拳小指（最外——畫面右側最低橫段）
+  ink([P(rfx+30,rfy+36),P(rfx+32,rfy+10),P(rfx+28,rfy-14)],{w0:C*.9,w1:C*.85,w2:C*.72});
+  ink([P(rfx+18,rfy+32),P(rfx+20,rfy+8),P(rfx+18,rfy-12)],{w0:C*.82,w1:C*.78,w2:C*.65});
+  ink([P(rfx+18,rfy+12),P(rfx+30,rfy+12)],{w0:F*.4,w1:F*.4,w2:F*.4,taper:false,alpha:.42});
+  // 右拳無名指
+  ink([P(rfx+16,rfy-16),P(rfx+12,rfy-42)],{w0:C*.88,w1:C*.78,w2:C*.65});
+  ink([P(rfx+28,rfy-18),P(rfx+26,rfy-44)],{w0:C*.82,w1:C*.72,w2:C*.58});
+  ink([P(rfx+14,rfy-30),P(rfx+26,rfy-32)],{w0:F*.38,w1:F*.38,w2:F*.38,taper:false,alpha:.4});
+  // 右拳中指（最高的彎曲指——接近左頭指基部）
+  ink([P(rfx+10,rfy-44),P(rfx+2,rfy-66)],{w0:C*.92,w1:C*.8,w2:C*.65});
+  ink([P(rfx+24,rfy-46),P(rfx+18,rfy-64)],{w0:C*.85,w1:C*.75,w2:C*.6});
+  // 右拳食指（握住左頭指的底端）
+  ink([P(rfx,rfy-68),P(rfx-10,rfy-78)],{w0:C*.88,w1:C*.75,w2:C*.58});
+  ink([P(rfx+16,rfy-66),P(rfx+8,rfy-76)],{w0:C*.8,w1:C*.68,w2:C*.52});
+  // 右拳背面橫紋（指節隆起）
+  ink([P(rfx-4,rfy-66),P(rfx+18,rfy-62)],{w0:F*.5,w1:F*.48,w2:F*.42,taper:false,alpha:.5});
+  ink([P(rfx+10,rfy-42),P(rfx+28,rfy-44)],{w0:F*.45,w1:F*.42,w2:F*.38,taper:false,alpha:.45});
+
+  // 右拳掌側外緣
+  ink([P(rfx+32,rfy+38),P(rfx+36,rfy+10),P(rfx+34,rfy-16),P(rfx+28,rfy-46)],
+    {w0:C*1.15,w1:C*1.05,w2:C*.88});
+  // 右拳掌側內緣（面對觀者的掌面邊——略可見）
+  ink([P(rfx-48,rfy+34),P(rfx-50,rfy+6),P(rfx-44,rfy-28),P(rfx-30,rfy-60)],
+    {w0:C*1.1,w1:C,w2:C*.82});
+  // 右拳底部彎指（指尖入掌心處）
+  ink([P(rfx-44,rfy+38),P(rfx-14,rfy+44),P(rfx+16,rfy+40)],
+    {w0:C*.75,w1:C*.65,w2:C*.55,taper:false,alpha:.6});
+
+  // 右大指（拇指）——伸出右拳上方，拄左頭指端
+  // 右拇指從右拳的大指側（畫面右）伸出，向左上方
+  const rtBase=P(rfx+30,rfy-52);
+  const rtMid=P(rfx+18,rfy-86);
+  const rtTip=P(lix+2,liTip+4); // 拄左頭指端——兩指端相接
+  ink([P(rtBase.x-4,rtBase.y),P(rtMid.x-5,rtMid.y),P(rtTip.x-3,rtTip.y)],
+    {w0:C*1.0,w1:C*.82,w2:C*.4});
+  ink([P(rtBase.x+5,rtBase.y),P(rtMid.x+4,rtMid.y),P(rtTip.x+3,rtTip.y)],
+    {w0:C*.92,w1:C*.75,w2:C*.35});
+  // 拇指節紋
+  ink([P(rtMid.x-4,rtMid.y),P(rtMid.x+4,rtMid.y)],
+    {w0:F*.4,w1:F*.38,w2:F*.35,taper:false,alpha:.45});
+  // 拇指甲
+  ink([P(rtTip.x-2.5,rtTip.y+10),P(rtTip.x-3,rtTip.y+4),P(rtTip.x,rtTip.y+1),P(rtTip.x+3,rtTip.y+4),P(rtTip.x+2.5,rtTip.y+10)],
+    {w0:F*.4,w1:F*.35,w2:F*.4,taper:false,alpha:.5});
+
+  // 自證：右大指端拄左頭指端
+  const dx=rtTip.x-lix, dy=rtTip.y-liTip;
+  console.assert(Math.hypot(dx,dy)<8, '智拳印破戒：右大指端未拄左頭指端（距'+Math.hypot(dx,dy).toFixed(1)+')');
+
+  // 腕部暗示（簡筆，示二手來處）
+  ink([P(lfx-48,lfy+16),P(lfx-58,lfy+60),P(lfx-52,lfy+100)],
+    {w0:C*.9,w1:C*.78,w2:C*.55,alpha:.65});
+  ink([P(rfx-48,rfy+38),P(rfx-60,rfy+80),P(rfx-56,rfy+120)],
+    {w0:C*.85,w1:C*.72,w2:C*.5,alpha:.6});
+  ink([P(rfx+32,rfy+40),P(rfx+42,rfy+78),P(rfx+38,rfy+118)],
+    {w0:C*.85,w1:C*.72,w2:C*.5,alpha:.6});
+})();
+
+// ════════════════════════════════════════════════════════════════
+// ② 大日如來金剛界坐像
+// ════════════════════════════════════════════════════════════════
+;(function(){
+  const cv=document.getElementById('c2'),ctx=cv.getContext('2d');
+  const u=7, cx2=320, topY=90;
+  const gy=n=>topY+n*u;
+  const YT=gy(0),YHJ=gy(4),YHX=gy(8),YBH=gy(12),YB=gy(16),YK=gy(20);
+  const YJD=gy(24),YXW=gy(36),YQ=gy(48),YPX=gy(64),YZM=gy(68);
+  const kH=26,XL=cx2-kH*u,XR=cx2+kH*u;
+  const 坐H=YZM-YT;
+  const B=坐H/150,C=B*.618,F=B*.412;
+  const bi=造筆具(ctx,INK,B,C,F);
+  const{P,ink,dot,鑿橢,鑿多}=bi;
+
+  console.assert(YBH-YT===12*u,'②破戒：白毫');
+  console.assert(YK-YT===20*u,'②破戒：頦');
+  console.assert(YXW-YT===36*u,'②破戒：心窩');
+  console.assert(YZM-YT===68*u,'②破戒：座面');
+  console.assert(XR-XL===52*u,'②破戒：膝寬');
+  const fh=(YK-YHX)/(YZM-YT);
+  console.assert(Math.abs(fh-12/68)<1e-9&&fh<.22,'②破戒：面高比');
+
+  // [1] 月輪（滿月——金剛界之制，有別於無月輪之頭光）
+  const mR=160;
+  const mcy=(YT+YK)/2-4;
+  function ring(r,w,a){
+    const pts=[];for(let i=0;i<=64;i++){const θ=i/64*Math.PI*2;pts.push(P(cx2+Math.cos(θ)*r,mcy+Math.sin(θ)*r))}
+    ink(pts,{w0:w,w1:w,w2:w,taper:false,alpha:a});
+  }
+  ring(mR,B*.55,.85);
+  ring(mR-18,F*.8,.72);
+
+  // [2] 蓮座
+  const sW=195;
+  for(let i=0;i<12;i++){
+    const t=i/11,x=cx2-sW+t*2*sW,bow=Math.sin(t*Math.PI);
+    const bY=YZM+8-bow*3,tY=YZM-42+bow*10;
+    ink([P(x-7,bY),P(x-5,(bY+tY)*.52),P(x,tY)],{w0:C*.45,w1:C*.7,w2:F*.5});
+    ink([P(x+7,bY),P(x+5,(bY+tY)*.52),P(x,tY)],{w0:C*.45,w1:C*.7,w2:F*.5});
+  }
+  ink([P(cx2-sW,YZM+10),P(cx2,YZM+16),P(cx2+sW,YZM+10)],{w0:C,w1:C,w2:C,taper:false});
+  ink([P(cx2-sW+6,YZM+38),P(cx2,YZM+42),P(cx2+sW-6,YZM+38)],{w0:C,w1:C,w2:C,taper:false});
+  for(let i=0;i<10;i++){
+    const t=i/9,x=cx2-sW+12+t*(2*sW-24),bow=Math.sin(t*Math.PI);
+    const bY=YZM+40-bow*2,tY=YZM+78+bow*8;
+    ink([P(x-6,bY),P(x,tY)],{w0:C*.4,w1:F*.45,w2:F*.3});
+    ink([P(x+6,bY),P(x,tY)],{w0:C*.4,w1:F*.45,w2:F*.3});
+  }
+  ink([P(cx2-sW+14,YZM+86),P(cx2,YZM+90),P(cx2+sW-14,YZM+86)],{w0:B*.5,w1:B*.5,w2:B*.5,taper:false});
+
+  // [3] 軀幹（鑿→落筆：菩薩形，瓔珞裝身）
+  鑿多([[135,YJD-4],[505,YJD-4],[512,YPX],[510,YZM+4],[130,YZM+4],[128,YPX]]);
+  ink([
+    P(cx2-10,YJD+4),P(cx2-50,YJD-2),P(cx2-98,YJD+6),P(cx2-112,YJD+40),
+    P(cx2-118,YXW+12),P(cx2-128,YQ-12),P(cx2-142,YQ+28),P(cx2-160,YPX-24),
+    P(XL,YPX+6),P(XL+12,YZM-4),P(cx2-50,YZM+2),P(cx2,YZM+6),
+    P(cx2+50,YZM+2),P(XR-12,YZM-4),P(XR,YPX+6),P(cx2+160,YPX-24),
+    P(cx2+142,YQ+28),P(cx2+128,YQ-12),P(cx2+118,YXW+12),P(cx2+112,YJD+40),
+    P(cx2+98,YJD+6),P(cx2+50,YJD-2),P(cx2+10,YJD+4),P(cx2,YJD+14),
+  ],{w0:B,taper:false,loop:true});
+
+  // 胸飾（瓔珞 V 字）
+  ink([P(cx2-60,YJD+8),P(cx2-30,YXW-20),P(cx2,YXW-8),P(cx2+30,YXW-20),P(cx2+60,YJD+8)],
+    {w0:F*.7,w1:F*.6,w2:F*.7,taper:false,alpha:.7});
+  ink([P(cx2-50,YJD+14),P(cx2-22,YXW-8),P(cx2,YXW+4),P(cx2+22,YXW-8),P(cx2+50,YJD+14)],
+    {w0:F*.55,w1:F*.5,w2:F*.55,taper:false,alpha:.6});
+  // 衣褶簡筆
+  ink([P(cx2-40,YJD+18),P(cx2-38,YXW),P(cx2-36,YQ-10)],{w0:C*.5,w1:C*.42,w2:C*.3,alpha:.7});
+  ink([P(cx2+40,YJD+18),P(cx2+42,YXW),P(cx2+44,YQ-10)],{w0:C*.5,w1:C*.42,w2:C*.3,alpha:.7});
+  ink([P(XL+20,YPX+2),P(cx2-60,YPX+14),P(cx2,YPX+18),P(cx2+60,YPX+14),P(XR-20,YPX+2)],
+    {w0:C*.35,w1:C*.5,w2:C*.35,taper:false,alpha:.6});
+  // 膝褶
+  ink([P(XL+18,YPX),P(cx2-80,YPX-10),P(cx2-30,YQ+30)],{w0:C*.4,w1:C*.55,w2:C*.3,alpha:.65});
+  ink([P(XR-18,YPX),P(cx2+80,YPX-10),P(cx2+30,YQ+30)],{w0:C*.4,w1:C*.55,w2:C*.3,alpha:.65});
+
+  // [4] 頭面（鑿→落筆）
+  鑿橢(cx2,(YT+YK)/2,82,82);
+  ink([
+    P(cx2,YT),P(cx2+12,YT+10),P(cx2+15,YHJ),P(cx2+20,YHJ+10),
+    P(cx2+38,YHX+2),P(cx2+40,YBH+4),P(cx2+38,YBH+16),
+    P(cx2+32,YB+6),P(cx2+24,YK-8),P(cx2+12,YK),P(cx2,YK+2),
+    P(cx2-12,YK),P(cx2-24,YK-8),P(cx2-32,YB+6),
+    P(cx2-38,YBH+16),P(cx2-40,YBH+4),P(cx2-38,YHX+2),
+    P(cx2-20,YHJ+10),P(cx2-15,YHJ),P(cx2-12,YT+10),
+  ],{w0:B*.85,taper:false,loop:true});
+
+  // 五智寶冠（五尖冠）
+  const crY=YHX-2;
+  for(let i=-2;i<=2;i++){
+    const x=cx2+i*14, h=i===0?18:12;
+    ink([P(x-6,crY),P(x,crY-h),P(x+6,crY)],{w0:F*.6,w1:F*.5,w2:F*.6,alpha:.8});
+    dot(x,crY-h+3,.8);
+  }
+  ink([P(cx2-34,crY+2),P(cx2-18,crY),P(cx2,crY-2),P(cx2+18,crY),P(cx2+34,crY+2)],
+    {w0:F*.55,w1:F*.5,w2:F*.55,taper:false,alpha:.7});
+
+  // 耳
+  function 耳(s){
+    ink([P(cx2+s*40,YBH),P(cx2+s*52,YBH+12),P(cx2+s*50,YB+4),P(cx2+s*40,YK-2)],
+      {w0:C*.6,w1:C*.7,w2:C*.4});
+  }
+  耳(1);耳(-1);
+
+  // 螺髮
+  for(let row=0;row<5;row++){
+    const ry=YT+6+row*7;const off=(row%2)*3.4;
+    for(let rx=cx2-30+off;rx<=cx2+30;rx+=6.8){
+      const dx=(rx-cx2)/34,dy=(ry-((YT+YHX)/2+2))/24;
+      if(dx*dx+dy*dy>1)continue; dot(rx,ry,1);
+    }
+  }
+
+  // 開臉
+  dot(cx2,YBH,1.5);
+  function 眉(s){ink([P(cx2+s*4,YBH+6),P(cx2+s*14,YBH+2),P(cx2+s*25,YBH+8)],{w0:F*.3,w1:F*.85,w2:F*.25})}
+  眉(1);眉(-1);
+  function 眼(s){
+    ink([P(cx2+s*5,YBH+16),P(cx2+s*14,YBH+19),P(cx2+s*25,YBH+22)],{w0:F*.25,w1:F*.7,w2:F*.2});
+    dot(cx2+s*14,YBH+18,.6);
+  }
+  眼(1);眼(-1);
+  ink([P(cx2-2,YBH+8),P(cx2-5,YB-3),P(cx2-6,YB)],{w0:F*.3,w1:F*.4,w2:F*.25});
+  ink([P(cx2+2,YBH+8),P(cx2+5,YB-3),P(cx2+6,YB)],{w0:F*.3,w1:F*.4,w2:F*.25});
+  ink([P(cx2-9,YB+10),P(cx2,YB+12),P(cx2+9,YB+10)],{w0:F*.22,w1:F*.55,w2:F*.22});
+
+  // 頸
+  ink([P(cx2-10,YK+3),P(cx2-12,YJD-3)],{w0:C*.4,w1:C*.3,w2:C*.25});
+  ink([P(cx2+10,YK+3),P(cx2+12,YJD-3)],{w0:C*.4,w1:C*.3,w2:C*.25});
+
+  // [5] 智拳印當胸（鑿→小型雙拳）
+  鑿多([[cx2-38,YXW-22],[cx2+38,YXW-22],[cx2+38,YXW+26],[cx2-38,YXW+26]]);
+  // 左拳（後方小型）
+  ink([P(cx2-18,YXW+12),P(cx2-22,YXW-6),P(cx2-16,YXW-18)],{w0:C*.7,w1:C*.6,w2:C*.5});
+  ink([P(cx2+6,YXW+10),P(cx2+8,YXW-8),P(cx2+4,YXW-16)],{w0:C*.6,w1:C*.52,w2:C*.42});
+  // 左頭指豎出
+  ink([P(cx2-4,YXW-18),P(cx2-5,YXW-36)],{w0:C*.55,w1:C*.42,w2:C*.25});
+  ink([P(cx2+4,YXW-18),P(cx2+3,YXW-34)],{w0:C*.5,w1:C*.38,w2:C*.22});
+  // 右拳前方
+  ink([P(cx2-24,YXW+14),P(cx2-28,YXW-4),P(cx2-22,YXW-20)],{w0:C*.75,w1:C*.65,w2:C*.52});
+  ink([P(cx2+14,YXW+12),P(cx2+18,YXW-6),P(cx2+14,YXW-18)],{w0:C*.68,w1:C*.58,w2:C*.45});
+  // 右大指拄左頭指端
+  ink([P(cx2+16,YXW-18),P(cx2+8,YXW-30),P(cx2-1,YXW-36)],{w0:C*.55,w1:C*.42,w2:C*.2});
+
+  // 臂略示
+  ink([P(cx2-98,YJD+6),P(cx2-68,YJD+34),P(cx2-40,YXW-4),P(cx2-24,YXW+8)],
+    {w0:C*1.0,w1:C*.82,w2:C*.65,alpha:.8});
+  ink([P(cx2+98,YJD+6),P(cx2+68,YJD+34),P(cx2+40,YXW-4),P(cx2+14,YXW+6)],
+    {w0:C*1.0,w1:C*.82,w2:C*.65,alpha:.8});
+})();
+
+// ════════════════════════════════════════════════════════════════
+// ③ 金剛薩埵
+// ════════════════════════════════════════════════════════════════
+;(function(){
+  const cv=document.getElementById('c3'),ctx=cv.getContext('2d');
+  const u=7,cx3=320,topY=90;
+  const gy=n=>topY+n*u;
+  const YT=gy(0),YHJ=gy(4),YHX=gy(8),YBH=gy(12),YB=gy(16),YK=gy(20);
+  const YJD=gy(24),YXW=gy(36),YQ=gy(48),YPX=gy(64),YZM=gy(68);
+  const kH=26,XL=cx3-kH*u,XR=cx3+kH*u;
+  const 坐H=YZM-YT;
+  const B=坐H/150,C=B*.618,F=B*.412;
+  const bi=造筆具(ctx,INK,B,C,F);
+  const{P,ink,dot,鑿橢,鑿多}=bi;
+
+  console.assert(YBH-YT===12*u,'③破戒：白毫');
+  console.assert(YK-YT===20*u,'③破戒：頦');
+  console.assert(YXW-YT===36*u,'③破戒：心窩');
+  console.assert(YZM-YT===68*u,'③破戒：座面');
+  console.assert(XR-XL===52*u,'③破戒：膝寬');
+
+  // [1] 月輪
+  const mcy=(YT+YK)/2-4;
+  function ring(r,w,a){
+    const pts=[];for(let i=0;i<=64;i++){const θ=i/64*Math.PI*2;pts.push(P(cx3+Math.cos(θ)*r,mcy+Math.sin(θ)*r))}
+    ink(pts,{w0:w,w1:w,w2:w,taper:false,alpha:a});
+  }
+  ring(160,B*.55,.85);ring(142,F*.8,.72);
+
+  // [2] 蓮座
+  const sW=195;
+  for(let i=0;i<12;i++){
+    const t=i/11,x=cx3-sW+t*2*sW,bow=Math.sin(t*Math.PI);
+    const bY=YZM+8-bow*3,tY=YZM-42+bow*10;
+    ink([P(x-7,bY),P(x-5,(bY+tY)*.52),P(x,tY)],{w0:C*.45,w1:C*.7,w2:F*.5});
+    ink([P(x+7,bY),P(x+5,(bY+tY)*.52),P(x,tY)],{w0:C*.45,w1:C*.7,w2:F*.5});
+  }
+  ink([P(cx3-sW,YZM+10),P(cx3,YZM+16),P(cx3+sW,YZM+10)],{w0:C,w1:C,w2:C,taper:false});
+  ink([P(cx3-sW+6,YZM+38),P(cx3,YZM+42),P(cx3+sW-6,YZM+38)],{w0:C,w1:C,w2:C,taper:false});
+  for(let i=0;i<10;i++){
+    const t=i/9,x=cx3-sW+12+t*(2*sW-24),bow=Math.sin(t*Math.PI);
+    ink([P(x-6,YZM+40-bow*2),P(x,YZM+78+bow*8)],{w0:C*.4,w1:F*.45,w2:F*.3});
+    ink([P(x+6,YZM+40-bow*2),P(x,YZM+78+bow*8)],{w0:C*.4,w1:F*.45,w2:F*.3});
+  }
+  ink([P(cx3-sW+14,YZM+86),P(cx3,YZM+90),P(cx3+sW-14,YZM+86)],{w0:B*.5,w1:B*.5,w2:B*.5,taper:false});
+
+  // [3] 軀幹（菩薩形——瓔珞裝身）
+  鑿多([[135,YJD-4],[505,YJD-4],[512,YPX],[510,YZM+4],[130,YZM+4],[128,YPX]]);
+  ink([
+    P(cx3-10,YJD+4),P(cx3-48,YJD-2),P(cx3-96,YJD+6),P(cx3-110,YJD+38),
+    P(cx3-116,YXW+10),P(cx3-126,YQ-14),P(cx3-140,YQ+26),P(cx3-158,YPX-22),
+    P(XL,YPX+6),P(XL+12,YZM-4),P(cx3-48,YZM+2),P(cx3,YZM+6),
+    P(cx3+48,YZM+2),P(XR-12,YZM-4),P(XR,YPX+6),P(cx3+158,YPX-22),
+    P(cx3+140,YQ+26),P(cx3+126,YQ-14),P(cx3+116,YXW+10),P(cx3+110,YJD+38),
+    P(cx3+96,YJD+6),P(cx3+48,YJD-2),P(cx3+10,YJD+4),P(cx3,YJD+14),
+  ],{w0:B,taper:false,loop:true});
+
+  // 瓔珞
+  ink([P(cx3-58,YJD+6),P(cx3-28,YXW-18),P(cx3,YXW-6),P(cx3+28,YXW-18),P(cx3+58,YJD+6)],
+    {w0:F*.65,w1:F*.55,w2:F*.65,taper:false,alpha:.68});
+  // 衣褶
+  ink([P(cx3-38,YJD+16),P(cx3-36,YXW),P(cx3-34,YQ-8)],{w0:C*.48,w1:C*.4,w2:C*.28,alpha:.68});
+  ink([P(cx3+38,YJD+16),P(cx3+40,YXW),P(cx3+42,YQ-8)],{w0:C*.48,w1:C*.4,w2:C*.28,alpha:.68});
+  ink([P(XL+18,YPX),P(cx3-58,YPX+12),P(cx3,YPX+16),P(cx3+58,YPX+12),P(XR-18,YPX)],
+    {w0:C*.32,w1:C*.48,w2:C*.32,taper:false,alpha:.58});
+  ink([P(XL+18,YPX),P(cx3-78,YPX-8),P(cx3-28,YQ+28)],{w0:C*.38,w1:C*.52,w2:C*.28,alpha:.62});
+  ink([P(XR-18,YPX),P(cx3+78,YPX-8),P(cx3+28,YQ+28)],{w0:C*.38,w1:C*.52,w2:C*.28,alpha:.62});
+
+  // [4] 頭面
+  鑿橢(cx3,(YT+YK)/2,80,80);
+  ink([
+    P(cx3,YT),P(cx3+12,YT+10),P(cx3+14,YHJ),P(cx3+20,YHJ+10),
+    P(cx3+36,YHX+2),P(cx3+39,YBH+4),P(cx3+37,YBH+16),
+    P(cx3+30,YB+6),P(cx3+22,YK-8),P(cx3+12,YK),P(cx3,YK+2),
+    P(cx3-12,YK),P(cx3-22,YK-8),P(cx3-30,YB+6),
+    P(cx3-37,YBH+16),P(cx3-39,YBH+4),P(cx3-36,YHX+2),
+    P(cx3-20,YHJ+10),P(cx3-14,YHJ),P(cx3-12,YT+10),
+  ],{w0:B*.85,taper:false,loop:true});
+
+  // 五佛冠
+  const crY=YHX-2;
+  for(let i=-2;i<=2;i++){
+    const x=cx3+i*13,h=i===0?16:11;
+    ink([P(x-5,crY),P(x,crY-h),P(x+5,crY)],{w0:F*.55,w1:F*.45,w2:F*.55,alpha:.78});
+    dot(x,crY-h+3,.7);
+  }
+  ink([P(cx3-32,crY+2),P(cx3,crY-2),P(cx3+32,crY+2)],{w0:F*.5,w1:F*.45,w2:F*.5,taper:false,alpha:.68});
+
+  // 耳
+  function 耳(s){
+    ink([P(cx3+s*39,YBH),P(cx3+s*50,YBH+12),P(cx3+s*48,YB+4),P(cx3+s*39,YK-2)],
+      {w0:C*.58,w1:C*.68,w2:C*.38});
+  }
+  耳(1);耳(-1);
+
+  // 螺髮
+  for(let row=0;row<5;row++){
+    const ry=YT+6+row*6.8;const off=(row%2)*3.2;
+    for(let rx=cx3-28+off;rx<=cx3+28;rx+=6.4){
+      const dx=(rx-cx3)/32,dy=(ry-((YT+YHX)/2+2))/22;
+      if(dx*dx+dy*dy>1)continue; dot(rx,ry,.9);
+    }
+  }
+
+  // 開臉
+  dot(cx3,YBH,1.4);
+  function 眉(s){ink([P(cx3+s*4,YBH+5),P(cx3+s*13,YBH+2),P(cx3+s*24,YBH+7)],{w0:F*.28,w1:F*.8,w2:F*.22})}
+  眉(1);眉(-1);
+  function 眼(s){
+    ink([P(cx3+s*5,YBH+14),P(cx3+s*13,YBH+17),P(cx3+s*24,YBH+20)],{w0:F*.22,w1:F*.65,w2:F*.18});
+    dot(cx3+s*13,YBH+16,.55);
+  }
+  眼(1);眼(-1);
+  ink([P(cx3-2,YBH+7),P(cx3-4.5,YB-3),P(cx3-5.5,YB)],{w0:F*.28,w1:F*.38,w2:F*.22});
+  ink([P(cx3+2,YBH+7),P(cx3+4.5,YB-3),P(cx3+5.5,YB)],{w0:F*.28,w1:F*.38,w2:F*.22});
+  ink([P(cx3-8,YB+9),P(cx3,YB+11),P(cx3+8,YB+9)],{w0:F*.2,w1:F*.5,w2:F*.2});
+
+  // 頸
+  ink([P(cx3-9,YK+3),P(cx3-10,YJD-3)],{w0:C*.38,w1:C*.28,w2:C*.22});
+  ink([P(cx3+9,YK+3),P(cx3+10,YJD-3)],{w0:C*.38,w1:C*.28,w2:C*.22});
+
+  // [5] 右臂＋五鈷杵當胸（鑿→落筆；畫面左＝像右）
+  鑿多([[cx3-110,YJD],[cx3-10,YJD],[cx3-10,YXW+24],[cx3-110,YXW+24]]);
+  // 右上臂
+  ink([P(cx3-96,YJD+6),P(cx3-82,YJD+30),P(cx3-66,YXW-14)],{w0:C*.9,w1:C*.78,w2:C*.62});
+  ink([P(cx3-78,YJD+10),P(cx3-68,YJD+28),P(cx3-54,YXW-10)],{w0:C*.78,w1:C*.65,w2:C*.5});
+  // 右前臂（舉向胸前）
+  ink([P(cx3-66,YXW-14),P(cx3-52,YXW-22),P(cx3-34,YXW-16)],{w0:C*.72,w1:C*.6,w2:C*.5});
+  // 右手握杵
+  ink([P(cx3-38,YXW-18),P(cx3-32,YXW-6),P(cx3-24,YXW-14)],{w0:C*.55,w1:C*.48,w2:C*.38});
+
+  // 五鈷杵（斜執當胸——杵斜約30°，把在手中，鈷端上指）
+  const vx=cx3-30,vy=YXW-14;
+  const vAngle=-Math.PI/6; // 向右上斜30°
+  function vP(dx,dy){ return P(vx+dx*Math.cos(vAngle)-dy*Math.sin(vAngle), vy+dx*Math.sin(vAngle)+dy*Math.cos(vAngle)); }
+  // 中鈷（直）
+  ink([vP(0,-65),vP(0,65)],{w0:C*.55,w1:C*.42,w2:C*.55});
+  // 脇鈷（嘴形內彎，上下各二）
+  for(const s of[-1,1]){
+    ink([vP(s*12,-38),vP(s*16,-52),vP(s*8,-62),vP(s*2,-66)],{w0:C*.45,w1:C*.38,w2:C*.22});
+    ink([vP(s*12,38),vP(s*16,52),vP(s*8,62),vP(s*2,66)],{w0:C*.45,w1:C*.38,w2:C*.22});
+  }
+  // 把·鬼目·蓮弁
+  ink([vP(-8,-28),vP(-8,28)],{w0:C*.5,w1:C*.42,w2:C*.5,taper:false,alpha:.7});
+  ink([vP(8,-28),vP(8,28)],{w0:C*.5,w1:C*.42,w2:C*.5,taper:false,alpha:.7});
+  for(const dy of[-28,28]){
+    dot(vP(-6,dy).x,vP(-6,dy).y,1.2);dot(vP(6,dy).x,vP(6,dy).y,1.2);
+    ink([vP(-10,dy+dy/Math.abs(dy)*4),vP(0,dy+dy/Math.abs(dy)*8),vP(10,dy+dy/Math.abs(dy)*4)],
+      {w0:F*.4,w1:F*.35,w2:F*.4,taper:false,alpha:.55});
+  }
+
+  // [6] 左臂＋五鈷鈴安左股（鑿→落筆；畫面右＝像左）
+  鑿多([[cx3+20,YXW-4],[cx3+120,YXW-4],[cx3+120,YQ+30],[cx3+20,YQ+30]]);
+  // 左上臂
+  ink([P(cx3+96,YJD+6),P(cx3+84,YJD+28),P(cx3+74,YXW+10)],{w0:C*.9,w1:C*.78,w2:C*.62});
+  ink([P(cx3+78,YJD+10),P(cx3+70,YJD+26),P(cx3+62,YXW+6)],{w0:C*.78,w1:C*.65,w2:C*.5});
+  // 左前臂（向左股下垂）
+  ink([P(cx3+74,YXW+10),P(cx3+82,YXW+28),P(cx3+90,YQ+4)],{w0:C*.72,w1:C*.6,w2:C*.5});
+  ink([P(cx3+62,YXW+6),P(cx3+70,YXW+24),P(cx3+78,YQ)],{w0:C*.65,w1:C*.52,w2:C*.42});
+  // 左手握鈴
+  ink([P(cx3+78,YQ),P(cx3+84,YQ+8),P(cx3+92,YQ+4)],{w0:C*.5,w1:C*.42,w2:C*.32});
+
+  // 五鈷鈴（鈴頭在下，杵端在上，把在手中）
+  const bx=cx3+85,by=YQ+4;
+  // 鈴身（鼓形）
+  ink([P(bx-6,by),P(bx-10,by+14),P(bx-12,by+28),P(bx-8,by+40),P(bx,by+44),
+       P(bx+8,by+40),P(bx+12,by+28),P(bx+10,by+14),P(bx+6,by)],
+    {w0:C*.48,w1:C*.52,w2:C*.48,taper:false,loop:true});
+  // 鈴口
+  ink([P(bx-10,by+40),P(bx,by+46),P(bx+10,by+40)],{w0:F*.42,w1:F*.38,w2:F*.42,taper:false,alpha:.6});
+  // 杵端（鈴頂小杵——向上）
+  ink([P(bx,by-14),P(bx,by)],{w0:C*.35,w1:C*.3,w2:C*.35});
+  for(const s of[-1,1])
+    ink([P(bx+s*5,by-4),P(bx+s*6,by-10),P(bx+s*2,by-14)],{w0:F*.35,w1:F*.28,w2:F*.15});
+})();
+
+// ════════════════════════════════════════════════════════════════
+// ④ 五鈷杵三昧耶形
+// ════════════════════════════════════════════════════════════════
+;(function(){
+  const cv=document.getElementById('c4'),ctx=cv.getContext('2d');
+  const B=3.2,C=B*.618,F=B*.412;
+  const bi=造筆具(ctx,INK,B,C,F);
+  const{P,ink,dot,鑿橢}=bi;
+  const vx=320,vy=280; // 杵中心
+
+  // 月輪＋蓮座（杵安其上）
+  const mR=120;
+  function ring(r,w,a){
+    const pts=[];for(let i=0;i<=64;i++){const θ=i/64*Math.PI*2;pts.push(P(vx+Math.cos(θ)*r,vy+80+Math.sin(θ)*r))}
+    ink(pts,{w0:w,w1:w,w2:w,taper:false,alpha:a});
+  }
+  ring(mR,B*.5,.6);
+
+  // 小蓮座
+  const sY=vy+200;
+  for(let i=0;i<10;i++){
+    const t=i/9,x=vx-100+t*200,bow=Math.sin(t*Math.PI);
+    const bY=sY+6-bow*2,tY=sY-28+bow*6;
+    ink([P(x-5,bY),P(x,tY)],{w0:C*.4,w1:F*.5,w2:F*.3});
+    ink([P(x+5,bY),P(x,tY)],{w0:C*.4,w1:F*.5,w2:F*.3});
+  }
+  ink([P(vx-105,sY+8),P(vx,sY+12),P(vx+105,sY+8)],{w0:C*.8,w1:C*.8,w2:C*.8,taper:false});
+
+  // ═══ 五鈷杵本體（豎置，兩端對稱）═══
+  // 把（中央握柄）
+  const hH=50; // 把半高
+  ink([P(vx-10,vy-hH),P(vx-12,vy-hH/2),P(vx-14,vy),P(vx-12,vy+hH/2),P(vx-10,vy+hH)],
+    {w0:C*.9,w1:C*.85,w2:C*.9,taper:false});
+  ink([P(vx+10,vy-hH),P(vx+12,vy-hH/2),P(vx+14,vy),P(vx+12,vy+hH/2),P(vx+10,vy+hH)],
+    {w0:C*.9,w1:C*.85,w2:C*.9,taper:false});
+  // 把中央裝飾帶
+  ink([P(vx-14,vy-4),P(vx-14,vy+4)],{w0:F*.5,w1:F*.5,w2:F*.5,taper:false,alpha:.6});
+  ink([P(vx+14,vy-4),P(vx+14,vy+4)],{w0:F*.5,w1:F*.5,w2:F*.5,taper:false,alpha:.6});
+  ink([P(vx-13,vy-16),P(vx+13,vy-16)],{w0:F*.4,w1:F*.4,w2:F*.4,taper:false,alpha:.5});
+  ink([P(vx-13,vy+16),P(vx+13,vy+16)],{w0:F*.4,w1:F*.4,w2:F*.4,taper:false,alpha:.5});
+
+  // 上下兩端（對稱結構：鬼目→蓮弁帯→五鈷）
+  for(const dir of [-1, 1]) {
+    const endY = vy + dir * hH; // 把端
+
+    // 鬼目（圓珠裝飾，把端左右各一）
+    dot(vx - 7, endY + dir * 6, 2.2);
+    dot(vx + 7, endY + dir * 6, 2.2);
+    // 鬼目環紋
+    ink([P(vx - 12, endY + dir * 4), P(vx, endY + dir * 8), P(vx + 12, endY + dir * 4)],
+      { w0: F * .45, w1: F * .4, w2: F * .45, taper: false, alpha: .55 });
+
+    // 蓮弁帯（把端外側，鈷根處蓮瓣帶）
+    const lbY = endY + dir * 16;
+    for (let i = -3; i <= 3; i++) {
+      const x = vx + i * 7;
+      const tipY = lbY + dir * 12;
+      ink([P(x - 3, lbY), P(x, tipY), P(x + 3, lbY)],
+        { w0: F * .42, w1: F * .35, w2: F * .42, alpha: .6 });
+    }
+    // 蓮弁帯橫線
+    ink([P(vx - 14, lbY - dir * 2), P(vx, lbY), P(vx + 14, lbY - dir * 2)],
+      { w0: F * .5, w1: F * .45, w2: F * .5, taper: false, alpha: .6 });
+
+    // 五鈷
+    const pBase = lbY + dir * 14; // 鈷起始
+    const pLen = 80;               // 鈷長
+
+    // 中鈷（直，稍長）
+    ink([P(vx, pBase), P(vx, pBase + dir * (pLen + 10))],
+      { w0: C * .72, w1: C * .45, w2: C * .18 });
+
+    // 脇鈷（嘴形內彎：先外張再內收抱中鈷）
+    for (const s of [-1, 1]) {
+      // 外側脇鈷（張角大）
+      ink([P(vx + s * 12, pBase),
+           P(vx + s * 26, pBase + dir * pLen * .3),
+           P(vx + s * 22, pBase + dir * pLen * .6),
+           P(vx + s * 8, pBase + dir * pLen * .88),
+           P(vx + s * 4, pBase + dir * (pLen + 6))],
+        { w0: C * .6, w1: C * .48, w2: C * .15 });
+      // 內側脇鈷（張角小）
+      ink([P(vx + s * 6, pBase),
+           P(vx + s * 16, pBase + dir * pLen * .28),
+           P(vx + s * 14, pBase + dir * pLen * .55),
+           P(vx + s * 5, pBase + dir * pLen * .82),
+           P(vx + s * 2, pBase + dir * (pLen + 2))],
+        { w0: C * .52, w1: C * .4, w2: C * .12 });
+    }
+  }
+
+  // 自證：兩端對稱
+  const topTip = vy - hH - 16 - 14 - 90 - 10; // 上端中鈷尖
+  const botTip = vy + hH + 16 + 14 + 90 + 10;  // 下端中鈷尖
+  const topDist = vy - topTip;
+  const botDist = botTip - vy;
+  console.assert(Math.abs(topDist - botDist) < 2, '五鈷杵破戒：兩端不對稱（上' + topDist + '下' + botDist + ')');
+})();
+
+</script>
+</body>
+</html>
