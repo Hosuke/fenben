@@ -11,7 +11,7 @@ export declare function 彌陀定印(bi: 筆具, x: number, z: number, 比?: num
 export declare function 施無畏印(bi: 筆具, x: number, z: number, 比?: number, 飾?: boolean): void;
 export declare function 與願印(bi: 筆具, x: number, z: number, 比?: number, 飾?: boolean): void;
 export declare function 觸地印(bi: 筆具, x: number, z: number, 比?: number, 飾?: boolean): void;
-export declare function 說法印(bi: 筆具, x: number, z: number, 比?: number): void;
+export declare function 說法印(bi: 筆具, x: number, z: number, 比?: number, 距?: number): void;
 export declare function 期剋印(bi: 筆具, x: number, z: number, 比?: number): void;
 export interface 手印條 {
     鍵: string;
