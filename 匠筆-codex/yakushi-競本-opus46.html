@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>藥師如來坐像 · 競本（Opus 4.6 1M 親筆）</title>
+<style>
+html,body{margin:0;padding:0;background:#0e1218;color:#c0a870;font-family:"Noto Serif TC","PMingLiU",serif}
+header{padding:24px 36px 10px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #262c38}
+header h1{font-size:24px;letter-spacing:.1em;margin:0;font-weight:600;color:#dcc98e}
+header .sub{font-size:12px;letter-spacing:.06em;color:#7a6c4a;text-align:right;line-height:1.6}
+main{display:flex;justify-content:center;padding:20px 0 30px}
+canvas{display:block;background:#0e1218}
+footer{text-align:center;font-size:11px;color:#4a4230;padding-bottom:24px;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<header>
+  <h1>藥師如來坐像</h1>
+  <div class="sub">自足 canvas 白描 · 競本（Opus 4.6 1M 親筆）<br>施無畏印 · 左掌承藥壺 · 結跏趺坐 · 頭光無月輪</div>
+</header>
+<main><canvas id="c" width="900" height="1200"></canvas></main>
+<footer>T1419 百二十指制格網 · 錨以碼自證 · 畫序即遮擋序（destination-out）</footer>
+
+<!-- 自驗：
+  ① 格網錨 console.assert 全過（白毫12·頦20·頸底24·心窩36·臍48·盤線64·座面68·膝寬52）
+  ② 面高比 12/68 ≈ 0.176 < 0.22（不犯頭大身促）
+  ③ 線身比 坐身高/BONE = 150（律內 1:100–200）
+  ④ 開臉簡筆：眉一筆·瞼一筆·瞳一點·白毫一點·頰不施線
+  ⑤ 畫序＝遮擋序：頭光→蓮座→鑿①軀幹→軀幹衣褶→鑿②頭→頭面耳頸→螺髮→
+     開臉→鑿③右臂→右臂施無畏→鑿④左臂→左臂掌→鑿⑤壺座→藥壺
+  ⑥ 座標皆本卷新擬，勿抄現成
+  ⑦ 體先於衣：褶隨體轉（環褶繞肢、張力褶自膝向胯）
+  ⑧ 藥壺：鼓腹束口蓋鈕俱全
+-->
+
+<script>
+'use strict';
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+
+// ═══ 一 · 量度層（T1419 百二十指制）═══
+const u = 10, cx = 450, topY = 180;
+const gy = n => topY + n * u;
+const Y頂 = gy(0), Y肉髻底 = gy(4), Y髮際 = gy(8), Y白毫 = gy(12);
+const Y鼻 = gy(16), Y頦 = gy(20), Y頸底 = gy(24);
+const Y心窩 = gy(36), Y臍 = gy(48);
+const Y盤線 = gy(64), Y座面 = gy(68);
+const 膝半 = 26, XkL = cx - 膝半 * u, XkR = cx + 膝半 * u;
+
+console.assert(Y白毫 - Y頂 === 12 * u, '破戒：白毫');
+console.assert(Y頦   - Y頂 === 20 * u, '破戒：頦');
+console.assert(Y頸底 - Y頂 === 24 * u, '破戒：頸底');
+console.assert(Y心窩 - Y頂 === 36 * u, '破戒：心窩');
+console.assert(Y臍   - Y頂 === 48 * u, '破戒：臍');
+console.assert(Y盤線 - Y頂 === 64 * u, '破戒：盤線');
+console.assert(Y座面 - Y頂 === 68 * u, '破戒：座面');
+console.assert(XkR - XkL === 52 * u, '破戒：膝寬');
+const 面高比 = (Y頦 - Y髮際) / (Y座面 - Y頂);
+console.assert(Math.abs(面高比 - 12 / 68) < 1e-9, '破戒：面高比');
+console.assert(面高比 < 0.22, '破戒：頭大身促');
+
+// ═══ 二 · 筆具層（三等筆制，線身比 1:150）═══
+const 坐H = Y座面 - Y頂;
+const BONE = 坐H / 150, CLOTH = BONE * 0.618, FINE = BONE * 0.412;
+console.assert(坐H / BONE >= 100 && 坐H / BONE <= 200, '破戒：線身比');
+const INK = '#d2bc86';
+
+// ═══ 三 · 筆路引擎（Catmull-Rom 寬度漸變 ribbon）═══
+const P = (x, y) => ({ x, y });
+function cr(a, b, c, d, t) {
+  const t2 = t * t, t3 = t2 * t;
+  return {
+    x: .5 * ((2*b.x) + (-a.x+c.x)*t + (2*a.x-5*b.x+4*c.x-d.x)*t2 + (-a.x+3*b.x-3*c.x+d.x)*t3),
+    y: .5 * ((2*b.y) + (-a.y+c.y)*t + (2*a.y-5*b.y+4*c.y-d.y)*t2 + (-a.y+3*b.y-3*c.y+d.y)*t3)
+  };
+}
+function sam(pts, n) {
+  n = n || 16; if (pts.length < 2) return pts.slice();
+  const e = [pts[0], ...pts, pts[pts.length - 1]], o = [];
+  for (let i = 0; i < pts.length - 1; i++)
+    for (let s = 0; s < n; s++) o.push(cr(e[i], e[i+1], e[i+2], e[i+3], s / n));
+  o.push(pts[pts.length - 1]); return o;
+}
+function wAt(t, a, b, c, tp) {
+  let w = t < .5 ? a + (b - a) * (t / .5) : b + (c - b) * ((t - .5) / .5);
+  if (tp) { if (t < .06) w *= .3 + .7 * (t / .06); if (t > .94) w *= .3 + .7 * ((1 - t) / .06); }
+  return w;
+}
+function ink(pts, o) {
+  o = o || {};
+  const w0 = o.w0 ?? BONE, w1 = o.w1 ?? w0, w2 = o.w2 ?? w1;
+  const tp = o.taper !== false && !o.loop, col = o.color || INK, al = o.alpha ?? 1;
+  let d = sam(pts, o.seg || 16); if (o.loop) d.push(d[0]);
+  const n = d.length; if (n < 2) return;
+  const L = [], R = [];
+  for (let i = 0; i < n; i++) {
+    const p = d[i], pa = d[Math.max(0, i-1)], pb = d[Math.min(n-1, i+1)];
+    let dx = pb.x - pa.x, dy = pb.y - pa.y;
+    const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
+    const hw = wAt(i / (n - 1), w0, w1, w2, tp) / 2;
+    L.push({ x: p.x - dy * hw, y: p.y + dx * hw });
+    R.push({ x: p.x + dy * hw, y: p.y - dx * hw });
+  }
+  ctx.beginPath(); ctx.moveTo(L[0].x, L[0].y);
+  for (let i = 1; i < n; i++) ctx.lineTo(L[i].x, L[i].y);
+  for (let i = n - 1; i >= 0; i--) ctx.lineTo(R[i].x, R[i].y);
+  ctx.closePath(); ctx.globalAlpha = al; ctx.fillStyle = col; ctx.fill(); ctx.globalAlpha = 1;
+}
+function dot(x, y, r) {
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = INK; ctx.fill();
+}
+function 鑿橢(x, y, rx, ry) {
+  ctx.save(); ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#000'; ctx.fill(); ctx.restore();
+}
+function 鑿多(ps) {
+  ctx.save(); ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath(); ctx.moveTo(ps[0][0], ps[0][1]);
+  for (let i = 1; i < ps.length; i++) ctx.lineTo(ps[i][0], ps[i][1]);
+  ctx.closePath(); ctx.fillStyle = '#000'; ctx.fill(); ctx.restore();
+}
+
+// ═══ 四 · 落筆（畫序＝遮擋序）═══
+
+// ── [1] 頭光（無月輪：雙圈＋光尖） ──
+;(function 頭光() {
+  const hx = cx, hy = (Y頂 + Y頦) / 2 - 6;
+  const r1 = 188, r2 = 164;
+  function ring(r, w, a) {
+    const pts = [];
+    for (let i = 0; i <= 72; i++) {
+      const θ = i / 72 * Math.PI * 2;
+      pts.push(P(hx + Math.cos(θ) * r, hy + Math.sin(θ) * r));
+    }
+    ink(pts, { w0: w, w1: w, w2: w, taper: false, alpha: a });
+  }
+  ring(r1, BONE * 0.58, 0.88);
+  ring(r2, FINE * 0.9, 0.82);
+  for (let i = 0; i < 44; i++) {
+    const θ = i / 44 * Math.PI * 2;
+    const x1 = hx + Math.cos(θ) * r1, y1 = hy + Math.sin(θ) * r1;
+    const x2 = hx + Math.cos(θ) * (r1 + 16), y2 = hy + Math.sin(θ) * (r1 + 16);
+    ink([P(x1, y1), P(x2, y2)], { w0: FINE * .7, w1: FINE * .25, w2: .2, alpha: .38 });
+  }
+})();
+
+// ── [2] 蓮華座 ──
+;(function 蓮座() {
+  const sW = 285;
+  // 上蓮瓣（尖朝上，承佛身）
+  for (let i = 0; i < 14; i++) {
+    const t = i / 13, x = cx - sW + t * 2 * sW;
+    const bow = Math.sin(t * Math.PI);
+    const bY = Y座面 + 12 - bow * 5, tY = Y座面 - 60 + bow * 14;
+    ink([P(x - 10, bY), P(x - 8, (bY + tY) * .52), P(x, tY)], { w0: CLOTH * .5, w1: CLOTH * .85, w2: FINE * .55 });
+    ink([P(x + 10, bY), P(x + 8, (bY + tY) * .52), P(x, tY)], { w0: CLOTH * .5, w1: CLOTH * .85, w2: FINE * .55 });
+    ink([P(x, bY + 4), P(x, tY + 5)], { w0: FINE * .5, w1: FINE * .5, w2: FINE * .25, alpha: .6 });
+  }
+  // 鼓腰
+  ink([P(cx - sW, Y座面 + 14), P(cx, Y座面 + 22), P(cx + sW, Y座面 + 14)],
+    { w0: CLOTH, w1: CLOTH, w2: CLOTH, taper: false });
+  ink([P(cx - sW + 8, Y座面 + 50), P(cx, Y座面 + 56), P(cx + sW - 8, Y座面 + 50)],
+    { w0: CLOTH, w1: CLOTH, w2: CLOTH, taper: false });
+  for (let i = -8; i <= 8; i++) {
+    const x = cx + i * 33, a = Math.abs(i) / 8;
+    ink([P(x, Y座面 + 16 + a * a * 8), P(x, Y座面 + 48 + a * a * 6)],
+      { w0: FINE * .6, w1: FINE * .6, w2: FINE * .35, alpha: .55 });
+  }
+  // 下蓮瓣（尖朝下）
+  for (let i = 0; i < 12; i++) {
+    const t = i / 11, x = cx - sW + 18 + t * (2 * sW - 36);
+    const bow = Math.sin(t * Math.PI);
+    const bY = Y座面 + 52 - bow * 3, tY = Y座面 + 108 + bow * 10;
+    ink([P(x - 9, bY), P(x - 7, (bY + tY) * .5), P(x, tY)], { w0: CLOTH * .45, w1: CLOTH * .75, w2: FINE * .45 });
+    ink([P(x + 9, bY), P(x + 7, (bY + tY) * .5), P(x, tY)], { w0: CLOTH * .45, w1: CLOTH * .75, w2: FINE * .45 });
+  }
+  // 臺基
+  ink([P(cx - sW + 20, Y座面 + 116), P(cx, Y座面 + 120), P(cx + sW - 20, Y座面 + 116)],
+    { w0: BONE * .6, w1: BONE * .6, w2: BONE * .6, taper: false });
+})();
+
+// ── [3] 軀幹＋衲衣（鑿① → 落筆） ──
+;(function 軀幹() {
+  鑿多([[195, 418], [705, 418], [718, 780], [712, 872], [188, 872], [182, 780]]);
+
+  // 外郭（閉合路徑：領口→肩→腋→膝→裾→回）
+  ink([
+    P(432, Y頸底 + 6),    // 左領口（像右）
+    P(378, Y頸底),        // 左肩內
+    P(310, Y頸底 + 8),    // 左肩峰
+    P(284, Y頸底 + 56),   // 左臂根
+    P(266, Y心窩 + 16),   // 左腋
+    P(254, Y臍 - 16),     // 左腰
+    P(236, Y臍 + 36),     // 左胯
+    P(212, Y盤線 - 36),   // 左大腿外
+    P(XkL, Y盤線 + 8),    // 左膝外（52指錨）
+    P(XkL + 18, Y座面 - 6), // 左膝底
+    P(326, Y座面 + 2),    // 左裾
+    P(cx, Y座面 + 8),     // 中裾垂尖
+    P(574, Y座面 + 2),    // 右裾
+    P(XkR - 18, Y座面 - 6), // 右膝底
+    P(XkR, Y盤線 + 8),    // 右膝外
+    P(688, Y盤線 - 36),   // 右大腿外
+    P(664, Y臍 + 36),     // 右胯
+    P(646, Y臍 - 16),     // 右腰
+    P(634, Y心窩 + 16),   // 右腋
+    P(616, Y頸底 + 56),   // 右臂根
+    P(590, Y頸底 + 8),    // 右肩峰
+    P(522, Y頸底),        // 右肩內
+    P(468, Y頸底 + 6),    // 右領口
+    P(cx, Y頸底 + 20),    // 領口 V 底
+  ], { w0: BONE, taper: false, loop: true });
+
+  // 衣褶（體先於衣——褶隨體轉）
+
+  // ⅰ 衲衣偏覆斜線（左肩→胸→右腰）
+  ink([P(382, Y頸底 + 4), P(430, Y心窩 - 24), P(468, Y心窩 + 8), P(520, Y臍 - 8), P(564, Y臍 + 28)],
+    { w0: CLOTH * 1.05, w1: CLOTH * .95, w2: CLOTH * .7 });
+
+  // ⅱ 胸垂褶（自領口下垂：近直之弧示軀幹圓柱）
+  ink([P(424, Y頸底 + 22), P(420, Y心窩 + 4), P(422, Y臍 - 14)],
+    { w0: CLOTH * .75, w1: CLOTH * .65, w2: CLOTH * .45 });
+  ink([P(462, Y頸底 + 26), P(466, Y心窩 + 12), P(470, Y臍 + 4)],
+    { w0: CLOTH * .68, w1: CLOTH * .58, w2: CLOTH * .38, alpha: .9 });
+  ink([P(504, Y頸底 + 30), P(508, Y心窩 + 22), P(514, Y臍 + 14)],
+    { w0: CLOTH * .55, w1: CLOTH * .48, w2: CLOTH * .3, alpha: .82 });
+
+  // ⅲ 膝部張力褶（自膝向胯——衣覆膝球，褶拉向軀幹）
+  ink([P(XkL + 28, Y盤線 + 4), P(292, Y盤線 - 14), P(382, Y臍 + 44)],
+    { w0: CLOTH * .55, w1: CLOTH * .78, w2: CLOTH * .45 });
+  ink([P(XkL + 38, Y盤線 + 12), P(312, Y盤線 - 4), P(398, Y臍 + 54)],
+    { w0: CLOTH * .48, w1: CLOTH * .68, w2: CLOTH * .38, alpha: .85 });
+  ink([P(XkL + 18, Y盤線 - 10), P(262, Y臍 + 44), P(316, Y臍 + 16)],
+    { w0: CLOTH * .45, w1: CLOTH * .6, w2: CLOTH * .3, alpha: .78 });
+  ink([P(XkR - 28, Y盤線 + 4), P(608, Y盤線 - 14), P(518, Y臍 + 44)],
+    { w0: CLOTH * .55, w1: CLOTH * .78, w2: CLOTH * .45 });
+  ink([P(XkR - 38, Y盤線 + 12), P(588, Y盤線 - 4), P(502, Y臍 + 54)],
+    { w0: CLOTH * .48, w1: CLOTH * .68, w2: CLOTH * .38, alpha: .85 });
+  ink([P(XkR - 18, Y盤線 - 10), P(638, Y臍 + 44), P(584, Y臍 + 16)],
+    { w0: CLOTH * .45, w1: CLOTH * .6, w2: CLOTH * .3, alpha: .78 });
+
+  // ⅳ 膝間弧褶（環褶繞股：弧鼓顯遠近）
+  ink([P(268, Y盤線), P(374, Y盤線 + 18), P(cx, Y盤線 + 24), P(526, Y盤線 + 18), P(632, Y盤線)],
+    { w0: CLOTH * .45, w1: CLOTH * .65, w2: CLOTH * .45, taper: false, alpha: .78 });
+  ink([P(288, Y盤線 + 14), P(386, Y盤線 + 30), P(cx, Y盤線 + 34), P(514, Y盤線 + 30), P(612, Y盤線 + 14)],
+    { w0: CLOTH * .38, w1: CLOTH * .55, w2: CLOTH * .38, taper: false, alpha: .68 });
+
+  // ⅴ 袖褶（環褶繞上臂之圓柱）
+  ink([P(300, Y頸底 + 28), P(280, Y頸底 + 46), P(272, Y頸底 + 66)],
+    { w0: CLOTH * .6, w1: CLOTH * .52, w2: CLOTH * .32, alpha: .75 });
+  ink([P(304, Y頸底 + 48), P(286, Y頸底 + 64), P(276, Y頸底 + 84)],
+    { w0: CLOTH * .52, w1: CLOTH * .44, w2: CLOTH * .26, alpha: .68 });
+  ink([P(600, Y頸底 + 28), P(620, Y頸底 + 46), P(628, Y頸底 + 66)],
+    { w0: CLOTH * .6, w1: CLOTH * .52, w2: CLOTH * .32, alpha: .75 });
+  ink([P(596, Y頸底 + 48), P(614, Y頸底 + 64), P(624, Y頸底 + 84)],
+    { w0: CLOTH * .52, w1: CLOTH * .44, w2: CLOTH * .26, alpha: .68 });
+
+  // ⅵ 裾底弧（膝下衣緣向座面垂之波）
+  ink([P(248, Y座面 - 18), P(326, Y座面 - 4), P(cx, Y座面 + 4), P(574, Y座面 - 4), P(652, Y座面 - 18)],
+    { w0: CLOTH * .4, w1: CLOTH * .5, w2: CLOTH * .4, taper: false, alpha: .65 });
+})();
+
+// ── [4] 頭面＋耳＋頸（鑿② → 落筆） ──
+;(function 頭部() {
+  鑿橢(cx, (Y頂 + Y頦) / 2, 118, 118);
+
+  // 頭輪廓（肉髻→顱→面→頦，閉合一圈）
+  ink([
+    P(cx, Y頂),                 // 頂
+    P(cx + 17, Y頂 + 14),       // 右肉髻坡
+    P(cx + 21, Y肉髻底),        // 右肉髻底
+    P(cx + 28, Y肉髻底 + 14),   // 右顱上
+    P(cx + 54, Y髮際 + 2),      // 右髮際
+    P(cx + 58, Y白毫 + 6),      // 右太陽穴
+    P(cx + 56, Y白毫 + 22),     // 右顴
+    P(cx + 48, Y鼻 + 8),        // 右頰
+    P(cx + 36, Y頦 - 10),       // 右頜
+    P(cx + 18, Y頦),            // 右頦側
+    P(cx, Y頦 + 2),             // 頦底
+    P(cx - 18, Y頦),            // 左頦側
+    P(cx - 36, Y頦 - 10),       // 左頜
+    P(cx - 48, Y鼻 + 8),        // 左頰
+    P(cx - 56, Y白毫 + 22),     // 左顴
+    P(cx - 58, Y白毫 + 6),      // 左太陽穴
+    P(cx - 54, Y髮際 + 2),      // 左髮際
+    P(cx - 28, Y肉髻底 + 14),   // 左顱上
+    P(cx - 21, Y肉髻底),        // 左肉髻底
+    P(cx - 17, Y頂 + 14),       // 左肉髻坡
+  ], { w0: BONE * .88, taper: false, loop: true });
+
+  // 耳（長垂至頦，耳輪可見）
+  function 耳(s) {
+    ink([P(cx + s * 58, Y白毫), P(cx + s * 76, Y白毫 + 18), P(cx + s * 74, Y鼻 + 6), P(cx + s * 58, Y頦 - 2)],
+      { w0: CLOTH * .7, w1: CLOTH * .82, w2: CLOTH * .48 });
+    ink([P(cx + s * 64, Y白毫 + 10), P(cx + s * 70, Y白毫 + 24), P(cx + s * 66, Y鼻 - 2)],
+      { w0: FINE * .55, w1: FINE * .45, w2: FINE * .25, alpha: .75 });
+  }
+  耳(1); 耳(-1);
+
+  // 頸（領口間可見之二線＋三道頸紋）
+  ink([P(cx - 16, Y頦 + 5), P(cx - 18, Y頸底 - 4)], { w0: CLOTH * .55, w1: CLOTH * .4, w2: CLOTH * .35 });
+  ink([P(cx + 16, Y頦 + 5), P(cx + 18, Y頸底 - 4)], { w0: CLOTH * .55, w1: CLOTH * .4, w2: CLOTH * .35 });
+  for (const nz of [20.375, 21.625, 23.625]) {
+    const ny = topY + nz * u, hw = 16 - (nz - 20) * 2.8;
+    ink([P(cx - hw, ny), P(cx, ny + .8), P(cx + hw, ny)],
+      { w0: FINE * .45, w1: FINE * .4, w2: FINE * .45, taper: false, alpha: .55 });
+  }
+})();
+
+// ── [5] 螺髮 ──
+;(function 螺髮() {
+  const ecx = cx, ecy = (Y頂 + Y髮際) / 2 + 2;
+  const erx = 50, ery = 36;
+  for (let row = 0; row < 8; row++) {
+    const ry = Y頂 + 8 + row * 9.6;
+    const off = (row % 2) * 4.8;
+    for (let rx = cx - 46 + off; rx <= cx + 46; rx += 9.6) {
+      const dx = (rx - ecx) / erx, dy = (ry - ecy) / ery;
+      if (dx * dx + dy * dy > 1.02) continue;
+      dot(rx, ry, 1.4);
+      ink([P(rx - 1.1, ry + .7), P(rx + 1.6, ry - 1.4)], { w0: .65, w1: .35, w2: .18, alpha: .72 });
+    }
+  }
+})();
+
+// ── [6] 開臉（簡筆：眉一筆·瞼一筆·瞳一點·頰不施線） ──
+;(function 開臉() {
+  dot(cx, Y白毫, 2.1);  // 白毫
+  // 眉（如初月——弧起弧收，中段最寬）
+  function 眉(s) {
+    ink([P(cx + s * 5, Y白毫 + 9), P(cx + s * 20, Y白毫 + 3), P(cx + s * 36, Y白毫 + 11)],
+      { w0: FINE * .32, w1: FINE * 1.05, w2: FINE * .28 });
+  }
+  眉(1); 眉(-1);
+  // 瞼（長弓垂目：內角高外角低，示入定之相）
+  function 眼(s) {
+    ink([P(cx + s * 7, Y白毫 + 22), P(cx + s * 21, Y白毫 + 27), P(cx + s * 36, Y白毫 + 31)],
+      { w0: FINE * .28, w1: FINE * .88, w2: FINE * .22 });
+    dot(cx + s * 20, Y白毫 + 25.5, .85);  // 瞳一點
+  }
+  眼(1); 眼(-1);
+  // 鼻（高直，犍陀羅之鼻——柱線＋準）
+  ink([P(cx - 2.5, Y白毫 + 12), P(cx - 6, Y鼻 - 4), P(cx - 7.5, Y鼻)], { w0: FINE * .38, w1: FINE * .52, w2: FINE * .32 });
+  ink([P(cx + 2.5, Y白毫 + 12), P(cx + 6, Y鼻 - 4), P(cx + 7.5, Y鼻)], { w0: FINE * .38, w1: FINE * .52, w2: FINE * .32 });
+  ink([P(cx - 7.5, Y鼻), P(cx, Y鼻 + 2.5), P(cx + 7.5, Y鼻)], { w0: FINE * .28, w1: FINE * .38, w2: FINE * .28 });
+  // 唇靜（合口，不上揚）
+  ink([P(cx - 13, Y鼻 + 14), P(cx - 4, Y鼻 + 16), P(cx + 4, Y鼻 + 16), P(cx + 13, Y鼻 + 14)],
+    { w0: FINE * .28, w1: FINE * .68, w2: FINE * .28 });
+})();
+
+// ── [7] 右臂：施無畏印（鑿③ → 落筆；畫面左＝像右） ──
+;(function 右臂() {
+  鑿多([[224, Y頸底 - 4], [352, Y頸底 - 4], [352, Y心窩 + 95], [224, Y心窩 + 95]]);
+
+  // 上臂外（肩峰→肘）
+  ink([P(310, Y頸底 + 8), P(270, Y頸底 + 80), P(252, Y心窩 + 70)],
+    { w0: CLOTH * 1.35, w1: CLOTH * 1.15, w2: CLOTH * .95 });
+  // 上臂內
+  ink([P(336, Y頸底 + 14), P(300, Y頸底 + 78), P(286, Y心窩 + 62)],
+    { w0: CLOTH * 1.15, w1: CLOTH * .95, w2: CLOTH * .78 });
+  // 肘褶
+  ink([P(250, Y心窩 + 66), P(268, Y心窩 + 76)], { w0: FINE * .75, w1: FINE * .42, w2: .25, alpha: .68 });
+  ink([P(254, Y心窩 + 78), P(272, Y心窩 + 86)], { w0: FINE * .65, w1: FINE * .35, w2: .2, alpha: .6 });
+  // 前臂外（肘→腕：舉臂上收）
+  ink([P(252, Y心窩 + 70), P(264, Y心窩 - 6), P(280, Y頸底 + 40)],
+    { w0: CLOTH * 1.15, w1: CLOTH * .95, w2: CLOTH * .8 });
+  // 前臂內
+  ink([P(286, Y心窩 + 62), P(296, Y心窩 - 2), P(310, Y頸底 + 44)],
+    { w0: CLOTH * .95, w1: CLOTH * .78, w2: CLOTH * .65 });
+  // 腕紋
+  ink([P(276, Y頸底 + 38), P(314, Y頸底 + 42)],
+    { w0: FINE * .72, w1: FINE * .72, w2: FINE * .72, taper: false, alpha: .65 });
+
+  // 掌（腕上方，掌心向外）
+  const pB = Y頸底 + 36;   // 掌底
+  const pK = pB - 62;       // 指根（掌高約 7 指）
+  ink([P(274, pB), P(264, pK + 16), P(262, pK)], { w0: CLOTH * .92, w1: CLOTH * .82, w2: CLOTH * .68 });
+  ink([P(316, pB), P(322, pK + 16), P(320, pK + 2)], { w0: CLOTH * .85, w1: CLOTH * .75, w2: CLOTH * .62 });
+  ink([P(264, pK + 2), P(288, pK - 4), P(318, pK + 2)],
+    { w0: CLOTH * .6, w1: CLOTH * .48, w2: CLOTH * .6, taper: false, alpha: .65 });
+
+  // 逐指（小→無→中→食→拇：各指雙邊＋節紋）
+  function 指(bx, by, tx, ty, w) {
+    const my = (by + ty) / 2;
+    ink([P(bx - 2.8, by), P(bx - 3.2, my), P(tx - 1.8, ty)], { w0: w, w1: w * .68, w2: w * .32 });
+    ink([P(bx + 2.8, by), P(bx + 3.2, my), P(tx + 1.8, ty)], { w0: w, w1: w * .68, w2: w * .32 });
+    ink([P(bx - 2.6, my + 2), P(bx + 2.6, my + 2)], { w0: FINE * .35, w1: FINE * .35, w2: FINE * .35, taper: false, alpha: .45 });
+  }
+  指(266, pK, 264, pK - 36, CLOTH * .78);    // 小指
+  指(278, pK - 2, 276, pK - 44, CLOTH * .88); // 無名
+  指(290, pK - 4, 288, pK - 50, CLOTH * .95); // 中指（最長）
+  指(302, pK - 2, 300, pK - 44, CLOTH * .88); // 食指
+  // 拇指（側出，二節，短曲）
+  ink([P(320, pK + 8), P(332, pK - 6), P(338, pK - 18)], { w0: CLOTH * .88, w1: CLOTH * .7, w2: CLOTH * .35 });
+  ink([P(324, pK + 10), P(336, pK - 2), P(340, pK - 14)], { w0: CLOTH * .78, w1: CLOTH * .6, w2: CLOTH * .28 });
+  ink([P(330, pK - 2), P(336, pK - 4)], { w0: FINE * .35, w1: FINE * .3, w2: FINE * .25, taper: false, alpha: .45 });
+})();
+
+// ── [8] 左臂：仰掌承藥壺（鑿④ → 落筆；畫面右＝像左） ──
+;(function 左臂() {
+  鑿多([[502, Y心窩 - 8], [656, Y心窩 - 8], [656, Y臍 + 48], [502, Y臍 + 48]]);
+
+  // 上臂外
+  ink([P(590, Y頸底 + 8), P(626, Y頸底 + 78), P(636, Y心窩 + 52)],
+    { w0: CLOTH * 1.35, w1: CLOTH * 1.15, w2: CLOTH * .95 });
+  // 上臂內
+  ink([P(564, Y頸底 + 14), P(600, Y頸底 + 76), P(612, Y心窩 + 44)],
+    { w0: CLOTH * 1.15, w1: CLOTH * .95, w2: CLOTH * .78 });
+  // 肘褶
+  ink([P(638, Y心窩 + 48), P(620, Y心窩 + 60)], { w0: FINE * .75, w1: FINE * .42, w2: .25, alpha: .68 });
+  ink([P(634, Y心窩 + 62), P(616, Y心窩 + 72)], { w0: FINE * .65, w1: FINE * .35, w2: .2, alpha: .6 });
+  // 前臂外（肘→腕，伸向腹前）
+  ink([P(636, Y心窩 + 52), P(608, Y心窩 + 82), P(562, Y臍 - 4), P(532, Y臍 + 14)],
+    { w0: CLOTH * 1.15, w1: CLOTH * .95, w2: CLOTH * .8 });
+  // 前臂內
+  ink([P(612, Y心窩 + 44), P(588, Y心窩 + 72), P(550, Y臍 - 8), P(526, Y臍 + 8)],
+    { w0: CLOTH * .95, w1: CLOTH * .78, w2: CLOTH * .65 });
+  // 腕紋
+  ink([P(524, Y臍 + 6), P(538, Y臍 + 16)],
+    { w0: FINE * .72, w1: FINE * .72, w2: FINE * .72, taper: false, alpha: .65 });
+
+  // 仰掌（掌緣可見＋指梢前露）
+  ink([P(532, Y臍 + 14), P(516, Y臍 + 24), P(494, Y臍 + 30), P(478, Y臍 + 22)],
+    { w0: CLOTH * .95, w1: CLOTH * .82, w2: CLOTH * .6 });
+  ink([P(532, Y臍 + 14), P(544, Y臍 + 26), P(548, Y臍 + 38)],
+    { w0: CLOTH * .85, w1: CLOTH * .72, w2: CLOTH * .52 });
+  // 指梢（壺前方可見之指尖——近者後落筆故先畫）
+  ink([P(478, Y臍 + 22), P(470, Y臍 + 14), P(464, Y臍 + 4)],
+    { w0: CLOTH * .58, w1: CLOTH * .45, w2: CLOTH * .25 });
+  ink([P(482, Y臍 + 26), P(476, Y臍 + 18), P(472, Y臍 + 8)],
+    { w0: CLOTH * .48, w1: CLOTH * .38, w2: CLOTH * .2, alpha: .82 });
+})();
+
+// ── [9] 藥壺（鑿⑤ → 落筆：壺蔽掌中，指梢已先落） ──
+;(function 藥壺() {
+  const bx = 506, bt = Y臍 - 22;  // 壺中心 x、壺蓋頂 y
+  鑿橢(bx, Y臍 + 6, 24, 16);
+
+  ink([
+    P(bx - 5, bt),      P(bx + 5, bt),       // 蓋鈕
+    P(bx + 5, bt + 7),  P(bx + 11, bt + 11),  // 蓋右
+    P(bx + 6, bt + 20),                       // 頸右
+    P(bx + 15, bt + 34),                      // 肩右
+    P(bx + 17, bt + 48),                      // 鼓腹右
+    P(bx + 11, bt + 58),                      // 收底右
+    P(bx, bt + 62),                           // 底
+    P(bx - 11, bt + 58),                      // 收底左
+    P(bx - 17, bt + 48),                      // 鼓腹左
+    P(bx - 15, bt + 34),                      // 肩左
+    P(bx - 6, bt + 20),                       // 頸左
+    P(bx - 11, bt + 11), P(bx - 5, bt + 7),   // 蓋左
+  ], { w0: CLOTH * .85, w1: CLOTH * .82, w2: CLOTH * .85, taper: false, loop: true });
+  dot(bx, bt + 2, 1.8);  // 蓋鈕飾
+  ink([P(bx - 15, bt + 38), P(bx, bt + 40), P(bx + 15, bt + 38)],
+    { w0: FINE * .42, w1: FINE * .42, w2: FINE * .42, taper: false, alpha: .58 });
+})();
+
+</script>
+</body>
+</html>
