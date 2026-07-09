@@ -6,15 +6,32 @@
   "license": "CC-BY-NC-SA-4.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
-    "check": "tsc --noEmit"
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc && node tools/牒.cjs",
+    "check": "tsc --noEmit",
+    "牒": "node tools/牒.cjs",
+    "回填": "node tools/回填.cjs"
   },
   "exports": {
-    "./liangdu": { "types": "./dist/liangdu.d.ts", "default": "./dist/liangdu.js" },
-    "./yigui": { "types": "./dist/yigui.d.ts", "default": "./dist/yigui.js" },
-    "./bi": { "types": "./dist/bi.d.ts", "default": "./dist/bi.js" },
-    "./baimiao": { "types": "./dist/baimiao.d.ts", "default": "./dist/baimiao.js" },
-    "./bujian": { "types": "./dist/bujian/index.d.ts", "default": "./dist/bujian/index.js" }
+    "./liangdu": {
+      "types": "./dist/liangdu.d.ts",
+      "default": "./dist/liangdu.js"
+    },
+    "./yigui": {
+      "types": "./dist/yigui.d.ts",
+      "default": "./dist/yigui.js"
+    },
+    "./bi": {
+      "types": "./dist/bi.d.ts",
+      "default": "./dist/bi.js"
+    },
+    "./baimiao": {
+      "types": "./dist/baimiao.d.ts",
+      "default": "./dist/baimiao.js"
+    },
+    "./bujian": {
+      "types": "./dist/bujian/index.d.ts",
+      "default": "./dist/bujian/index.js"
+    }
   },
   "devDependencies": {
     "typescript": "^5.5.0"
