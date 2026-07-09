@@ -10,7 +10,7 @@ import { 菩薩坐身 } from './pusa.js';
 import { 法界定印, 臂釧 } from '../bujian/index.js';
 
 // 五化佛冠（承薩埵 fugen-k 之制：冠帶綴珠，五化佛列坐，冠繒垂帶）
-function 五化佛冠(bi: 筆具): void {
+export function 五化佛冠(bi: 筆具): void {
   const { M, Qk, C, S, 衣, 細 } = 運筆(bi);
   const { dot, dim, A } = bi;
   衣(() => {

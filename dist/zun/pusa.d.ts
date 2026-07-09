@@ -16,7 +16,7 @@ export declare function 前臂(bi: 筆具, 筆: 運筆具, 肘: readonly [number
 export interface 菩薩相參 {
     臂: (bi: 筆具, 筆: 運筆具) => void;
     冠?: ((bi: 筆具) => void) | '無';
-    髻?: '寶髻' | '天髻';
+    髻?: '寶髻' | '天髻' | '五髻';
     胸瓔滴z?: number;
     天衣?: boolean;
     條帛?: boolean;

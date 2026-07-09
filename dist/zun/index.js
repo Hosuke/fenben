@@ -41,6 +41,10 @@ import { 寶幢如來 } from './east-t.js';
 import { 開敷華王如來 } from './south-t.js';
 import { 無量壽如來 } from './west-t.js';
 import { 天鼓雷音如來 } from './north-t.js';
+import { 普賢菩薩 } from './fugen-t.js';
+import { 文殊師利菩薩 } from './monju-t.js';
+import { 觀自在菩薩 } from './kannon-t.js';
+import { 彌勒菩薩 } from './miroku-t.js';
 export const 落筆簿 = {
     'center|k': 大日金剛界,
     'fugen|k': 金剛薩埵,
@@ -86,7 +90,11 @@ export const 落筆簿 = {
     'south|t': 開敷華王如來,
     'west|t': 無量壽如來,
     'north|t': 天鼓雷音如來,
-    // 胎藏五佛之筆立（中臺八葉四菩薩候波）
+    'fugen|t': 普賢菩薩,
+    'monju|t': 文殊師利菩薩,
+    'kannon|t': 觀自在菩薩,
+    'miroku|t': 彌勒菩薩,
+    // 胎藏中臺八葉院滿（諸院候波）
 };
 // 候審筆：儀軌信雖已核（字段出典俱足），**筆**未經主人過目者——
 // 陳列頁當現朱界候審，主人印可乃摘（候審之律，勿使新筆僭已核之章）
@@ -101,4 +109,5 @@ export const 候審筆 = new Set([
     'g-ki|k', 'g-man|k', 'g-ka|k', 'g-bu|k',
     'g-ko|k', 'g-ke|k', 'g-to|k', 'g-zu|k',
     'center|t', 'east|t', 'south|t', 'west|t', 'north|t',
+    'fugen|t', 'monju|t', 'kannon|t', 'miroku|t',
 ]);
