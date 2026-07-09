@@ -1,4 +1,5 @@
 export { 月輪, 頭光 } from './guang.js';
+export { 舉身光, 如意雲 } from './jing.js';
 export { 蓮華座 } from './zuo.js';
 export { 菩薩開臉, 點睛, 垂埵耳, 頸三道, 忿怒開臉, 忿怒點睛 } from './lian.js';
 export { 寶髻, 垂髮, 天髻, 五髻, 焰髮 } from './fa.js';

@@ -46,6 +46,8 @@ function 覓headless() {
   const dataUrl = await page.evaluate(async () => {
     const { 依號 } = await import('/dist/yigui.js');
     const { 白描 } = await import('/dist/baimiao.js');
+    const { 執筆 } = await import('/dist/bi.js');
+    const { 舉身光, 如意雲 } = await import('/dist/bujian/jing.js');
     const W = 2400, H = 1560;
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     const x = c.getContext('2d');
@@ -72,8 +74,25 @@ function 覓headless() {
       const x2 = c2.getContext('2d');
       x2.translate(cx, cy);
       x2.strokeStyle = '#d8b36a'; x2.fillStyle = '#d8b36a';
+      const b0 = 執筆(x2, R);
+      b0.ctx.lineWidth = b0.W_OUT; b0.ctx.lineCap = 'round';
+      舉身光(b0);                                  // 光先落於尊後
       白描(x2, R, face, `${id}|h`);
       x.drawImage(c2, 0, 0);
+    }
+    // 如意雲：上界四朵（兩隅內傾，中央二朵讓中尊光尖）
+    {
+      const c3 = document.createElement('canvas'); c3.width = W; c3.height = H;
+      const x3 = c3.getContext('2d');
+      x3.translate(W / 2, H * 0.5);
+      x3.strokeStyle = '#d8b36a'; x3.fillStyle = '#d8b36a';
+      const b3 = 執筆(x3, 420);
+      b3.ctx.lineWidth = b3.W_OUT; b3.ctx.lineCap = 'round';
+      如意雲(b3, -76, -22, 2.6, 1);
+      如意雲(b3, 76, -22, 2.6, -1);
+      如意雲(b3, -34, -30, 2.0, -1, 0.45);
+      如意雲(b3, 34, -30, 2.0, 1, 0.45);
+      x.drawImage(c3, 0, 0);
     }
     return c.toDataURL('image/png');
   });
