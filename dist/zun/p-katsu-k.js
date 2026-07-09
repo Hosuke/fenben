@@ -3,6 +3,7 @@ import { 寶珠, 羯磨杵 } from '../bujian/sanmaya.js';
 import { 側拳, 臂釧, 腕釧 } from '../bujian/index.js';
 export const 業波羅蜜 = (bi) => 菩薩坐身(bi, {
     髻: '天髻',
+    冠: '無',
     臂(bi, 筆) {
         const { M, C, Qk, S, 骨, 衣, 細, 陰, 陽 } = 筆;
         骨(() => { 上臂常勢(筆, -1, 40.0); 上臂常勢(筆, 1, 40.2); });

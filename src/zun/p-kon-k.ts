@@ -9,6 +9,7 @@ import { 觸地印, 側拳, 臂釧, 腕釧 } from '../bujian/index.js';
 
 export const 金剛波羅蜜 = (bi: 筆具): void => 菩薩坐身(bi, {
   髻: '天髻',
+  冠: '無',
   臂(bi, 筆) {
     const { M, C, S, 骨, 細, 陰, 陽 } = 筆;
     // 尊右臂：垂而觸地（承阿閦之杆）

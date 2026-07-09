@@ -23,6 +23,7 @@ export interface 菩薩相參 {
     髮先?: boolean;
     冠髻先?: boolean;
     嚴先?: boolean;
+    月輪?: boolean;
 }
 export declare function 三峰寶冠(bi: 筆具): void;
 export declare function 菩薩坐身(bi: 筆具, 參: 菩薩相參): void;

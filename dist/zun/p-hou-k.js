@@ -2,6 +2,7 @@ import { 菩薩坐身, 前臂 } from './pusa.js';
 import { 彌陀定印, 臂釧 } from '../bujian/index.js';
 export const 法波羅蜜 = (bi) => 菩薩坐身(bi, {
     髻: '天髻',
+    冠: '無',
     臂(bi, 筆) {
         const { M, L, C, Qk, S, 骨, 衣, 細, 陰, 陽 } = 筆;
         // 定印之臂（承彌陀）：肘外而前臂相就於腹前

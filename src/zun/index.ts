@@ -49,6 +49,11 @@ import { 金剛香 } from './g-ko-k.js';
 import { 金剛華 } from './g-ke-k.js';
 import { 金剛燈 } from './g-to-k.js';
 import { 金剛塗 } from './g-zu-k.js';
+import { 大日胎藏 } from './center-t.js';
+import { 寶幢如來 } from './east-t.js';
+import { 開敷華王如來 } from './south-t.js';
+import { 無量壽如來 } from './west-t.js';
+import { 天鼓雷音如來 } from './north-t.js';
 
 export type 筆 = (bi: 筆具, mian: 面) => void;
 
@@ -91,7 +96,13 @@ export const 落筆簿: Record<string, 筆> = {
   'g-ke|k': 金剛華,
   'g-to|k': 金剛燈,
   'g-zu|k': 金剛塗,
-  // 金剛界成身會三十七尊之筆至此滿簿（胎藏諸尊候波）
+  // 金剛界成身會三十七尊之筆至此滿簿
+  'center|t': 大日胎藏,
+  'east|t': 寶幢如來,
+  'south|t': 開敷華王如來,
+  'west|t': 無量壽如來,
+  'north|t': 天鼓雷音如來,
+  // 胎藏五佛之筆立（中臺八葉四菩薩候波）
 };
 
 // 候審筆：儀軌信雖已核（字段出典俱足），**筆**未經主人過目者——
@@ -106,4 +117,5 @@ export const 候審筆 = new Set<string>([
   's-ko|k', 's-saku|k', 's-sa|k', 's-rei|k',
   'g-ki|k', 'g-man|k', 'g-ka|k', 'g-bu|k',
   'g-ko|k', 'g-ke|k', 'g-to|k', 'g-zu|k',
+  'center|t', 'east|t', 'south|t', 'west|t', 'north|t',
 ]);
