@@ -63,6 +63,7 @@ import { 藥師如來 } from './yakushi-h.js';
 import { 阿彌陀如來漢 } from './mida-h.js';
 import { 日光菩薩 } from './nikko-h.js';
 import { 月光菩薩 } from './gakko-h.js';
+import { 宮毘羅 } from './kubira-h.js';
 
 export type 筆 = (bi: 筆具, mian: 面) => void;
 
@@ -121,6 +122,7 @@ export const 落筆簿: Record<string, 筆> = {
   'mida|h': 阿彌陀如來漢,
   'nikko|h': 日光菩薩,
   'gakko|h': 月光菩薩,
+  'kubira|h': 宮毘羅,
   // 漢傳橫三世＋藥師二脅侍立（十二神將・星供候波）
 };
 
