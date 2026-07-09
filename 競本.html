@@ -53,6 +53,40 @@ try {
   白描(x, 242, 依號['yakushi'].h, 'yakushi|h');
 } catch (e) { console.error(e); }
 
+// 主坊四題：庫內活渲為照（智拳印部件・大日 center|k・薩埵 fugen|k・五鈷杵三昧耶）
+const 主四 = document.createElement('div');
+主四.className = '卷';
+主四.innerHTML = '<header><b>主坊 · Fable 親筆</b><small>庫內活渲四題</small></header>';
+const 四布 = document.createElement('canvas');
+四布.width = 720; 四布.height = 520; 四布.style.width = '100%';
+主四.appendChild(四布);
+document.getElementById('四題廳').appendChild(主四);
+try {
+  const { 依號: 依4 } = await import('./dist/yigui.js');
+  const { 白描: 描4, 三昧耶白描 } = await import('./dist/baimiao.js');
+  const { 執筆 } = await import('./dist/bi.js');
+  const { 智拳印 } = await import('./dist/bujian/shouyin.js');
+  const g = 四布.getContext('2d');
+  g.fillStyle = '#0a0e1d'; g.fillRect(0, 0, 720, 520);
+  g.strokeStyle = '#d8b36a'; g.fillStyle = '#d8b36a';
+  // ①智拳印獨幅（左上）
+  g.save(); g.translate(180, 88);
+  const b1 = 執筆(g, 620); b1.ctx.lineWidth = b1.W_OUT; b1.ctx.lineCap = 'round';
+  g.translate(0, 620 * 0.565 - 620 * 0.0145 * 36);   // 印域置格心
+  智拳印(b1, 0, 36, 2.2, true);
+  g.restore();
+  // ②大日（右上）③薩埵（左下）
+  for (const [id, cx, cy] of [['center', 540, 128], ['fugen', 180, 390]]) {
+    g.save(); g.translate(cx, cy);
+    描4(g, 118, 依4[id].k, `${id}|k`);
+    g.restore();
+  }
+  // ④五鈷杵三昧耶（右下）
+  g.save(); g.translate(540, 390);
+  三昧耶白描(g, 118, 'east');
+  g.restore();
+} catch (e) { console.error(e); }
+
 const 席 = (廳id, 名, 註, 檔) => {
   const 格 = document.createElement('div');
   格.className = '卷';
