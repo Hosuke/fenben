@@ -26,6 +26,7 @@ export interface 筆具 {
     dim: (a: number, fn: () => void) => void;
     一筆: (法: 鋒法, 書: (p: 鋒路) => void) => void;
 }
+export declare function 執筆立(ctx: CanvasRenderingContext2D, R: number): 筆具;
 export declare function 執筆(ctx: CanvasRenderingContext2D, R: number): 筆具;
 export interface 運筆具 {
     M(x: number, z: number): void;

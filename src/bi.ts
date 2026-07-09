@@ -38,9 +38,20 @@ export interface 筆具 {
   一筆: (法: 鋒法, 書: (p: 鋒路) => void) => void; // 筆鋒：變寬之筆，起收有法
 }
 
+// 立像之框（2026-07-09 立像之制）：立像百二十指全格（頂0…膝92・脛底116・踵120，
+// 錨悉出 liangdu 縱剖，無坐像折算），故頂當高提乃容全軀——yT = -R·0.875，
+// 底裕 R·0.125 容蓮座。坐像仍用 執筆（頂沉 R·0.565）。
+export function 執筆立(ctx: CanvasRenderingContext2D, R: number): 筆具 {
+  return 執筆之(ctx, R, -R * 0.875);
+}
+
 export function 執筆(ctx: CanvasRenderingContext2D, R: number): 筆具 {
+  return 執筆之(ctx, R, -R * 0.565);
+}
+
+function 執筆之(ctx: CanvasRenderingContext2D, R: number, 頂y: number): 筆具 {
   const u = R * 0.0145;
-  const yT = -R * 0.565;                // 頂之縱座標（微沉，使坐像安於輪心）
+  const yT = 頂y;                       // 頂之縱座標（坐像微沉安於輪心；立像高提容全軀）
   const Y = (z: number) => yT + z * u;  // 縱錨（指→畫布）
   const W_OUT = R * 0.0285, W_IN = R * 0.0163;
   const P = (pts: Array<[number, number]>, close = false) => {
