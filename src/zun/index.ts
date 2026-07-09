@@ -61,6 +61,8 @@ import { 彌勒菩薩 } from './miroku-t.js';
 import { 釋迦牟尼佛 } from './shaka-h.js';
 import { 藥師如來 } from './yakushi-h.js';
 import { 阿彌陀如來漢 } from './mida-h.js';
+import { 日光菩薩 } from './nikko-h.js';
+import { 月光菩薩 } from './gakko-h.js';
 
 export type 筆 = (bi: 筆具, mian: 面) => void;
 
@@ -117,7 +119,9 @@ export const 落筆簿: Record<string, 筆> = {
   'shaka|h': 釋迦牟尼佛,
   'yakushi|h': 藥師如來,
   'mida|h': 阿彌陀如來漢,
-  // 漢傳橫三世立（豎三世・藥師眷屬・星供候波）
+  'nikko|h': 日光菩薩,
+  'gakko|h': 月光菩薩,
+  // 漢傳橫三世＋藥師二脅侍立（十二神將・星供候波）
 };
 
 // 候審筆：儀軌信雖已核（字段出典俱足），**筆**未經主人過目者——
