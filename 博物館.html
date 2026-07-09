@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>粉本線上博物館</title>
+<style>
+  :root { --紙: #0d1124; --金: #d8b36a; --硃: #b0402c; --灰: #6b7186; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--紙); color: var(--金); font-family: "Songti TC", "Noto Serif TC", serif; padding: 2rem 4vw 4rem; }
+  h1 { font-size: 1.6rem; letter-spacing: .35em; text-align: center; margin: .5rem 0 .2rem; }
+  .註 { text-align: center; color: var(--灰); font-size: .85rem; margin-bottom: 2.2rem; line-height: 1.8; }
+  .註 a { color: var(--金); }
+  h2 { font-size: 1.15rem; letter-spacing: .2em; margin: 2.4rem 0 1rem; border-left: 3px solid var(--硃); padding-left: .6em; }
+  h2 small { color: var(--灰); font-size: .75rem; letter-spacing: .1em; margin-left: 1em; }
+  .廳 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.2rem; }
+  .展 { border: 1px solid #2a3050; border-radius: 6px; overflow: hidden; background: #0a0e1d; }
+  .展 header { display: flex; justify-content: space-between; padding: .5em .9em; font-size: .92rem; border-bottom: 1px solid #2a3050; }
+  .展 header small { color: var(--灰); }
+  .展 img { display: block; width: 100%; height: auto; }
+  .展 .說 { padding: .6em .9em .8em; color: var(--灰); font-size: .82rem; line-height: 1.7; }
+  .展 .說 a { color: var(--金); }
+  .候展 { border-style: dashed; }
+  .候展 .空 { padding: 2.2em .9em; text-align: center; color: var(--灰); letter-spacing: .25em; }
+  .品 { display: inline-block; border: 1px solid var(--硃); color: var(--硃); font-size: .7rem; padding: 0 .5em; border-radius: 3px; margin-left: .5em; letter-spacing: .1em; }
+</style>
+</head>
+<body>
+<h1>粉本線上博物館</h1>
+<div class="註">
+  程序造像之藏——如法量度（T1419 百二十指）・儀軌出典・白描無填。<br>
+  常設：兩界壇城・漢傳諸帖・星供籌備；別館：<a href="競本.html">諸家競本評卷廳</a>・<a href="index.html">逐尊陳列頁</a>（朱界者候審）。<br>
+  互動壇城在 <a href="https://github.com/Hosuke/mandala">mandala</a>（Three.js，粉本回填自動上壇）；此館司靜觀與風格之藏。
+</div>
+
+<h2>兩界壇城廳 <small>金剛界・胎藏，皆庫內已核之筆活渲合幀</small></h2>
+<div class="廳">
+  <div class="展">
+    <header><b>金剛界成身會三十七尊</b><small>五解脫輪之制</small></header>
+    <img src="圖錄/壇城/成身會三十七尊一幀.png" alt="成身會三十七尊" loading="lazy">
+    <div class="說">下東阿閦・左南寶生・上西彌陀・右北不空成就；四親近向壇心，內外四供四隅，四攝居四門。誦戒 37。賢劫千佛・外金剛部候波。</div>
+  </div>
+  <div class="展">
+    <header><b>胎藏中台八葉院九尊</b><small>上東之向</small></header>
+    <img src="圖錄/壇城/中台八葉院九尊一幀.png" alt="中台八葉院九尊" loading="lazy">
+    <div class="說">八葉蓮華：四方四佛（寶幢・開敷華王・無量壽・天鼓雷音），四隅四菩薩（普賢・文殊・觀音・彌勒），中臺大日法界定印。誦戒 9。</div>
+  </div>
+</div>
+
+<h2>漢傳廳 <small>橫三世・藥師曼荼羅基本式（諸尊候審中）</small></h2>
+<div class="廳">
+  <div class="展">
+    <header><b>橫三世佛一幀</b><small>唐卡首卷</small></header>
+    <img src="圖錄/唐卡試卷/橫三世一幀.png" alt="橫三世一幀" loading="lazy">
+    <div class="說">中釋迦・左西彌陀・右東藥師（面南觀者之位）；舉身光・如意雲・八大線印記。</div>
+  </div>
+  <div class="展">
+    <header><b>藥師十五尊一幀</b><small>鎌倉本基本式</small></header>
+    <img src="圖錄/唐卡試卷/藥師十五尊一幀.png" alt="藥師十五尊一幀" loading="lazy">
+    <div class="說">三尊（日光觀者右・月光觀者左）＋十二神將左右各六（忿怒八搩，持物依作例三源並陳）。</div>
+  </div>
+</div>
+
+<h2>星供廳 <small>籌備中——圈層之格已立，諸星候筆</small></h2>
+<div class="廳">
+  <div class="展">
+    <header><b>星供曼荼羅円制構圖</b><small>候筆之格<span class="品">籌備</span></small></header>
+    <img src="圖錄/星供/円曼荼羅構圖一幀.png" alt="星供円曼荼羅構圖" loading="lazy">
+    <div class="說">一院中尊釋迦金輪（像容四源已核級，中尊之筆在途）／二院上北斗下九曜／三院十二宮／外院廿八宿。誦戒 57。</div>
+  </div>
+</div>
+
+<h2>歷代風格館 <small>籌備中——同尊異體：一尊多風格之藏（考據四卷已備，逐室候展）</small></h2>
+<div class="廳">
+  <div class="展 候展">
+    <header><b>犍陀羅室</b><small>精度之的所宗<span class="品">候展</span></small></header>
+    <div class="空">候 展</div>
+    <div class="說">衣紋見身體之勢——本庫逐尊之判準即出於此；擬以釋迦坐像開室。</div>
+  </div>
+  <div class="展 候展">
+    <header><b>漢地室</b><small>唐宋元明四段<span class="品">候展</span></small></header>
+    <div class="空">候 展</div>
+    <div class="說">唐吳家樣（蘭葉描）・宋白描立科・元壁畫作坊・明水陸兩脈——<a href="docs/考據/畫風-漢地.md">畫風-漢地</a>卷為據；線有提按方有生命。</div>
+  </div>
+  <div class="展 候展">
+    <header><b>藏地室</b><small>畫派五系<span class="品">候展</span></small></header>
+    <div class="空">候 展</div>
+    <div class="說">勉唐・欽則・嘎瑪嘎孜諸派線色之辨——<a href="docs/考據/畫風-藏地.md">畫風-藏地</a>卷為據；打格八大線與 T1419 梵絣同源。</div>
+  </div>
+  <div class="展 候展">
+    <header><b>東密室</b><small>白描図像法統<span class="品">候展</span></small></header>
+    <div class="空">候 展</div>
+    <div class="說">白描図像四大集成・現圖曼荼羅諸本・五部心觀——<a href="docs/考據/畫風-日本.md">畫風-日本</a>卷為據；本庫直系法統，無肥瘦鐵線為正。</div>
+  </div>
+  <div class="展 候展">
+    <header><b>尼瓦爾南傳室</b><small>paubha・Kandyan・蒲甘<span class="品">候展</span></small></header>
+    <div class="空">候 展</div>
+    <div class="說">尼瓦爾為藏地唐卡之源；蘭卡《Bimbamāna》與 T1419 共源異流——<a href="docs/考據/畫風-南傳尼瓦爾.md">畫風-南傳尼瓦爾</a>卷為據。</div>
+  </div>
+</div>
+</body>
+</html>
