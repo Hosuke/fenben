@@ -15,6 +15,7 @@ import { 錨點, 坐像 } from './liangdu.js';
 import { 執筆 } from './bi.js';
 import { 落筆簿, 候審筆 } from './zun/index.js';
 import { 依號 } from './yigui.js';
+import { 三昧耶目 } from './bujian/sanmaya.js';
 const M = 錨點(); // { 肉髻:4, 頂髮:8, 額:12(=白毫), 鼻:16, 頦:20, 頸喉:24, 心窩... }
 const 白毫 = M.白毫, 髮際 = M.頂髮, 頦 = M.頦, 頸底 = M.頸喉;
 const 心窩 = M.喉至心窩, 臍 = M.心窩至臍;
@@ -282,6 +283,23 @@ export function 上壇之(id, side) {
     const 鍵 = `${id}|${side}`;
     const 有筆 = Object.prototype.hasOwnProperty.call(落筆簿, 鍵) && typeof 落筆簿[鍵] === 'function';
     return 有筆 && !候審筆.has(鍵) ? { 面: f, 鍵 } : null;
+}
+// ── 三昧耶白描：三昧耶會之器（金剛界三十七尊）——回填契約面（2026-07-09 增）──
+// 鍵＝尊號（無側之分——三十七尊之器唯金剛界之制，胎藏諸尊之器未備勿混）。
+// 置器於月輪心（z=37 器帶蓮座心微上，同譜頁之制），依各條展比而縮——
+// 內情（座標・比）悉封於此，壇城不知譜頁之制。無其器還 false，壇守現行示意。
+const 器簿 = Object.fromEntries(三昧耶目.map(條 => [條.鍵, 條]));
+export function 三昧耶白描(ctx, R, id) {
+    const 條 = 器簿[id];
+    if (!條)
+        return false;
+    const bi = 執筆(ctx, R);
+    ctx.save();
+    ctx.lineWidth = bi.W_OUT;
+    ctx.lineCap = 'round';
+    條.筆(bi, 0, 37, 條.展比);
+    ctx.restore();
+    return true;
 }
 // 舊名之通（mandala 相容）
 export { 白描 as drawFunpon, 白描 as default };

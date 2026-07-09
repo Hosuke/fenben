@@ -6,4 +6,5 @@ export declare function 上壇之(id: string, side: 't' | 'k'): {
     面: 面;
     鍵: string;
 } | null;
+export declare function 三昧耶白描(ctx: CanvasRenderingContext2D, R: number, id: string): boolean;
 export { 白描 as drawFunpon, 白描 as default };
