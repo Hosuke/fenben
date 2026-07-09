@@ -20,6 +20,9 @@ export interface 菩薩相參 {
     胸瓔滴z?: number;
     天衣?: boolean;
     條帛?: boolean;
+    髮先?: boolean;
+    冠髻先?: boolean;
+    嚴先?: boolean;
 }
 export declare function 三峰寶冠(bi: 筆具): void;
 export declare function 菩薩坐身(bi: 筆具, 參: 菩薩相參): void;

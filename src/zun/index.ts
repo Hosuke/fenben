@@ -21,6 +21,34 @@ import { 不空成就如來 } from './north-k.js';
 import { 金剛王 } from './k-o-k.js';
 import { 金剛愛 } from './k-ai-k.js';
 import { 金剛喜 } from './k-ki-k.js';
+import { 金剛寶 } from './kokuzo-k.js';
+import { 金剛光 } from './k-ko-k.js';
+import { 金剛幢 } from './k-do-k.js';
+import { 金剛笑 } from './k-sho-k.js';
+import { 金剛法 } from './kannon-k.js';
+import { 金剛利 } from './monju-k.js';
+import { 金剛因 } from './miroku-k.js';
+import { 金剛語 } from './k-go-k.js';
+import { 金剛業 } from './k-gyo-k.js';
+import { 金剛護 } from './k-gou-k.js';
+import { 金剛牙 } from './k-ge-k.js';
+import { 金剛拳尊 } from './k-ken-k.js';
+import { 金剛波羅蜜 } from './p-kon-k.js';
+import { 寶波羅蜜 } from './p-ho-k.js';
+import { 法波羅蜜 } from './p-hou-k.js';
+import { 業波羅蜜 } from './p-katsu-k.js';
+import { 金剛鉤尊 } from './s-ko-k.js';
+import { 金剛索尊 } from './s-saku-k.js';
+import { 金剛鎖尊 } from './s-sa-k.js';
+import { 金剛鈴尊 } from './s-rei-k.js';
+import { 金剛嬉 } from './g-ki-k.js';
+import { 金剛鬘 } from './g-man-k.js';
+import { 金剛歌 } from './g-ka-k.js';
+import { 金剛舞 } from './g-bu-k.js';
+import { 金剛香 } from './g-ko-k.js';
+import { 金剛華 } from './g-ke-k.js';
+import { 金剛燈 } from './g-to-k.js';
+import { 金剛塗 } from './g-zu-k.js';
 
 export type 筆 = (bi: 筆具, mian: 面) => void;
 
@@ -35,7 +63,35 @@ export const 落筆簿: Record<string, 筆> = {
   'k-o|k': 金剛王,
   'k-ai|k': 金剛愛,
   'k-ki|k': 金剛喜,
-  // 餘尊候親筆逐尊登簿
+  'kokuzo|k': 金剛寶,
+  'k-ko|k': 金剛光,
+  'k-do|k': 金剛幢,
+  'k-sho|k': 金剛笑,
+  'kannon|k': 金剛法,
+  'monju|k': 金剛利,
+  'miroku|k': 金剛因,
+  'k-go|k': 金剛語,
+  'k-gyo|k': 金剛業,
+  'k-gou|k': 金剛護,
+  'k-ge|k': 金剛牙,
+  'k-ken|k': 金剛拳尊,
+  'p-kon|k': 金剛波羅蜜,
+  'p-ho|k': 寶波羅蜜,
+  'p-hou|k': 法波羅蜜,
+  'p-katsu|k': 業波羅蜜,
+  's-ko|k': 金剛鉤尊,
+  's-saku|k': 金剛索尊,
+  's-sa|k': 金剛鎖尊,
+  's-rei|k': 金剛鈴尊,
+  'g-ki|k': 金剛嬉,
+  'g-man|k': 金剛鬘,
+  'g-ka|k': 金剛歌,
+  'g-bu|k': 金剛舞,
+  'g-ko|k': 金剛香,
+  'g-ke|k': 金剛華,
+  'g-to|k': 金剛燈,
+  'g-zu|k': 金剛塗,
+  // 金剛界成身會三十七尊之筆至此滿簿（胎藏諸尊候波）
 };
 
 // 候審筆：儀軌信雖已核（字段出典俱足），**筆**未經主人過目者——
@@ -43,4 +99,11 @@ export const 落筆簿: Record<string, 筆> = {
 export const 候審筆 = new Set<string>([
   'east|k', 'south|k', 'west|k', 'north|k',
   'k-o|k', 'k-ai|k', 'k-ki|k',
+  'kokuzo|k', 'k-ko|k', 'k-do|k', 'k-sho|k',
+  'kannon|k', 'monju|k', 'miroku|k', 'k-go|k',
+  'k-gyo|k', 'k-gou|k', 'k-ge|k', 'k-ken|k',
+  'p-kon|k', 'p-ho|k', 'p-hou|k', 'p-katsu|k',
+  's-ko|k', 's-saku|k', 's-sa|k', 's-rei|k',
+  'g-ki|k', 'g-man|k', 'g-ka|k', 'g-bu|k',
+  'g-ko|k', 'g-ke|k', 'g-to|k', 'g-zu|k',
 ]);
