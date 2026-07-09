@@ -64,6 +64,17 @@ import { 阿彌陀如來漢 } from './mida-h.js';
 import { 日光菩薩 } from './nikko-h.js';
 import { 月光菩薩 } from './gakko-h.js';
 import { 宮毘羅 } from './kubira-h.js';
+import { 伐折羅 } from './basara-h.js';
+import { 迷企羅 } from './mekira-h.js';
+import { 安底羅 } from './antera-h.js';
+import { 頞儞羅 } from './anira-h.js';
+import { 珊底羅 } from './santera-h.js';
+import { 因達羅 } from './indara-h.js';
+import { 波夷羅 } from './haira-h.js';
+import { 摩虎羅 } from './makora-h.js';
+import { 真達羅 } from './shindara-h.js';
+import { 招杜羅 } from './shotora-h.js';
+import { 毘羯羅 } from './bikara-h.js';
 
 export type 筆 = (bi: 筆具, mian: 面) => void;
 
@@ -123,7 +134,18 @@ export const 落筆簿: Record<string, 筆> = {
   'nikko|h': 日光菩薩,
   'gakko|h': 月光菩薩,
   'kubira|h': 宮毘羅,
-  // 漢傳橫三世＋藥師二脅侍立（十二神將・星供候波）
+  'basara|h': 伐折羅,
+  'mekira|h': 迷企羅,
+  'antera|h': 安底羅,
+  'anira|h': 頞儞羅,
+  'santera|h': 珊底羅,
+  'indara|h': 因達羅,
+  'haira|h': 波夷羅,
+  'makora|h': 摩虎羅,
+  'shindara|h': 真達羅,
+  'shotora|h': 招杜羅,
+  'bikara|h': 毘羯羅,
+  // 漢傳十二神將滿員（2026-07-09）；星供曼荼羅候波
 };
 
 // 候審筆：儀軌信雖已核（字段出典俱足），**筆**未經主人過目者——
