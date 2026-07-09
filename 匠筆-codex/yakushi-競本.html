@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>藥師如來坐像 · Codex 競本白描</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0d12;
+      --ink: #e8ddbf;
+      --muted: rgba(232, 221, 191, 0.68);
+      --rule: rgba(232, 221, 191, 0.18);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); }
+    body {
+      font-family: "Songti TC", "Noto Serif TC", "Source Han Serif TC", "Hiragino Mincho ProN", serif;
+      letter-spacing: 0;
+    }
+    main {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      justify-items: center;
+      gap: 14px;
+      padding: 22px 16px 24px;
+      background:
+        linear-gradient(180deg, rgba(232, 221, 191, 0.035), transparent 220px),
+        var(--bg);
+    }
+    header, footer {
+      width: min(720px, 100%);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 10px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 5.4vw, 38px);
+      font-weight: 600;
+      line-height: 1.15;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+      text-align: right;
+      white-space: nowrap;
+    }
+    figure {
+      margin: 0;
+      width: min(720px, 100%);
+      align-self: center;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 720 / 820;
+      border: 1px solid var(--rule);
+      background:
+        linear-gradient(rgba(232, 221, 191, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232, 221, 191, 0.03) 1px, transparent 1px),
+        #101217;
+      background-size: 40px 40px;
+    }
+    figcaption, footer {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    figcaption { padding-top: 9px; }
+    footer {
+      border-top: 1px solid var(--rule);
+      border-bottom: 0;
+      padding-top: 10px;
+      padding-bottom: 0;
+    }
+    @media (max-width: 560px) {
+      main { padding: 14px 10px 18px; }
+      header { align-items: start; }
+      .meta { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>藥師如來坐像</h1>
+    <div class="meta">自足 canvas 白描<br>施無畏印 · 左掌承藥壺</div>
+  </header>
+
+  <figure>
+    <canvas id="yakushi" aria-label="藥師如來坐像白描"></canvas>
+    <figcaption>如來形，螺髮肉髻，結跏趺坐蓮華座；頭光不作月輪。線寬約為身高一百二十至二百分之一。</figcaption>
+  </figure>
+
+  <footer>Codex 競本 · 2026-07-09 · 不取 src 座標</footer>
+</main>
+
+<script>
+(() => {
+  const W = 720;
+  const H = 820;
+  const U = 8;
+  const TOP = 44;
+  const CX = 360;
+  const INK = '#e8ddbf';
+  const SHOW_GRID = new URLSearchParams(location.search).get('grid') === '1';
+  const c = document.getElementById('yakushi');
+  const ctx = c.getContext('2d');
+
+  const y = z => TOP + z * U;
+  const A = {
+    top: y(0),
+    urna: y(12),
+    nose: y(16),
+    chin: y(20),
+    neck: y(24),
+    heart: y(36),
+    navel: y(48),
+    lap: y(64),
+    seat: y(68),
+    kneeL: CX - 26 * U,
+    kneeR: CX + 26 * U
+  };
+
+  const LW = {
+    bone: 4.1,
+    robe: 3.1,
+    fine: 2.75,
+    hair: 2.75,
+    erase: 9
+  };
+
+  function resize() {
+    const box = c.getBoundingClientRect();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    c.width = Math.round(box.width * dpr);
+    c.height = Math.round(box.width * H / W * dpr);
+    ctx.setTransform(c.width / W, 0, 0, c.height / H, 0, 0);
+    draw();
+  }
+
+  function stroke(width, fn, color = INK, cap = 'round', join = 'round') {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = cap;
+    ctx.lineJoin = join;
+    ctx.beginPath();
+    fn();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function erase(width, fn) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    fn();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function move(x0, y0) { ctx.moveTo(x0, y0); }
+  function line(x1, y1) { ctx.lineTo(x1, y1); }
+  function curve(x1, y1, x2, y2, x3, y3) { ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3); }
+  function quad(x1, y1, x2, y2) { ctx.quadraticCurveTo(x1, y1, x2, y2); }
+  function oval(cx, cy, rx, ry, width = LW.bone, s = 0, e = Math.PI * 2) {
+    stroke(width, () => ctx.ellipse(cx, cy, rx, ry, 0, s, e));
+  }
+
+  function dot(x0, y0, r = 1.8) {
+    stroke(LW.fine, () => {
+      ctx.moveTo(x0 - r, y0);
+      ctx.arc(x0, y0, r, Math.PI, Math.PI * 3);
+    });
+  }
+
+  function drawGrid() {
+    if (!SHOW_GRID) return;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(232,221,191,.20)';
+    ctx.lineWidth = 1;
+    for (const z of [0, 12, 16, 20, 24, 36, 48, 64, 68]) {
+      ctx.beginPath();
+      ctx.moveTo(108, y(z));
+      ctx.lineTo(612, y(z));
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.moveTo(A.kneeL, A.seat);
+    ctx.lineTo(A.kneeR, A.seat);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawHaloBack() {
+    oval(CX, y(11.5), 154, 165, LW.robe);
+    stroke(LW.fine, () => {
+      ctx.ellipse(CX, y(11.5), 132, 143, 0, 0.1, Math.PI * 1.92);
+    });
+    for (let i = -6; i <= 6; i++) {
+      const a = -Math.PI / 2 + i * 0.18;
+      const x0 = CX + Math.cos(a) * 138;
+      const yy0 = y(11.5) + Math.sin(a) * 149;
+      const x1 = CX + Math.cos(a) * 151;
+      const yy1 = y(11.5) + Math.sin(a) * 162;
+      stroke(LW.fine, () => { move(x0, yy0); line(x1, yy1); });
+    }
+  }
+
+  function drawLotusBack() {
+    stroke(LW.robe, () => {
+      move(A.kneeL - 62, A.seat + 12);
+      curve(198, 632, 286, 650, CX, 650);
+      curve(434, 650, 522, 632, A.kneeR + 62, A.seat + 12);
+    });
+    for (let i = -5; i <= 5; i++) {
+      const x0 = CX + i * 48;
+      const h = 42 - Math.abs(i) * 3;
+      stroke(LW.fine, () => {
+        move(x0 - 30, A.seat + 15);
+        quad(x0, A.seat + 15 + h, x0 + 30, A.seat + 15);
+      });
+    }
+    stroke(LW.robe, () => {
+      move(155, 684);
+      curve(246, 704, 474, 704, 565, 684);
+      move(176, 704);
+      curve(260, 742, 460, 742, 544, 704);
+    });
+    for (let i = -4; i <= 4; i++) {
+      const x0 = CX + i * 55;
+      stroke(LW.fine, () => {
+        move(x0 - 30, 699);
+        quad(x0, 740 - Math.abs(i) * 5, x0 + 30, 699);
+      });
+    }
+  }
+
+  function drawFarRobeAndBody() {
+    stroke(LW.bone, () => {
+      move(250, A.neck + 18);
+      curve(208, 280, 176, 386, 168, 500);
+      curve(161, 555, 154, 577, A.kneeL, A.seat);
+      move(470, A.neck + 18);
+      curve(512, 280, 544, 386, 552, 500);
+      curve(559, 555, 566, 577, A.kneeR, A.seat);
+    });
+
+    stroke(LW.robe, () => {
+      move(292, A.neck + 4);
+      curve(265, 322, 255, 392, 248, A.lap - 5);
+      move(429, A.neck + 2);
+      curve(456, 323, 464, 392, 470, A.lap - 4);
+      move(244, A.heart - 2);
+      curve(300, 374, 385, 398, 478, A.heart + 34);
+      move(257, A.heart + 32);
+      curve(314, 414, 402, 438, 488, A.navel + 26);
+      move(230, A.lap - 20);
+      curve(300, A.lap + 18, 425, A.lap + 19, 492, A.lap - 18);
+    });
+
+    for (let i = 0; i < 9; i++) {
+      const sx = 236 + i * 31;
+      stroke(LW.fine, () => {
+        move(sx, A.lap - 9 - Math.sin(i) * 6);
+        curve(sx + 9, A.lap + 18, sx - 17, A.seat - 4, sx + 5, A.seat + 16);
+      });
+    }
+  }
+
+  function drawHeadAndHair() {
+    stroke(LW.bone, () => {
+      move(CX - 54, y(7.5));
+      curve(CX - 76, y(10.5), CX - 70, y(17.2), CX - 35, A.chin - 1);
+      curve(CX - 16, A.chin + 12, CX + 16, A.chin + 12, CX + 35, A.chin - 1);
+      curve(CX + 70, y(17.2), CX + 76, y(10.5), CX + 54, y(7.5));
+    });
+    stroke(LW.robe, () => {
+      move(CX - 60, y(8.3));
+      curve(CX - 50, y(5.3), CX - 22, y(4.4), CX, y(4.6));
+      curve(CX + 22, y(4.4), CX + 50, y(5.3), CX + 60, y(8.3));
+      move(CX - 34, y(4.8));
+      curve(CX - 28, y(1.6), CX - 8, A.top, CX, A.top);
+      curve(CX + 8, A.top, CX + 28, y(1.6), CX + 34, y(4.8));
+    });
+
+    for (let row = 0; row < 5; row++) {
+      const yy = y(5.6 + row * 1.05);
+      const n = 5 + row * 2;
+      const spread = 18 + row * 9;
+      for (let i = 0; i < n; i++) {
+        const t = n === 1 ? 0 : i / (n - 1);
+        const x0 = CX - spread + t * spread * 2;
+        stroke(LW.hair, () => {
+          ctx.arc(x0, yy + Math.sin(t * Math.PI) * 3, 2.25, 0.1, Math.PI * 1.82);
+        });
+      }
+    }
+  }
+
+  function drawFace() {
+    stroke(LW.fine, () => {
+      move(CX - 31, A.urna - 9);
+      quad(CX - 18, A.urna - 17, CX - 5, A.urna - 10);
+      move(CX + 5, A.urna - 10);
+      quad(CX + 18, A.urna - 17, CX + 31, A.urna - 9);
+    });
+    stroke(LW.fine, () => {
+      move(CX - 27, A.urna + 5);
+      quad(CX - 14, A.urna + 1, CX - 4, A.urna + 5);
+      move(CX + 4, A.urna + 5);
+      quad(CX + 14, A.urna + 1, CX + 27, A.urna + 5);
+    });
+    dot(CX - 14, A.urna + 5, 1.25);
+    dot(CX + 14, A.urna + 5, 1.25);
+    dot(CX, A.urna, 1.4);
+    stroke(LW.fine, () => {
+      move(CX, A.urna + 10);
+      curve(CX + 3, y(14.5), CX + 2, A.nose - 3, CX - 3, A.nose);
+      move(CX - 14, y(18.3));
+      quad(CX, y(18.9), CX + 14, y(18.3));
+    });
+  }
+
+  function drawArmsBack() {
+    stroke(LW.robe, () => {
+      move(251, A.neck + 27);
+      curve(211, 298, 205, 344, 223, 381);
+      curve(232, 399, 245, 408, 262, 410);
+      move(470, A.neck + 25);
+      curve(514, 306, 507, 389, 452, 428);
+      curve(427, 446, 403, 452, 384, 447);
+    });
+  }
+
+  function drawMedicineHandAndJar() {
+    erase(24, () => {
+      move(336, A.navel - 2);
+      curve(355, A.navel - 20, 398, A.navel - 20, 419, A.navel - 1);
+      move(374, A.navel - 70);
+      line(398, A.navel - 70);
+    });
+    stroke(LW.robe, () => {
+      move(336, A.navel - 1);
+      curve(352, A.navel - 17, 402, A.navel - 17, 420, A.navel - 1);
+      move(345, A.navel + 4);
+      curve(362, A.navel + 15, 395, A.navel + 15, 412, A.navel + 4);
+    });
+    for (let i = 0; i < 4; i++) {
+      stroke(LW.fine, () => {
+        move(352 + i * 15, A.navel - 6);
+        curve(357 + i * 12, A.navel - 13, 362 + i * 12, A.navel - 13, 366 + i * 14, A.navel - 5);
+      });
+    }
+
+    stroke(LW.bone, () => {
+      move(374, A.navel - 68);
+      curve(354, A.navel - 58, 353, A.navel - 24, 374, A.navel - 13);
+      curve(391, A.navel - 5, 413, A.navel - 18, 412, A.navel - 41);
+      curve(411, A.navel - 58, 397, A.navel - 69, 374, A.navel - 68);
+      move(371, A.navel - 73);
+      curve(381, A.navel - 79, 397, A.navel - 79, 407, A.navel - 73);
+      move(378, A.navel - 89);
+      line(401, A.navel - 89);
+      move(380, A.navel - 83);
+      curve(386, A.navel - 91, 394, A.navel - 91, 400, A.navel - 83);
+    });
+    stroke(LW.fine, () => {
+      move(363, A.navel - 44);
+      curve(376, A.navel - 36, 393, A.navel - 35, 406, A.navel - 43);
+      move(371, A.navel - 19);
+      curve(381, A.navel - 15, 395, A.navel - 16, 405, A.navel - 23);
+    });
+  }
+
+  function drawAbhayaHand() {
+    erase(34, () => {
+      move(246, 309);
+      curve(248, 279, 277, 262, 300, 284);
+      move(250, 376);
+      curve(260, 338, 279, 322, 304, 321);
+    });
+    stroke(LW.robe, () => {
+      move(251, A.neck + 27);
+      curve(222, 303, 225, 344, 252, 371);
+      curve(264, 383, 286, 383, 302, 368);
+    });
+    stroke(LW.bone, () => {
+      move(267, 320);
+      curve(251, 298, 260, 271, 283, 267);
+      curve(309, 263, 322, 289, 311, 318);
+      curve(302, 339, 280, 342, 267, 320);
+    });
+    const fingers = [
+      [276, 281, 270, 241, 278, 218],
+      [287, 275, 286, 229, 295, 205],
+      [298, 277, 303, 233, 313, 211],
+      [307, 285, 320, 250, 330, 233],
+      [270, 305, 246, 291, 238, 270]
+    ];
+    for (const f of fingers) {
+      stroke(LW.robe, () => {
+        move(f[0], f[1]);
+        curve((f[0] + f[2]) / 2, f[1] - 16, f[2], f[3] + 12, f[4], f[5]);
+      });
+    }
+    for (const f of fingers.slice(0, 4)) {
+      stroke(LW.fine, () => {
+        move(f[0] + 5, f[1] + 2);
+        curve(f[2] + 6, f[3] + 18, f[4] + 4, f[5] + 12, f[4] + 2, f[5] + 2);
+      });
+    }
+    stroke(LW.fine, () => {
+      move(274, 313);
+      quad(289, 304, 305, 313);
+      move(274, 327);
+      quad(290, 336, 306, 327);
+    });
+  }
+
+  function drawNearRobeAndLegs() {
+    erase(18, () => {
+      move(A.kneeL - 5, A.seat - 1);
+      curve(256, A.seat - 32, 464, A.seat - 32, A.kneeR + 5, A.seat - 1);
+    });
+    stroke(LW.bone, () => {
+      move(A.kneeL, A.seat);
+      curve(244, A.seat - 43, 476, A.seat - 43, A.kneeR, A.seat);
+      move(214, A.seat - 10);
+      curve(284, A.lap - 40, 432, A.lap - 41, 506, A.seat - 10);
+    });
+    stroke(LW.robe, () => {
+      move(236, A.seat - 18);
+      curve(284, A.seat + 16, 436, A.seat + 16, 485, A.seat - 18);
+      move(286, A.seat - 49);
+      curve(321, A.seat - 24, 396, A.seat - 23, 432, A.seat - 49);
+    });
+    for (let i = -5; i <= 5; i++) {
+      const x0 = CX + i * 28;
+      stroke(LW.fine, () => {
+        move(x0, A.lap - 5 - Math.abs(i) * 2);
+        curve(x0 + i * 3, A.lap + 20, x0 - i * 4, A.seat - 20, x0 + i * 9, A.seat - 3);
+      });
+    }
+  }
+
+  function drawShoulderDrapery() {
+    stroke(LW.robe, () => {
+      move(296, A.neck + 4);
+      curve(322, 288, 394, 290, 426, A.neck + 7);
+      move(300, A.neck + 29);
+      curve(334, 326, 391, 329, 428, A.neck + 31);
+      move(292, A.heart - 15);
+      curve(326, A.heart - 3, 392, A.heart - 2, 428, A.heart - 16);
+    });
+    for (let i = 0; i < 6; i++) {
+      stroke(LW.fine, () => {
+        move(315 + i * 19, 283 + i % 2 * 5);
+        curve(330 + i * 10, 330, 316 + i * 30, 382, 330 + i * 22, 430);
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    drawGrid();
+    drawHaloBack();
+    drawLotusBack();
+    drawFarRobeAndBody();
+    drawArmsBack();
+    drawHeadAndHair();
+    drawNearRobeAndLegs();
+    drawShoulderDrapery();
+    drawMedicineHandAndJar();
+    drawAbhayaHand();
+    drawFace();
+  }
+
+  window.addEventListener('resize', resize, { passive: true });
+  resize();
+})();
+</script>
+
+<!--
+自驗清單（2026-07-09）：
+1. 錨全中否：
+   - 取 1 自指 = 8px，頂 y=44；白毫 y=140、鼻端 y=172、頦 y=204、頸底 y=236、心窩 y=332、臍 y=428、盤線 y=556、座面 y=588。
+   - 膝寬 52 自指，左右外緣 x=152 與 x=568，寬 416px。畫布可加 ?grid=1 檢視。
+   - 頭頂、白毫、鼻、頦、臍、座面、雙膝外緣皆按此坐標落筆；頭光另作外輪，不充月輪。
+2. 畫序即遮擋序行否：
+   - 先頭光與蓮座，次遠衣身、遠臂、頭髮，再前膝、肩衣、左掌藥壺、右施無畏掌、面。
+   - 以 destination-out 鑿三處：前膝鑿座面後線；左掌與藥壺鑿腹前衣線；施無畏掌鑿肩袖與胸前線。前物後落，交界不互穿。
+3. 施無畏與藥壺：
+   - 尊右手在觀者左側，舉掌當胸，掌心向外，拇指與四指分作五指舒伸。
+   - 尊左手在腹前仰掌，藥壺鼓腹束口、有蓋鈕；壺先鑿掌上衣線再落，壺身不透掌、不畫掌內隱線穿壺。
+4. 面簡筆、繁筆所投：
+   - 面部只用眉一筆、瞼一筆、瞳一點、白毫一點、鼻口少線，頰不加修飾線。
+   - 繁筆落於螺髮、衣褶、膝前環褶、蓮瓣、五指與藥壺幾何。
+5. 線身比：
+   - 頂至座面 544px；骨線 4.1px 約 1:133，衣線 3.1px 約 1:175，細線與髮線 2.75px 約 1:198，皆在 1:100-200 內。
+6. 禁讀 src：
+   - 本檔依 goal 之錨與畫風指導自運；本輪只讀 `匠筆-codex/goal-yakushi-競本.md`、`匠筆-codex/畫風指導.md` 及同目錄既有 HTML 版式參照，未讀 `src/` 座標。
+-->
+</body>
+</html>
