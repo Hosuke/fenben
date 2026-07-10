@@ -63,6 +63,7 @@ import { 真達羅 } from './shindara-h.js';
 import { 招杜羅 } from './shotora-h.js';
 import { 毘羯羅 } from './bikara-h.js';
 import { 降三世明王 } from './gozanze-k.js';
+import { 千手觀音 } from './senju-h.js';
 export const 落筆簿 = {
     'center|k': 大日金剛界,
     'fugen|k': 金剛薩埵,
@@ -131,6 +132,7 @@ export const 落筆簿 = {
     'shotora|h': 招杜羅,
     'bikara|h': 毘羯羅,
     'gozanze|k': 降三世明王,
+    'senju|h': 千手觀音,
     // 漢傳十二神將滿員（2026-07-09）；星供曼荼羅候波；複雜像波啟（降三世首筆）
 };
 // 候審筆：儀軌信雖已核（字段出典俱足），**筆**未經主人過目者——
