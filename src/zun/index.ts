@@ -75,6 +75,7 @@ import { 摩虎羅 } from './makora-h.js';
 import { 真達羅 } from './shindara-h.js';
 import { 招杜羅 } from './shotora-h.js';
 import { 毘羯羅 } from './bikara-h.js';
+import { 降三世明王 } from './gozanze-k.js';
 
 export type 筆 = (bi: 筆具, mian: 面) => void;
 
@@ -145,7 +146,8 @@ export const 落筆簿: Record<string, 筆> = {
   'shindara|h': 真達羅,
   'shotora|h': 招杜羅,
   'bikara|h': 毘羯羅,
-  // 漢傳十二神將滿員（2026-07-09）；星供曼荼羅候波
+  'gozanze|k': 降三世明王,
+  // 漢傳十二神將滿員（2026-07-09）；星供曼荼羅候波；複雜像波啟（降三世首筆）
 };
 
 // 候審筆：儀軌信雖已核（字段出典俱足），**筆**未經主人過目者——
