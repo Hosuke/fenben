@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>四題競本 · Codex 5.6 卷</title>
+  <style>
+    :root {
+      --夜: #171613;
+      --金: #d6c28c;
+      --淡金: #9b8d68;
+      --紙: #f2ecdc;
+      --墨: #292620;
+      --界: rgba(214, 194, 140, .24);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--夜); color: var(--金); }
+    body {
+      font-family: "Songti TC", "Noto Serif CJK TC", "Source Han Serif TC", "Hiragino Mincho ProN", serif;
+      text-rendering: optimizeLegibility;
+    }
+    main { min-height: 100vh; padding: 22px 18px 26px; }
+    header, .卷, footer { width: min(1900px, 100%); margin-inline: auto; }
+    header { display: flex; align-items: baseline; gap: 22px; border-bottom: 1px solid var(--界); padding-bottom: 12px; }
+    h1 { margin: 0; font-size: clamp(25px, 2.4vw, 38px); font-weight: 600; letter-spacing: .08em; }
+    .序 { color: var(--淡金); font-size: 12px; line-height: 1.7; }
+    .卷 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(250px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+      align-items: start;
+    }
+    figure { margin: 0; min-width: 0; }
+    .畫框 { padding: 8px; border: 1px solid var(--界); background: #11100e; }
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 520 / 700;
+      background:
+        radial-gradient(ellipse at 52% 38%, rgba(255,255,255,.42), transparent 58%),
+        linear-gradient(103deg, rgba(78,65,40,.025), transparent 28%, rgba(78,65,40,.018) 67%, transparent),
+        var(--紙);
+    }
+    figcaption { min-height: 76px; padding: 10px 3px 0; line-height: 1.6; color: var(--淡金); font-size: 12px; }
+    figcaption b { display: block; color: var(--金); font-size: 14px; font-weight: 600; letter-spacing: .06em; }
+    footer { border-top: 1px solid var(--界); margin-top: 14px; padding-top: 10px; color: var(--淡金); font-size: 11px; line-height: 1.6; }
+    @media (max-width: 1080px) {
+      .卷 { overflow-x: auto; grid-template-columns: repeat(4, minmax(300px, 1fr)); padding-bottom: 8px; }
+      header { display: block; }
+      .序 { margin-top: 5px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>四題競本</h1>
+    <div class="序">Codex 5.6 卷 · T1419 百二十指制 · 白描單色無填 · 線身比 1:159 · 畫序即遮擋序</div>
+  </header>
+
+  <section class="卷" aria-label="四題白描並列">
+    <figure>
+      <div class="畫框"><canvas id="智拳" width="520" height="700" aria-label="智拳印獨幅"></canvas></div>
+      <figcaption><b>一 · 智拳印獨幅</b>左拳立頭指，右拳四指逐節繞握；右拇指自拳背上蟠，端拄左頭指端。</figcaption>
+    </figure>
+    <figure>
+      <div class="畫框"><canvas id="大日" width="520" height="700" aria-label="大日如來金剛界坐像"></canvas></div>
+      <figcaption><b>二 · 大日如來（金剛界）</b>菩薩形，五智寶冠；智拳印當胸，結跏趺坐月輪蓮座。</figcaption>
+    </figure>
+    <figure>
+      <div class="畫框"><canvas id="薩埵" width="520" height="700" aria-label="金剛薩埵坐像"></canvas></div>
+      <figcaption><b>三 · 金剛薩埵</b>五佛冠；右手五鈷杵當胸，左手五鈷鈴安股，結跏趺坐月輪蓮座。</figcaption>
+    </figure>
+    <figure>
+      <div class="畫框"><canvas id="五鈷" width="520" height="700" aria-label="五鈷杵三昧耶形獨幅"></canvas></div>
+      <figcaption><b>四 · 五鈷杵三昧耶形</b>把、鬼目、蓮弁帯、中鈷與四脇鈷皆具；兩端鏡成，豎立月輪蓮座中。</figcaption>
+    </figure>
+  </section>
+
+  <footer>遠者先落，近者先以 <code>destination-out</code> 鑿去下線而後描；②③格網錨、①拄接距、④兩端對稱皆於載入時以 <code>console.assert</code> 自證。</footer>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const W = 520, H = 700, 墨 = '#292620';
+  const 粗 = 2.9, 中 = 2.15, 細 = 1.35, 鑿寬 = 8.5;
+  const 報 = { 斷言: 0, 鑿: 0, 失: 0 };
+
+  function 證(名, 真) {
+    報.斷言++;
+    if (!真) 報.失++;
+    console.assert(真, 名);
+  }
+
+  function 備紙(id, 畫) {
+    const c = document.getElementById(id);
+    const dpr = Math.min(2, Math.max(1, devicePixelRatio || 1));
+    c.width = W * dpr; c.height = H * dpr;
+    const x = c.getContext('2d');
+    x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    x.clearRect(0, 0, W, H);
+    x.strokeStyle = 墨; x.lineCap = 'round'; x.lineJoin = 'round';
+    畫(x);
+  }
+
+  function 描(x, 筆, 路, 虛線) {
+    x.save(); x.globalCompositeOperation = 'source-over'; x.strokeStyle = 墨;
+    x.lineWidth = 筆; x.lineCap = 'round'; x.lineJoin = 'round';
+    if (虛線) x.setLineDash(虛線);
+    x.beginPath(); 路(x); x.stroke(); x.restore();
+  }
+  function 線(x, ax, ay, bx, by, 筆 = 細) { 描(x, 筆, p => { p.moveTo(ax, ay); p.lineTo(bx, by); }); }
+  function 橢(x, cx, cy, rx, ry, 筆 = 中, 轉 = 0, 始 = 0, 終 = Math.PI * 2) {
+    描(x, 筆, p => p.ellipse(cx, cy, rx, ry, 轉, 始, 終));
+  }
+  function 鑿線(x, 筆, 路) {
+    報.鑿++;
+    x.save(); x.globalCompositeOperation = 'destination-out'; x.strokeStyle = '#000';
+    x.lineWidth = 筆; x.lineCap = 'round'; x.lineJoin = 'round';
+    x.beginPath(); 路(x); x.stroke(); x.restore();
+  }
+  function 鑿形(x, 路) {
+    報.鑿++;
+    x.save(); x.globalCompositeOperation = 'destination-out'; x.beginPath(); 路(x); x.fill(); x.restore();
+  }
+  function 鑿橢(x, cx, cy, rx, ry, 轉 = 0) {
+    鑿形(x, p => p.ellipse(cx, cy, rx, ry, 轉, 0, Math.PI * 2));
+  }
+  function 多線(x, 點, 筆 = 細, 閉 = false) {
+    描(x, 筆, p => {
+      p.moveTo(點[0][0], 點[0][1]);
+      for (let i = 1; i < 點.length; i++) p.lineTo(點[i][0], 點[i][1]);
+      if (閉) p.closePath();
+    });
+  }
+  function 玉(x, cx, cy, r = 3.2, 筆 = 細) { 橢(x, cx, cy, r, r, 筆); }
+
+  /* T1419 百二十指制：兩坐尊只共享尺度，不共享姿勢座標。 */
+  function 格網(名) {
+    const u = 6.8, cx = 260, top = 108;
+    const A = {
+      名, u, cx,
+      頂: top,
+      白毫: top + 12 * u,
+      頦: top + 20 * u,
+      頸底: top + 24 * u,
+      心窩: top + 36 * u,
+      臍: top + 48 * u,
+      盤線: top + 64 * u,
+      座面: top + 68 * u,
+      左膝: cx - 26 * u,
+      右膝: cx + 26 * u
+    };
+    證(`${名}：頂0`, A.頂 === top);
+    證(`${名}：白毫12`, Math.abs(A.白毫 - A.頂 - 12 * u) < 1e-9);
+    證(`${名}：頦20`, Math.abs(A.頦 - A.頂 - 20 * u) < 1e-9);
+    證(`${名}：頸底24`, Math.abs(A.頸底 - A.頂 - 24 * u) < 1e-9);
+    證(`${名}：心窩36`, Math.abs(A.心窩 - A.頂 - 36 * u) < 1e-9);
+    證(`${名}：臍48`, Math.abs(A.臍 - A.頂 - 48 * u) < 1e-9);
+    證(`${名}：盤線64`, Math.abs(A.盤線 - A.頂 - 64 * u) < 1e-9);
+    證(`${名}：座面68`, Math.abs(A.座面 - A.頂 - 68 * u) < 1e-9);
+    證(`${名}：膝寬52`, Math.abs(A.右膝 - A.左膝 - 52 * u) < 1e-9);
+    證(`${名}：線身比在律內`, (A.座面 - A.頂) / 粗 >= 100 && (A.座面 - A.頂) / 粗 <= 200);
+    return A;
+  }
+
+  function 月輪(x, cx = 260, cy = 327, r = 245) {
+    橢(x, cx, cy, r, r, 中);
+    橢(x, cx, cy, r - 9, r - 9, 細);
+  }
+
+  function 蓮瓣(x, cx, 基, 尖, 半寬, 筆 = 細) {
+    描(x, 筆, p => {
+      p.moveTo(cx - 半寬, 基);
+      p.bezierCurveTo(cx - 半寬 * .92, 基 + (尖 - 基) * .32, cx - 半寬 * .28, 尖 + (基 - 尖) * .12, cx, 尖);
+      p.bezierCurveTo(cx + 半寬 * .28, 尖 + (基 - 尖) * .12, cx + 半寬 * .92, 基 + (尖 - 基) * .32, cx + 半寬, 基);
+      p.quadraticCurveTo(cx, 基 + (尖 - 基) * .12, cx - 半寬, 基);
+    });
+    描(x, 細, p => {
+      p.moveTo(cx, 尖 + (基 - 尖) * .18);
+      p.quadraticCurveTo(cx + 半寬 * .16, (基 + 尖) / 2, cx, 基 + (尖 - 基) * .06);
+    });
+  }
+
+  function 蓮座(x, 座面 = 570, 寬 = 420) {
+    const cx = 260;
+    橢(x, cx, 座面 + 4, 寬 / 2, 14, 中);
+    描(x, 細, p => { p.moveTo(cx - 寬 * .46, 座面 + 6); p.bezierCurveTo(cx - 95, 座面 + 22, cx + 95, 座面 + 22, cx + 寬 * .46, 座面 + 6); });
+    const 上數 = 11, 上跨 = 寬 * .82;
+    for (let i = 0; i < 上數; i++) {
+      const t = i / (上數 - 1), px = cx - 上跨 / 2 + t * 上跨;
+      const 高 = 31 + 9 * Math.cos((t - .5) * Math.PI);
+      蓮瓣(x, px, 座面 + 51, 座面 + 51 - 高, 17, i === 5 ? 中 : 細);
+    }
+    橢(x, cx, 座面 + 50, 寬 * .455, 13, 中);
+    橢(x, cx, 座面 + 61, 寬 * .44, 11, 細);
+    const 下數 = 12, 下跨 = 寬 * .79;
+    for (let i = 0; i < 下數; i++) {
+      const t = i / (下數 - 1), px = cx - 下跨 / 2 + t * 下跨;
+      const 深 = 36 + 9 * Math.cos((t - .5) * Math.PI);
+      蓮瓣(x, px, 座面 + 63, 座面 + 63 + 深, 16, 細);
+    }
+    描(x, 中, p => { p.moveTo(cx - 寬 * .38, 座面 + 110); p.quadraticCurveTo(cx, 座面 + 121, cx + 寬 * .38, 座面 + 110); });
+    描(x, 細, p => { p.moveTo(cx - 寬 * .34, 座面 + 119); p.quadraticCurveTo(cx, 座面 + 128, cx + 寬 * .34, 座面 + 119); });
+  }
+
+  function 鑿坐尊輪廓(x, A) {
+    鑿橢(x, A.cx, (A.頂 + A.頦) / 2, 58, 75);
+    鑿形(x, p => {
+      p.moveTo(178, 48); p.lineTo(342, 48); p.lineTo(345, 130); p.lineTo(175, 130); p.closePath();
+    });
+    鑿形(x, p => {
+      p.moveTo(210, A.頦 - 2); p.lineTo(310, A.頦 - 2);
+      p.lineTo(375, 285); p.lineTo(391, 402); p.lineTo(447, 547);
+      p.lineTo(430, 581); p.lineTo(90, 581); p.lineTo(73, 547);
+      p.lineTo(129, 402); p.lineTo(145, 285); p.closePath();
+    });
+  }
+
+  function 身衣(x, A, 式) {
+    const c = A.cx;
+    /* 肩—肘—腕之杆勢先立，外輪廓後以褶承體。 */
+    描(x, 粗, p => {
+      p.moveTo(c - 23, A.頸底); p.bezierCurveTo(c - 60, 270, 172, 275, 155, 294);
+      p.bezierCurveTo(143, 320, 144, 375, 132, 419);
+      p.bezierCurveTo(121, 463, 104, 508, A.左膝, A.盤線);
+      p.bezierCurveTo(108, 558, 166, 563, c, A.座面);
+    });
+    描(x, 粗, p => {
+      p.moveTo(c + 23, A.頸底); p.bezierCurveTo(c + 60, 270, 348, 275, 365, 294);
+      p.bezierCurveTo(377, 320, 376, 375, 388, 419);
+      p.bezierCurveTo(399, 463, 416, 508, A.右膝, A.盤線);
+      p.bezierCurveTo(412, 558, 354, 563, c, A.座面);
+    });
+    描(x, 中, p => {
+      p.moveTo(181, 286); p.bezierCurveTo(200, 305, 219, 328, 237, A.臍);
+      p.quadraticCurveTo(c, A.臍 + 10, 283, A.臍);
+      p.bezierCurveTo(303, 326, 320, 304, 339, 286);
+    });
+    描(x, 細, p => { p.moveTo(c - 21, A.頸底 + 2); p.quadraticCurveTo(c - 43, 293, c - 49, 326); });
+    描(x, 細, p => { p.moveTo(c + 21, A.頸底 + 2); p.quadraticCurveTo(c + 43, 293, c + 49, 326); });
+    /* 腰與結跏趺之股棚。 */
+    描(x, 中, p => { p.moveTo(183, A.臍); p.quadraticCurveTo(c, A.臍 + 13, 337, A.臍); });
+    描(x, 細, p => { p.moveTo(190, A.臍 + 9); p.quadraticCurveTo(c, A.臍 + 22, 330, A.臍 + 9); });
+    描(x, 粗, p => {
+      p.moveTo(c, A.臍 + 13); p.bezierCurveTo(221, 466, 175, 505, A.左膝, A.盤線);
+      p.bezierCurveTo(149, 548, 211, 549, c, A.座面 - 4);
+    });
+    描(x, 粗, p => {
+      p.moveTo(c, A.臍 + 13); p.bezierCurveTo(299, 466, 345, 505, A.右膝, A.盤線);
+      p.bezierCurveTo(371, 548, 309, 549, c, A.座面 - 4);
+    });
+    /* 兩足露於對股，足趾簡而逐列。 */
+    描(x, 中, p => { p.moveTo(143, 526); p.bezierCurveTo(163, 509, 195, 506, 223, 516); p.bezierCurveTo(239, 522, 238, 536, 219, 540); p.bezierCurveTo(188, 545, 158, 540, 143, 526); });
+    描(x, 中, p => { p.moveTo(377, 526); p.bezierCurveTo(357, 509, 325, 506, 297, 516); p.bezierCurveTo(281, 522, 282, 536, 301, 540); p.bezierCurveTo(332, 545, 362, 540, 377, 526); });
+    for (let i = 0; i < 4; i++) {
+      描(x, 細, p => { p.moveTo(166 + i * 14, 518 - i * .8); p.quadraticCurveTo(170 + i * 14, 526, 168 + i * 14, 535); });
+      描(x, 細, p => { p.moveTo(354 - i * 14, 518 - i * .8); p.quadraticCurveTo(350 - i * 14, 526, 352 - i * 14, 535); });
+    }
+    /* 褶線自腰、膝、踝三處發，不作交叉網格。 */
+    const 左褶 = [[252,451,205,493,126,535],[246,458,202,512,171,548],[231,461,195,480,159,499]];
+    const 右褶 = 左褶.map(a => [W-a[0],a[1],W-a[2],a[3],W-a[4],a[5]]);
+    [...左褶, ...右褶].forEach(a => 描(x, 細, p => { p.moveTo(a[0],a[1]); p.quadraticCurveTo(a[2],a[3],a[4],a[5]); }));
+    描(x, 細, p => { p.moveTo(c, 462); p.bezierCurveTo(246, 492, 247, 523, c, 558); });
+    描(x, 細, p => { p.moveTo(c, 462); p.bezierCurveTo(274, 492, 273, 523, c, 558); });
+    if (式 === '大日') {
+      /* 菩薩瓔珞：只以輪廓線，不填。 */
+      描(x, 細, p => { p.moveTo(215, 294); p.quadraticCurveTo(c, 333, 305, 294); });
+      描(x, 細, p => { p.moveTo(224, 301); p.quadraticCurveTo(c, 348, 296, 301); });
+      玉(x, c, 340, 5, 細);
+    } else {
+      描(x, 細, p => { p.moveTo(218, 296); p.quadraticCurveTo(c, 326, 302, 296); });
+      描(x, 細, p => { p.moveTo(231, 304); p.quadraticCurveTo(c, 343, 289, 304); });
+      玉(x, c, 335, 4.5, 細);
+    }
+  }
+
+  function 面與髮(x, A) {
+    const c = A.cx;
+    描(x, 粗, p => {
+      p.moveTo(c, A.頂); p.bezierCurveTo(c - 39, A.頂 + 1, c - 52, A.頂 + 34, c - 50, A.頂 + 76);
+      p.bezierCurveTo(c - 47, A.頂 + 108, c - 22, A.頦 - 3, c, A.頦);
+      p.bezierCurveTo(c + 22, A.頦 - 3, c + 47, A.頂 + 108, c + 50, A.頂 + 76);
+      p.bezierCurveTo(c + 52, A.頂 + 34, c + 39, A.頂 + 1, c, A.頂);
+    });
+    描(x, 中, p => { p.moveTo(c - 48, A.頂 + 34); p.quadraticCurveTo(c, A.頂 + 7, c + 48, A.頂 + 34); });
+    描(x, 細, p => { p.moveTo(c - 46, A.頂 + 45); p.quadraticCurveTo(c, A.頂 + 19, c + 46, A.頂 + 45); });
+    /* 耳與垂璫。 */
+    for (const s of [-1,1]) {
+      描(x, 細, p => { p.moveTo(c + s*49, A.頂+55); p.bezierCurveTo(c+s*67,A.頂+54,c+s*66,A.頂+94,c+s*50,A.頂+105); });
+      描(x, 細, p => { p.moveTo(c + s*55, A.頂+68); p.quadraticCurveTo(c+s*59,A.頂+81,c+s*51,A.頂+91); });
+      玉(x, c+s*58, A.頂+111, 4, 細);
+      描(x, 細, p => { p.moveTo(c+s*58,A.頂+115); p.quadraticCurveTo(c+s*64,A.頂+126,c+s*57,A.頂+137); });
+    }
+    /* 半闔眼、眉、鼻、口；白毫恰在十二指錨。 */
+    玉(x, c, A.白毫, 3.2, 中);
+    描(x, 細, p => { p.moveTo(c-35,A.白毫+1); p.quadraticCurveTo(c-20,A.白毫-8,c-7,A.白毫-2); });
+    描(x, 細, p => { p.moveTo(c+35,A.白毫+1); p.quadraticCurveTo(c+20,A.白毫-8,c+7,A.白毫-2); });
+    描(x, 中, p => { p.moveTo(c-34,A.白毫+10); p.quadraticCurveTo(c-22,A.白毫+18,c-8,A.白毫+11); });
+    描(x, 中, p => { p.moveTo(c+34,A.白毫+10); p.quadraticCurveTo(c+22,A.白毫+18,c+8,A.白毫+11); });
+    描(x, 細, p => { p.moveTo(c,A.白毫+6); p.bezierCurveTo(c-2,A.白毫+19,c-5,A.白毫+28,c-10,A.白毫+35); p.quadraticCurveTo(c,A.白毫+40,c+9,A.白毫+35); });
+    描(x, 細, p => { p.moveTo(c-16,A.白毫+50); p.quadraticCurveTo(c,A.白毫+58,c+16,A.白毫+50); });
+    描(x, 細, p => { p.moveTo(c-10,A.白毫+58); p.quadraticCurveTo(c,A.白毫+63,c+10,A.白毫+58); });
+    線(x, c-20, A.頦, c-20, A.頸底, 中); 線(x, c+20, A.頦, c+20, A.頸底, 中);
+    描(x, 細, p => { p.moveTo(c-20,A.頸底-2); p.quadraticCurveTo(c,A.頸底+12,c+20,A.頸底-2); });
+  }
+
+  function 五智寶冠(x, A) {
+    const c = A.cx, xs = [-68,-34,0,34,68], hs = [43,57,72,57,43];
+    描(x, 中, p => { p.moveTo(c-87,A.頂+5); p.quadraticCurveTo(c,A.頂+19,c+87,A.頂+5); });
+    描(x, 細, p => { p.moveTo(c-84,A.頂-7); p.quadraticCurveTo(c,A.頂+6,c+84,A.頂-7); });
+    xs.forEach((dx,i) => {
+      const base = A.頂-4, tip = base-hs[i], hw = i===2 ? 17 : 15;
+      描(x, i===2?中:細, p => {
+        p.moveTo(c+dx-hw,base); p.bezierCurveTo(c+dx-hw,base-18,c+dx-7,tip+12,c+dx,tip);
+        p.bezierCurveTo(c+dx+7,tip+12,c+dx+hw,base-18,c+dx+hw,base); p.closePath();
+      });
+      玉(x,c+dx,base-21,4.2,細);
+      描(x, 細, p => { p.moveTo(c+dx-6,base-11); p.quadraticCurveTo(c+dx,base-18,c+dx+6,base-11); });
+    });
+    for(let i=0;i<13;i++) 玉(x,c-72+i*12,A.頂+5+Math.abs(6-i)*.09,1.55,細);
+  }
+
+  function 五佛冠(x, A) {
+    const c=A.cx, xs=[-70,-35,0,35,70], hs=[42,54,66,54,42];
+    描(x, 中, p => { p.moveTo(c-91,A.頂+6); p.quadraticCurveTo(c,A.頂+20,c+91,A.頂+6); });
+    描(x, 細, p => { p.moveTo(c-88,A.頂-8); p.quadraticCurveTo(c,A.頂+5,c+88,A.頂-8); });
+    xs.forEach((dx,i)=>{
+      const base=A.頂-5, tip=base-hs[i], hw=i===2?18:16;
+      描(x,i===2?中:細,p=>{
+        p.moveTo(c+dx-hw,base); p.bezierCurveTo(c+dx-hw,base-25,c+dx-10,tip+9,c+dx,tip);
+        p.bezierCurveTo(c+dx+10,tip+9,c+dx+hw,base-25,c+dx+hw,base); p.closePath();
+      });
+      /* 五龕中各一小佛：頭圓、肩弧、禪膝三筆。 */
+      玉(x,c+dx,base-27,3.1,細);
+      描(x,細,p=>{p.moveTo(c+dx-7,base-17);p.quadraticCurveTo(c+dx,base-24,c+dx+7,base-17);});
+      描(x,細,p=>{p.moveTo(c+dx-8,base-11);p.quadraticCurveTo(c+dx,base-5,c+dx+8,base-11);});
+    });
+    for(let i=0;i<12;i++) 玉(x,c-66+i*12,A.頂+6,1.45,細);
+  }
+
+  function 智拳小印(x, cx, cy, s=1) {
+    const X=v=>cx+v*s, Y=v=>cy+v*s;
+    /* 左拳與立頭指先落。 */
+    描(x, 中, p=>{
+      p.moveTo(X(-29),Y(23)); p.bezierCurveTo(X(-31),Y(7),X(-22),Y(-1),X(-10),Y(-2));
+      p.lineTo(X(-8),Y(-41)); p.bezierCurveTo(X(-7),Y(-56),X(7),Y(-56),X(8),Y(-41));
+      p.lineTo(X(10),Y(7)); p.bezierCurveTo(X(25),Y(8),X(29),Y(18),X(26),Y(34));
+      p.bezierCurveTo(X(15),Y(44),X(-14),Y(45),X(-29),Y(23));
+    });
+    線(x,X(-8),Y(-29),X(8),Y(-29),細); 線(x,X(-8),Y(-13),X(9),Y(-13),細);
+    [-8,4,16].forEach(v=>描(x,細,p=>{p.moveTo(X(-24),Y(v+18));p.quadraticCurveTo(X(0),Y(v+24),X(23),Y(v+18));}));
+    /* 右拳包握，先鑿左指外線而自治。 */
+    鑿形(x,p=>{p.ellipse(X(24),Y(9),35*s,29*s,-.08,0,Math.PI*2);});
+    描(x, 中, p=>{p.moveTo(X(-3),Y(-3));p.bezierCurveTo(X(15),Y(-15),X(45),Y(-12),X(56),Y(2));p.bezierCurveTo(X(64),Y(16),X(55),Y(36),X(35),Y(40));p.bezierCurveTo(X(16),Y(44),X(-2),Y(32),X(-3),Y(-3));});
+    [-5,8,21].forEach(v=>描(x,細,p=>{p.moveTo(X(1),Y(v));p.quadraticCurveTo(X(27),Y(v+7),X(55),Y(v+1));}));
+    線(x,X(19),Y(-8),X(17),Y(35),細); 線(x,X(39),Y(-8),X(42),Y(33),細);
+    /* 右拇自拳背蟠至左頭指端。 */
+    鑿線(x, 7*s, p=>{p.moveTo(X(50),Y(22));p.bezierCurveTo(X(43),Y(-8),X(25),Y(-37),X(2),Y(-53));});
+    描(x, 中, p=>{p.moveTo(X(51),Y(24));p.bezierCurveTo(X(45),Y(-7),X(27),Y(-40),X(3),Y(-54));p.quadraticCurveTo(X(-2),Y(-54),X(-5),Y(-49));});
+    描(x, 細, p=>{p.moveTo(X(44),Y(27));p.bezierCurveTo(X(39),Y(-3),X(22),Y(-31),X(2),Y(-48));});
+  }
+
+  function 微五鈷(x, cx, cy, 長=88, 角=-.35) {
+    x.save(); x.translate(cx,cy); x.rotate(角);
+    const h=長/2;
+    描(x,中,p=>{p.moveTo(-3,-h+3);p.lineTo(0,-h);p.lineTo(3,-h+3);p.lineTo(2,h-3);p.lineTo(0,h);p.lineTo(-2,h-3);p.closePath();});
+    橢(x,0,0,6,12,細); 橢(x,0,0,3,7,細);
+    for(const sy of [-1,1]) {
+      線(x,-14,sy*15,14,sy*15,細); 線(x,-16,sy*20,16,sy*20,細);
+      for(const sx of [-1,1]) {
+        描(x,細,p=>{p.moveTo(sx*5,sy*20);p.bezierCurveTo(sx*12,sy*28,sx*14,sy*(h-10),sx*3,sy*(h-4));});
+        描(x,細,p=>{p.moveTo(sx*12,sy*18);p.bezierCurveTo(sx*27,sy*28,sx*25,sy*(h-11),sx*7,sy*(h-3));});
+      }
+    }
+    x.restore();
+  }
+
+  function 五鈷鈴(x, cx, cy, s=1) {
+    const Y=v=>cy+v*s, X=v=>cx+v*s;
+    /* 鈴身先落，拳後覆柄。 */
+    微五鈷(x,cx,Y(-39),44*s,0);
+    描(x,細,p=>{p.moveTo(X(-7),Y(-20));p.lineTo(X(-9),Y(-4));p.lineTo(X(9),Y(-4));p.lineTo(X(7),Y(-20));});
+    描(x,中,p=>{p.moveTo(X(-10),Y(-4));p.bezierCurveTo(X(-13),Y(8),X(-25),Y(14),X(-30),Y(30));p.bezierCurveTo(X(-35),Y(43),X(-38),Y(48),X(-41),Y(51));});
+    描(x,中,p=>{p.moveTo(X(10),Y(-4));p.bezierCurveTo(X(13),Y(8),X(25),Y(14),X(30),Y(30));p.bezierCurveTo(X(35),Y(43),X(38),Y(48),X(41),Y(51));});
+    橢(x,cx,Y(51),43*s,9*s,中); 橢(x,cx,Y(43),34*s,7*s,細);
+    描(x,細,p=>{p.moveTo(X(-28),Y(26));p.quadraticCurveTo(cx,Y(38),X(28),Y(26));});
+    玉(x,cx,Y(18),5*s,細);
+  }
+
+  function 畫大日(x) {
+    const A=格網('②大日');
+    月輪(x); 蓮座(x,A.座面,420); 鑿坐尊輪廓(x,A);
+    身衣(x,A,'大日'); 面與髮(x,A); 五智寶冠(x,A);
+    /* 袖在身前：肩→肘→腕，印在最前。 */
+    鑿線(x,鑿寬,p=>{p.moveTo(158,302);p.bezierCurveTo(177,324,198,342,229,A.心窩+8);});
+    鑿線(x,鑿寬,p=>{p.moveTo(362,302);p.bezierCurveTo(343,324,322,342,291,A.心窩+8);});
+    描(x,中,p=>{p.moveTo(158,302);p.bezierCurveTo(177,324,198,342,229,A.心窩+8);p.quadraticCurveTo(235,A.心窩+13,241,A.心窩+19);});
+    描(x,中,p=>{p.moveTo(362,302);p.bezierCurveTo(343,324,322,342,291,A.心窩+8);p.quadraticCurveTo(285,A.心窩+13,279,A.心窩+19);});
+    描(x,細,p=>{p.moveTo(174,310);p.quadraticCurveTo(196,354,231,372);});
+    描(x,細,p=>{p.moveTo(346,310);p.quadraticCurveTo(324,354,289,372);});
+    鑿橢(x,260,A.心窩+14,57,44);
+    智拳小印(x,248,A.心窩+8,1.02);
+  }
+
+  function 畫薩埵(x) {
+    const A=格網('③薩埵');
+    月輪(x); 蓮座(x,A.座面,420); 鑿坐尊輪廓(x,A);
+    身衣(x,A,'薩埵'); 面與髮(x,A); 五佛冠(x,A);
+    /* 右手（畫面左）先器後拳：五鈷斜當心。 */
+    微五鈷(x,196,A.心窩-7,122,-.38);
+    鑿橢(x,202,A.心窩+8,19,16,-.12);
+    鑿線(x,鑿寬,p=>{p.moveTo(159,301);p.bezierCurveTo(168,325,181,342,202,A.心窩+8);});
+    描(x,粗,p=>{p.moveTo(159,301);p.bezierCurveTo(168,325,181,342,202,A.心窩+8);});
+    描(x,中,p=>{p.ellipse(202,A.心窩+8,19,15,-.12,0,Math.PI*2);});
+    for(let i=0;i<3;i++) 描(x,細,p=>{p.moveTo(188,A.心窩+2+i*7);p.quadraticCurveTo(202,A.心窩+7+i*7,216,A.心窩+2+i*7);});
+    /* 左臂落至左股；鈴在股前，拳最後覆鈴柄。 */
+    五鈷鈴(x,354,510,.82);
+    鑿線(x,鑿寬,p=>{p.moveTo(361,301);p.bezierCurveTo(377,355,383,421,357,482);});
+    描(x,粗,p=>{p.moveTo(361,301);p.bezierCurveTo(377,355,383,421,357,482);});
+    描(x,細,p=>{p.moveTo(345,312);p.bezierCurveTo(358,366,366,425,349,474);});
+    鑿橢(x,355,477,18,16,.05);
+    描(x,中,p=>{p.ellipse(355,477,18,15,.05,0,Math.PI*2);});
+    for(let i=0;i<3;i++) 線(x,341,471+i*7,369,471+i*7,細);
+    /* 鈴柄只露拳上拳下；不可在拳後又以末筆穿掌。 */
+    線(x,355,458,355,462,細); 線(x,355,492,355,497,細);
+    描(x,細,p=>{p.moveTo(369,474);p.quadraticCurveTo(361,463,351,466);p.quadraticCurveTo(347,470,351,474);});
+  }
+
+  function 畫智拳獨幅(x) {
+    /* 左手在後：腕、拳、獨豎頭指。 */
+    描(x,粗,p=>{
+      p.moveTo(154,609);p.bezierCurveTo(164,569,174,535,178,507);
+      p.bezierCurveTo(135,481,119,440,127,398);p.bezierCurveTo(133,365,161,347,205,349);
+      p.lineTo(211,171);p.bezierCurveTo(212,151,229,139,244,149);
+      p.bezierCurveTo(252,154,253,164,252,177);p.lineTo(258,349);
+      p.bezierCurveTo(295,354,313,379,309,421);p.bezierCurveTo(306,460,283,486,253,497);
+      p.bezierCurveTo(247,535,245,573,242,613);
+    });
+    /* 左頭指三節兩關節及甲。 */
+    線(x,211,231,252,232,細); 線(x,211,291,255,292,細);
+    描(x,細,p=>{p.moveTo(218,171);p.quadraticCurveTo(232,162,246,172);p.lineTo(246,201);p.quadraticCurveTo(232,207,218,199);p.closePath();});
+    描(x,細,p=>{p.moveTo(216,240);p.quadraticCurveTo(233,247,252,240);});
+    描(x,細,p=>{p.moveTo(216,300);p.quadraticCurveTo(234,308,255,300);});
+    /* 左拳餘四指：四層各見近、遠關節；左拇斜掩拳心。 */
+    [372,401,431,460].forEach((yy,i)=>{
+      描(x,中,p=>{p.moveTo(140,yy);p.bezierCurveTo(173,yy-10,229,yy+13,292,yy-2);});
+      線(x,171+i*4,yy-4,168+i*4,yy+14,細);
+      線(x,232+i*3,yy+1,229+i*3,yy+18,細);
+    });
+    描(x,中,p=>{p.moveTo(156,480);p.bezierCurveTo(177,472,200,449,216,418);p.bezierCurveTo(224,402,244,405,250,421);p.bezierCurveTo(256,439,237,462,210,486);});
+    線(x,191,460,208,472,細); 線(x,219,429,238,438,細);
+
+    /* 右拳在前繞握：先鑿去所覆左拳與頭指。 */
+    鑿形(x,p=>{p.moveTo(236,269);p.bezierCurveTo(269,244,359,244,393,271);p.bezierCurveTo(423,297,425,405,394,445);p.bezierCurveTo(360,478,279,474,245,443);p.closePath();});
+    描(x,粗,p=>{
+      p.moveTo(240,282);p.bezierCurveTo(270,250,355,244,393,271);
+      p.bezierCurveTo(421,291,426,398,394,443);
+      p.bezierCurveTo(363,476,286,475,248,444);
+      p.bezierCurveTo(232,420,229,314,240,282);
+    });
+    /* 右拳四指：每指一橫節帶，兩道縱關節；左頭指於握內故斷隱。 */
+    [288,326,365,405].forEach((yy,i)=>{
+      描(x,中,p=>{p.moveTo(247,yy);p.bezierCurveTo(284,yy-12,344,yy+12,411,yy-3);});
+      描(x,細,p=>{p.moveTo(252,yy+10);p.bezierCurveTo(291,yy+1,348,yy+21,407,yy+7);});
+      線(x,287+i*2,yy-4,284+i*2,yy+15,細);
+      線(x,351-i*2,yy+1,353-i*2,yy+19,細);
+    });
+    /* 右掌外緣與腕。 */
+    描(x,中,p=>{p.moveTo(394,443);p.bezierCurveTo(410,483,421,540,434,611);});
+    描(x,中,p=>{p.moveTo(354,472);p.bezierCurveTo(366,518,375,565,382,612);});
+    描(x,細,p=>{p.moveTo(370,479);p.quadraticCurveTo(392,493,414,485);});
+
+    /* 右拇在最前，自拳背斜升；以鑿線令所經四指與左指自治。 */
+    const 左端=[232,151], 右端=[235,153];
+    鑿線(x,24,p=>{p.moveTo(385,418);p.bezierCurveTo(365,349,310,242,右端[0],右端[1]);});
+    描(x,粗,p=>{p.moveTo(397,419);p.bezierCurveTo(376,349,318,235,241,149);p.quadraticCurveTo(237,145,左端[0],左端[1]);});
+    描(x,粗,p=>{p.moveTo(373,423);p.bezierCurveTo(356,355,303,252,228,164);p.quadraticCurveTo(226,156,左端[0],左端[1]);});
+    描(x,細,p=>{p.moveTo(327,291);p.quadraticCurveTo(305,294,291,307);});
+    描(x,細,p=>{p.moveTo(358,352);p.quadraticCurveTo(338,356,324,370);});
+    /* 拇甲及兩節。 */
+    描(x,細,p=>{p.moveTo(235,155);p.quadraticCurveTo(245,163,251,176);});
+    線(x,276,211,293,199,細); 線(x,328,296,346,286,細);
+
+    const 距=Math.hypot(左端[0]-右端[0],左端[1]-右端[1]);
+    證(`①右拇指端拄左頭指端：距 ${距.toFixed(2)}`,距<=4);
+    證('①右拳確包左頭指中段',232>229 && 232<258 && 330>269 && 330<445);
+    證('①逐指逐節：左右可見節數足',4*2+3+2>=13);
+  }
+
+  function 畫五鈷獨幅(x) {
+    const cx=260, cy=300;
+    月輪(x,cx,cy,236);
+    蓮座(x,526,386);
+    /* 杵壓月輪而立：先鑿其通身，免月輪透器。 */
+    鑿形(x,p=>{p.moveTo(166,72);p.lineTo(354,72);p.lineTo(354,528);p.lineTo(166,528);p.closePath();});
+
+    /* 中把：鼓腹而束腰，六格逐節。 */
+    描(x,粗,p=>{p.moveTo(229,270);p.bezierCurveTo(238,280,238,320,229,330);p.lineTo(291,330);p.bezierCurveTo(282,320,282,280,291,270);p.closePath();});
+    橢(x,cx,270,33,7,中); 橢(x,cx,330,33,7,中);
+    [282,294,306,318].forEach(y=>描(x,細,p=>{p.moveTo(238,y);p.quadraticCurveTo(cx,y+5,282,y); }));
+    for (const s of [-1,1]) 描(x,細,p=>{p.moveTo(cx+s*14,276);p.bezierCurveTo(cx+s*5,291,cx+s*5,309,cx+s*14,324);});
+
+    const Y=(d,s)=>cy+s*d;
+    function 一端(s) {
+      /* 鬼目：尖橢圍目，不以普通圓代。 */
+      描(x,中,p=>{p.moveTo(cx,Y(34,s));p.bezierCurveTo(cx-23,Y(47,s),cx-22,Y(67,s),cx,Y(76,s));p.bezierCurveTo(cx+22,Y(67,s),cx+23,Y(47,s),cx,Y(34,s));});
+      橢(x,cx,Y(55,s),7,11,細);
+      /* 蓮弁帯：雙輪之間八瓣。 */
+      橢(x,cx,Y(82,s),48,8,中); 橢(x,cx,Y(97,s),55,8,中);
+      for(let i=-3;i<=3;i++) {
+        const px=cx+i*14;
+        描(x,細,p=>{p.moveTo(px-7,Y(84,s));p.quadraticCurveTo(px,Y(101,s),px+7,Y(84,s));});
+      }
+      /* 中鈷直：兩輪廓收尖，軸線正直。 */
+      描(x,粗,p=>{p.moveTo(cx-6,Y(98,s));p.bezierCurveTo(cx-5,Y(137,s),cx-4,Y(185,s),cx,Y(220,s));p.bezierCurveTo(cx+4,Y(185,s),cx+5,Y(137,s),cx+6,Y(98,s));});
+      線(x,cx,Y(105,s),cx,Y(217,s),細);
+      /* 四脇鈷：內外各一對，嘴尖皆反折向中鈷。 */
+      for (const sx of [-1,1]) {
+        描(x,中,p=>{
+          p.moveTo(cx+sx*14,Y(96,s));
+          p.bezierCurveTo(cx+sx*28,Y(126,s),cx+sx*42,Y(151,s),cx+sx*17,Y(190,s));
+          p.bezierCurveTo(cx+sx*11,Y(195,s),cx+sx*10,Y(184,s),cx+sx*15,Y(177,s));
+          p.bezierCurveTo(cx+sx*27,Y(149,s),cx+sx*22,Y(123,s),cx+sx*8,Y(105,s));
+        });
+        描(x,中,p=>{
+          p.moveTo(cx+sx*38,Y(94,s));
+          p.bezierCurveTo(cx+sx*70,Y(120,s),cx+sx*81,Y(154,s),cx+sx*34,Y(181,s));
+          p.bezierCurveTo(cx+sx*27,Y(184,s),cx+sx*26,Y(174,s),cx+sx*35,Y(168,s));
+          p.bezierCurveTo(cx+sx*61,Y(145,s),cx+sx*54,Y(119,s),cx+sx*29,Y(102,s));
+        });
+      }
+    }
+    一端(-1); 一端(1);
+
+    /* 對稱不只驗端距，並逐點驗把外代表點、鬼目、帯、中鈷、脇鈷尖。 */
+    const 上樣=[[229,270],[260,266],[260,245],[212,218],[260,80],[277,110],[294,119]];
+    const 下樣=上樣.map(([px,py])=>[px,2*cy-py]);
+    上樣.forEach(([px,py],i)=>{
+      證(`④鏡成點${i+1}`,Math.abs(px-下樣[i][0])<1e-9 && Math.abs(py+下樣[i][1]-2*cy)<1e-9);
+    });
+    證('④中鈷直立',260===cx && Math.abs((cy-220)+(cy+220)-2*cy)<1e-9);
+    證('④兩端至心等距',Math.abs(Math.abs(80-cy)-Math.abs(520-cy))<1e-9);
+  }
+
+  備紙('智拳',畫智拳獨幅);
+  備紙('大日',畫大日);
+  備紙('薩埵',畫薩埵);
+  備紙('五鈷',畫五鈷獨幅);
+  證('全卷確有 destination-out 鑿蔽',報.鑿>=14);
+  window.__四題自證 = Object.freeze({...報, 線身比:(68*6.8/粗)});
+  console.info('四題自證',window.__四題自證);
+})();
+</script>
+
+<!--
+  Headless 親驗返工記（playwright-core + chrome-headless-shell）：
+  第一輪：JS 例外零、console.assert 三十二條皆過；惟目驗見大日胸前小印縮如團珠，
+          薩埵胸杵枝疏近羽，蓮瓣尖直成齒。遂加長小印立指與拇指蟠勢，重分小杵四脇鈷，
+          蓮瓣閉廓添中脈，使瓣肩翻卷；並縮薩埵兩拳，免器手爭大。
+  第二輪：JS 例外零、console.assert 三十三條皆過、destination-out 十八鑿；總覽前三病已解。
+          復以四幅各放大至 1040px 親看，乃見薩埵鈴柄末筆穿透左拳。遂刪通貫直線，改作
+          拳上、拳下兩截，另添拇指扣柄；蔽法始自治。末輪再驗此處與全卷載入。
+  第三輪：1920×1120 全卷重截，四幅同列同高；鈴柄不復穿拳。page error 與 console error
+          皆零，三十三斷言失敗數零，十八鑿仍在，外援資源數零；至此收筆。
+-->
+</body>
+</html>

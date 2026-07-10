@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>藥師如來坐像 · Codex 5.6 競本</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f0e6;
+      --ink: #211d18;
+      --quiet: rgba(33, 29, 24, .62);
+      --rule: rgba(33, 29, 24, .18);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); }
+    body { font-family: "Songti TC", "Noto Serif TC", "Hiragino Mincho ProN", serif; }
+    main {
+      width: min(930px, 100%);
+      margin: 0 auto;
+      padding: 18px 15px 22px;
+    }
+    header, footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 20px;
+      border-color: var(--rule);
+      border-style: solid;
+      border-width: 0 0 1px;
+      padding: 0 2px 11px;
+    }
+    h1 { margin: 0; font-size: clamp(22px, 4vw, 34px); font-weight: 500; letter-spacing: .08em; }
+    .meta, figcaption, footer { color: var(--quiet); font-size: 12px; line-height: 1.6; }
+    .meta { text-align: right; white-space: nowrap; }
+    figure { margin: 14px 0 0; }
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 900 / 1080;
+      background: var(--paper);
+    }
+    figcaption { padding: 9px 2px 12px; }
+    footer { border-width: 1px 0 0; padding: 10px 2px 0; }
+    @media (max-width: 540px) {
+      main { padding: 10px 8px 16px; }
+      header { align-items: flex-start; }
+      .meta { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>藥師如來坐像</h1>
+    <div class="meta">Codex 5.6 競本<br>白描 · 頭光 · 無月輪</div>
+  </header>
+  <figure>
+    <canvas id="畫布" aria-label="藥師如來結跏趺坐，右手施無畏印，左手承藥壺之白描"></canvas>
+    <figcaption>如來形，螺髮肉髻；尊右手施無畏，尊左手仰掌承藥壺；結跏趺坐蓮華座。</figcaption>
+  </figure>
+  <footer><span>T1419 百二十指制坐像錨</span><span>單色線 · 無填 · canvas 自足</span></footer>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const W = 900;
+  const H = 1080;
+  const u = 10;
+  const 中 = 450;
+  const 頂基 = 60;
+  const 墨 = '#211d18';
+  const 顯格 = new URLSearchParams(location.search).get('grid') === '1';
+  const 畫布 = document.getElementById('畫布');
+  const ctx = 畫布.getContext('2d');
+  const Y = 指 => 頂基 + 指 * u;
+
+  const 錨 = Object.freeze({
+    頂:       Object.freeze({ x: 中, y: Y(0) }),
+    白毫:     Object.freeze({ x: 中, y: Y(12) }),
+    頦:       Object.freeze({ x: 中, y: Y(20) }),
+    頸底:     Object.freeze({ x: 中, y: Y(24) }),
+    心窩:     Object.freeze({ x: 中, y: Y(36) }),
+    臍:       Object.freeze({ x: 中, y: Y(48) }),
+    盤線:     Object.freeze({ x: 中, y: Y(64) }),
+    座面:     Object.freeze({ x: 中, y: Y(68) }),
+    膝左:     Object.freeze({ x: 中 - 26 * u, y: Y(64.8) }),
+    膝右:     Object.freeze({ x: 中 + 26 * u, y: Y(64.8) })
+  });
+
+  /* 所斷皆取實落筆之點；下列諸點直接供 path 使用，非另造目測標記。 */
+  console.assert(錨.頂.y - 頂基 === 0 * u, '破戒：頂錨不中');
+  console.assert(錨.白毫.y - 錨.頂.y === 12 * u, '破戒：白毫錨不中');
+  console.assert(錨.頦.y - 錨.頂.y === 20 * u, '破戒：頦錨不中');
+  console.assert(錨.頸底.y - 錨.頂.y === 24 * u, '破戒：頸底錨不中');
+  console.assert(錨.心窩.y - 錨.頂.y === 36 * u, '破戒：心窩錨不中');
+  console.assert(錨.臍.y - 錨.頂.y === 48 * u, '破戒：臍錨不中');
+  console.assert(錨.盤線.y - 錨.頂.y === 64 * u, '破戒：盤線錨不中');
+  console.assert(錨.座面.y - 錨.頂.y === 68 * u, '破戒：座面錨不中');
+  console.assert(錨.膝右.x - 錨.膝左.x === 52 * u, '破戒：膝寬不合五十二指');
+
+  const 筆 = Object.freeze({ 骨: 5.1, 衣: 4.1, 細: 3.4, 鑿: 15 });
+  const 坐身高 = 錨.座面.y - 錨.頂.y;
+  for (const [名, 寬] of Object.entries({ 骨線: 筆.骨, 衣線: 筆.衣, 細線: 筆.細 })) {
+    console.assert(坐身高 / 寬 >= 100 && 坐身高 / 寬 <= 200,
+      `破戒：${名}線身比不在 1:100–200`, { ratio: 坐身高 / 寬 });
+  }
+
+  const 鑿錄 = [];
+
+  function 線(寬, 落筆, alpha = 1) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = 墨;
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = 寬;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    落筆(ctx);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function 鑿(名, 寬, 落筆) {
+    鑿錄.push(名);
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 寬;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    落筆(ctx);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function 橢圓(x, y, rx, ry, 寬 = 筆.衣, 轉 = 0, 起 = 0, 止 = Math.PI * 2) {
+    線(寬, p => p.ellipse(x, y, rx, ry, 轉, 起, 止));
+  }
+
+  function 頭光() {
+    /* 空輪只界頭光，無填、無月輪。 */
+    橢圓(中, 183, 166, 174, 筆.衣);
+    橢圓(中, 183, 148, 156, 筆.細);
+    線(筆.細, p => {
+      for (const a of [-2.77, -2.39, -1.98, -1.57, -1.16, -.75, -.37]) {
+        const x0 = 中 + Math.cos(a) * 153;
+        const y0 = 183 + Math.sin(a) * 161;
+        const x1 = 中 + Math.cos(a) * 163;
+        const y1 = 183 + Math.sin(a) * 171;
+        p.moveTo(x0, y0); p.lineTo(x1, y1);
+      }
+    });
+  }
+
+  function 蓮座後層() {
+    /* 座與蓮先落，膝及衣稍後自鑿其交界。座面之中點正取座面錨。 */
+    線(筆.骨, p => {
+      p.moveTo(142, 錨.座面.y);
+      p.bezierCurveTo(238, 764, 337, 錨.座面.y, 錨.座面.x, 錨.座面.y);
+      p.bezierCurveTo(563, 錨.座面.y, 662, 764, 758, 錨.座面.y);
+    });
+    線(筆.衣, p => {
+      p.moveTo(157, 766); p.bezierCurveTo(242, 789, 656, 789, 743, 766);
+      p.moveTo(177, 823); p.bezierCurveTo(277, 853, 623, 853, 723, 823);
+      p.moveTo(191, 882); p.bezierCurveTo(296, 908, 604, 908, 709, 882);
+    });
+
+    const 上瓣 = [
+      [183, 767, 218, 810, 256, 775], [242, 775, 280, 827, 321, 780],
+      [306, 780, 345, 836, 388, 782], [369, 782, 409, 842, 450, 784],
+      [431, 784, 472, 842, 512, 782], [512, 782, 555, 836, 594, 780],
+      [579, 780, 620, 827, 658, 775], [644, 775, 682, 810, 717, 767]
+    ];
+    線(筆.細, p => {
+      for (const [x0, y0, xc, yc, x1, y1] of 上瓣) {
+        p.moveTo(x0, y0); p.quadraticCurveTo(xc, yc, x1, y1);
+      }
+    });
+
+    const 下瓣心 = [222, 296, 374, 450, 526, 604, 678];
+    線(筆.衣, p => {
+      for (const x of 下瓣心) {
+        const 高 = 54 - Math.abs(x - 中) * .025;
+        p.moveTo(x - 39, 829);
+        p.quadraticCurveTo(x, 829 + 高, x + 39, 829);
+      }
+    });
+    線(筆.細, p => {
+      for (const x of [260, 336, 412, 488, 564, 640]) {
+        p.moveTo(x - 34, 880); p.quadraticCurveTo(x, 927, x + 34, 880);
+      }
+    });
+
+    /* 低而安定的仰覆蓮承台，補足百二十指畫幅而不增身相。 */
+    線(筆.骨, p => {
+      p.moveTo(182, 914); p.bezierCurveTo(292, 933, 608, 933, 718, 914);
+      p.moveTo(169, 945); p.bezierCurveTo(288, 963, 612, 963, 731, 945);
+      p.moveTo(186, 980); p.lineTo(714, 980);
+      p.moveTo(205, 980); p.lineTo(223, 1014); p.lineTo(677, 1014); p.lineTo(695, 980);
+    });
+    線(筆.細, p => {
+      p.moveTo(227, 952); p.quadraticCurveTo(450, 973, 673, 952);
+      p.moveTo(250, 987); p.quadraticCurveTo(450, 1003, 650, 987);
+    });
+  }
+
+  function 身衣後層() {
+    /* 先立肩丘、胸筒、胯棚；兩臂與前膝稍後覆之。 */
+    鑿('身軀鑿去頭光下緣', 38, p => {
+      p.moveTo(410, 310); p.bezierCurveTo(372, 310, 329, 331, 299, 365);
+      p.moveTo(490, 310); p.bezierCurveTo(528, 310, 571, 331, 601, 365);
+    });
+    線(筆.骨, p => {
+      p.moveTo(414, 錨.頸底.y);
+      p.bezierCurveTo(376, 304, 329, 321, 302, 355);
+      p.bezierCurveTo(268, 402, 248, 489, 234, 584);
+      p.bezierCurveTo(225, 635, 208, 677, 錨.膝左.x, 錨.膝左.y);
+      p.moveTo(486, 錨.頸底.y);
+      p.bezierCurveTo(526, 304, 573, 321, 600, 355);
+      p.bezierCurveTo(635, 404, 652, 492, 666, 584);
+      p.bezierCurveTo(675, 635, 692, 677, 錨.膝右.x, 錨.膝右.y);
+    });
+    線(筆.衣, p => {
+      p.moveTo(374, 322); p.bezierCurveTo(397, 344, 427, 350, 472, 350);
+      p.bezierCurveTo(514, 350, 543, 338, 564, 323);
+      p.moveTo(354, 349); p.bezierCurveTo(382, 382, 412, 402, 錨.心窩.x, 錨.心窩.y);
+      p.bezierCurveTo(479, 447, 505, 474, 520, 519);
+      p.moveTo(333, 376); p.bezierCurveTo(368, 417, 393, 468, 407, 錨.臍.y);
+      p.moveTo(566, 372); p.bezierCurveTo(538, 411, 526, 466, 524, 518);
+    });
+    /* 胸腹衣褶同一斜杆，疏密漸放；不作經緯網。 */
+    線(筆.細, p => {
+      p.moveTo(386, 351); p.bezierCurveTo(403, 385, 430, 408, 477, 431);
+      p.moveTo(370, 372); p.bezierCurveTo(397, 411, 433, 438, 493, 462);
+      p.moveTo(359, 401); p.bezierCurveTo(392, 444, 438, 475, 510, 492);
+      p.moveTo(348, 437); p.bezierCurveTo(389, 478, 434, 501, 494, 514);
+    });
+  }
+
+  function 遠臂() {
+    /* 尊右臂（畫面左）：肩—肘—腕三節可追，袖外郭不團縮。 */
+    線(筆.骨, p => {
+      p.moveTo(322, 338); p.bezierCurveTo(298, 365, 284, 416, 281, 474);
+      p.bezierCurveTo(279, 490, 266, 485, 254, 466);
+      p.bezierCurveTo(241, 447, 237, 430, 243, 413);
+      p.moveTo(352, 365); p.bezierCurveTo(329, 403, 319, 458, 303, 493);
+      p.bezierCurveTo(292, 516, 267, 514, 245, 479);
+    });
+    線(筆.衣, p => {
+      p.moveTo(314, 371); p.bezierCurveTo(288, 401, 274, 439, 276, 477);
+      p.moveTo(326, 393); p.bezierCurveTo(304, 423, 297, 458, 293, 487);
+      p.moveTo(252, 470); p.quadraticCurveTo(273, 482, 299, 487);
+    });
+
+    /* 尊左臂（畫面右）：肩下降至肘，再回收至腹前腕。 */
+    線(筆.骨, p => {
+      p.moveTo(573, 338); p.bezierCurveTo(611, 374, 628, 425, 632, 474);
+      p.bezierCurveTo(635, 504, 608, 535, 559, 557);
+      p.moveTo(548, 367); p.bezierCurveTo(579, 402, 592, 447, 589, 482);
+      p.bezierCurveTo(587, 509, 558, 525, 526, 536);
+    });
+    線(筆.衣, p => {
+      p.moveTo(593, 375); p.bezierCurveTo(615, 415, 618, 458, 611, 492);
+      p.moveTo(575, 402); p.bezierCurveTo(594, 443, 594, 478, 579, 507);
+      p.moveTo(585, 512); p.quadraticCurveTo(601, 523, 616, 511);
+    });
+  }
+
+  function 頭與螺髮() {
+    /* 面輪後落於光前；肉髻最高點即頂錨。 */
+    鑿('頭面鑿去頭光內線', 18, p => {
+      p.moveTo(393, 126); p.bezierCurveTo(381, 166, 383, 219, 414, 251);
+      p.quadraticCurveTo(450, 280, 486, 251);
+      p.bezierCurveTo(517, 219, 519, 166, 507, 126);
+    });
+    線(筆.骨, p => {
+      p.moveTo(397, 145);
+      p.bezierCurveTo(388, 122, 400, 104, 422, 91);
+      p.bezierCurveTo(422, 72, 435, 錨.頂.y, 錨.頂.x, 錨.頂.y);
+      p.bezierCurveTo(465, 錨.頂.y, 478, 72, 478, 91);
+      p.bezierCurveTo(500, 104, 512, 122, 503, 145);
+      p.moveTo(402, 137); p.bezierCurveTo(377, 158, 379, 219, 413, 250);
+      p.bezierCurveTo(425, 260, 437, 267, 錨.頦.x, 錨.頦.y);
+      p.bezierCurveTo(463, 267, 475, 260, 487, 250);
+      p.bezierCurveTo(521, 219, 523, 158, 498, 137);
+    });
+    線(筆.衣, p => {
+      p.moveTo(397, 145); p.bezierCurveTo(412, 127, 434, 121, 450, 122);
+      p.bezierCurveTo(466, 121, 488, 127, 503, 145);
+      p.moveTo(414, 253); p.bezierCurveTo(416, 273, 419, 289, 414, 錨.頸底.y);
+      p.moveTo(486, 253); p.bezierCurveTo(484, 273, 481, 289, 486, 錨.頸底.y);
+    });
+    /* 耳垂長而不飾，令如來形不作冠相。 */
+    線(筆.細, p => {
+      p.moveTo(390, 173); p.bezierCurveTo(371, 169, 376, 225, 397, 233);
+      p.moveTo(510, 173); p.bezierCurveTo(529, 169, 524, 225, 503, 233);
+      p.moveTo(383, 185); p.quadraticCurveTo(391, 206, 393, 221);
+      p.moveTo(517, 185); p.quadraticCurveTo(509, 206, 507, 221);
+    });
+
+    const 螺列 = [
+      [450, 76, 3], [438, 82, 3], [462, 82, 3],
+      [424, 94, 3.2], [437, 95, 3.2], [450, 94, 3.2], [463, 95, 3.2], [476, 94, 3.2],
+      [412, 108, 3.3], [427, 109, 3.3], [442, 108, 3.3], [457, 109, 3.3], [472, 108, 3.3], [487, 109, 3.3],
+      [403, 124, 3.4], [419, 123, 3.4], [435, 124, 3.4], [451, 123, 3.4], [467, 124, 3.4], [483, 123, 3.4], [499, 124, 3.4],
+      [397, 141, 3.5], [414, 140, 3.5], [431, 141, 3.5], [448, 140, 3.5], [465, 141, 3.5], [482, 140, 3.5], [499, 141, 3.5]
+    ];
+    線(筆.細, p => {
+      for (const [x, y, r] of 螺列) {
+        p.moveTo(x + r, y);
+        p.arc(x, y, r, -.12, Math.PI * 1.58);
+      }
+    });
+  }
+
+  function 結跏與前衣() {
+    /* 前膝落於身與座之上：先以膝球外郭鑿開座線。 */
+    鑿('前膝鑿去座面與後衣', 20, p => {
+      p.moveTo(錨.膝左.x, 錨.膝左.y);
+      p.bezierCurveTo(255, 603, 358, 608, 中, 錨.盤線.y);
+      p.bezierCurveTo(542, 608, 645, 603, 錨.膝右.x, 錨.膝右.y);
+      p.bezierCurveTo(660, 735, 240, 735, 錨.膝左.x, 錨.膝左.y);
+    });
+    線(筆.骨, p => {
+      p.moveTo(錨.膝左.x, 錨.膝左.y);
+      p.bezierCurveTo(230, 611, 321, 590, 中, 錨.盤線.y);
+      p.bezierCurveTo(579, 590, 670, 611, 錨.膝右.x, 錨.膝右.y);
+      p.bezierCurveTo(688, 721, 590, 739, 錨.座面.x, 錨.座面.y);
+      p.bezierCurveTo(310, 739, 212, 721, 錨.膝左.x, 錨.膝左.y);
+    });
+
+    /* 兩足仰露，足趾略收；交叉處在盤線上方。 */
+    線(筆.衣, p => {
+      p.moveTo(286, 646); p.bezierCurveTo(306, 617, 347, 612, 389, 633);
+      p.bezierCurveTo(414, 646, 429, 659, 440, 673);
+      p.moveTo(614, 646); p.bezierCurveTo(594, 617, 553, 612, 511, 633);
+      p.bezierCurveTo(486, 646, 471, 659, 460, 673);
+      p.moveTo(298, 650); p.quadraticCurveTo(342, 677, 414, 679);
+      p.moveTo(602, 650); p.quadraticCurveTo(558, 677, 486, 679);
+    });
+    線(筆.細, p => {
+      for (let i = 0; i < 3; i++) {
+        const xl = 306 + i * 15;
+        const xr = 594 - i * 15;
+        p.moveTo(xl, 639 + i * .5); p.quadraticCurveTo(xl - 2, 643, xl - 4, 646);
+        p.moveTo(xr, 639 + i * .5); p.quadraticCurveTo(xr + 2, 643, xr + 4, 646);
+      }
+    });
+
+    /* 褶皆由胯及膝支點發：膝上環褶示球，中央張力褶示股棚。 */
+    線(筆.衣, p => {
+      p.moveTo(367, 571); p.bezierCurveTo(391, 602, 421, 626, 錨.盤線.x, 錨.盤線.y);
+      p.moveTo(533, 571); p.bezierCurveTo(509, 602, 479, 626, 錨.盤線.x, 錨.盤線.y);
+      p.moveTo(338, 588); p.bezierCurveTo(364, 624, 391, 653, 405, 704);
+      p.moveTo(562, 588); p.bezierCurveTo(536, 624, 509, 653, 495, 704);
+      p.moveTo(中, 錨.盤線.y); p.bezierCurveTo(437, 674, 430, 699, 430, 724);
+      p.moveTo(中, 錨.盤線.y); p.bezierCurveTo(463, 674, 470, 699, 470, 724);
+    });
+    線(筆.細, p => {
+      p.moveTo(204, 674); p.bezierCurveTo(241, 644, 290, 640, 328, 657);
+      p.moveTo(201, 692); p.bezierCurveTo(246, 662, 298, 662, 343, 684);
+      p.moveTo(696, 674); p.bezierCurveTo(659, 644, 610, 640, 572, 657);
+      p.moveTo(699, 692); p.bezierCurveTo(654, 662, 602, 662, 557, 684);
+      p.moveTo(326, 714); p.quadraticCurveTo(390, 728, 430, 724);
+      p.moveTo(574, 714); p.quadraticCurveTo(510, 728, 470, 724);
+    });
+  }
+
+  function 仰掌與藥壺() {
+    /* 手是前物：先鑿腹衣與遠前臂，再落仰掌；掌上緣實過臍錨。 */
+    鑿('左仰掌鑿去腹衣與前臂', 26, p => {
+      p.moveTo(395, 551); p.bezierCurveTo(430, 531, 489, 530, 557, 552);
+    });
+    線(筆.骨, p => {
+      p.moveTo(558, 552); p.bezierCurveTo(528, 542, 492, 538, 錨.臍.x, 錨.臍.y);
+      p.bezierCurveTo(426, 539, 408, 542, 394, 548);
+      p.bezierCurveTo(385, 552, 388, 558, 400, 561);
+      p.bezierCurveTo(440, 572, 497, 572, 548, 564);
+      p.quadraticCurveTo(559, 561, 558, 552);
+    });
+    線(筆.細, p => {
+      p.moveTo(396, 548); p.quadraticCurveTo(410, 550, 426, 550);
+      p.moveTo(398, 553); p.quadraticCurveTo(414, 556, 431, 555);
+      p.moveTo(404, 558); p.quadraticCurveTo(421, 562, 439, 559);
+      p.moveTo(427, 544); p.quadraticCurveTo(444, 549, 460, 547);
+      p.moveTo(506, 552); p.quadraticCurveTo(529, 557, 550, 554);
+    });
+
+    /* 壺復為掌上前物：鑿掌內隱線，故壺與掌不互透。 */
+    鑿('藥壺鑿去掌內隱線', 60, p => {
+      p.moveTo(484, 459); p.lineTo(484, 522);
+      p.moveTo(484, 431); p.lineTo(484, 459);
+    });
+    線(筆.骨, p => {
+      p.moveTo(463, 529);
+      p.bezierCurveTo(447, 510, 449, 476, 466, 459);
+      p.bezierCurveTo(474, 451, 476, 445, 475, 435);
+      p.moveTo(505, 529);
+      p.bezierCurveTo(521, 510, 519, 476, 502, 459);
+      p.bezierCurveTo(494, 451, 492, 445, 493, 435);
+      p.moveTo(463, 529); p.quadraticCurveTo(484, 537, 505, 529);
+      p.moveTo(475, 435); p.quadraticCurveTo(484, 430, 493, 435);
+      p.moveTo(472, 426); p.quadraticCurveTo(484, 420, 496, 426);
+      p.moveTo(475, 417); p.lineTo(493, 417);
+      p.moveTo(478, 411); p.quadraticCurveTo(484, 404, 490, 411);
+    });
+    線(筆.細, p => {
+      p.moveTo(460, 516); p.bezierCurveTo(475, 523, 493, 523, 508, 516);
+      p.moveTo(468, 456); p.quadraticCurveTo(484, 462, 500, 456);
+    });
+  }
+
+  function 施無畏手() {
+    /* 掌前鑿袖與胸線；四指上舒、拇指內張，尊右掌向外。 */
+    鑿('施無畏掌鑿去袖與胸衣', 32, p => {
+      p.moveTo(247, 438); p.bezierCurveTo(238, 403, 235, 350, 247, 302);
+      p.moveTo(264, 404); p.lineTo(293, 382);
+      p.moveTo(242, 431); p.bezierCurveTo(250, 455, 271, 484, 296, 495);
+    });
+    線(筆.骨, p => {
+      p.moveTo(237, 440);
+      p.bezierCurveTo(230, 420, 222, 395, 222, 371);
+      /* 小指 */
+      p.lineTo(217, 331); p.quadraticCurveTo(216, 320, 224, 317);
+      p.quadraticCurveTo(233, 316, 234, 327); p.lineTo(237, 354);
+      /* 無名指 */
+      p.lineTo(236, 303); p.quadraticCurveTo(236, 291, 245, 289);
+      p.quadraticCurveTo(255, 289, 256, 301); p.lineTo(257, 351);
+      /* 中指 */
+      p.lineTo(258, 287); p.quadraticCurveTo(259, 274, 269, 274);
+      p.quadraticCurveTo(279, 275, 279, 288); p.lineTo(277, 353);
+      /* 食指 */
+      p.lineTo(280, 301); p.quadraticCurveTo(282, 290, 291, 291);
+      p.quadraticCurveTo(301, 293, 299, 304); p.lineTo(291, 369);
+      /* 虎口與拇指 */
+      p.bezierCurveTo(294, 374, 299, 376, 305, 373);
+      p.lineTo(329, 355); p.quadraticCurveTo(338, 350, 343, 358);
+      p.quadraticCurveTo(347, 366, 338, 372); p.lineTo(306, 405);
+      p.bezierCurveTo(294, 417, 285, 429, 278, 446);
+      p.bezierCurveTo(267, 452, 249, 450, 237, 440);
+    });
+    /* 指隙續至掌丘，見五指而不畫穿皮之紋。 */
+    線(筆.細, p => {
+      p.moveTo(237, 354); p.quadraticCurveTo(240, 368, 242, 380);
+      p.moveTo(257, 351); p.quadraticCurveTo(260, 368, 260, 384);
+      p.moveTo(277, 353); p.quadraticCurveTo(278, 370, 275, 386);
+      p.moveTo(291, 369); p.quadraticCurveTo(286, 385, 280, 397);
+      p.moveTo(234, 397); p.bezierCurveTo(251, 386, 276, 390, 291, 404);
+      p.moveTo(239, 416); p.bezierCurveTo(255, 409, 275, 414, 282, 430);
+      p.moveTo(292, 401); p.quadraticCurveTo(309, 390, 322, 375);
+    });
+    線(筆.衣, p => {
+      p.moveTo(237, 440); p.quadraticCurveTo(257, 451, 278, 446);
+      p.moveTo(243, 452); p.quadraticCurveTo(260, 462, 280, 457);
+      p.moveTo(243, 452); p.bezierCurveTo(251, 472, 266, 488, 283, 496);
+      p.moveTo(280, 457); p.bezierCurveTo(286, 473, 293, 486, 303, 493);
+    });
+  }
+
+  function 面相() {
+    /* 繁筆止於髮衣手足；開臉守眉一筆、瞼一筆、瞳一點。 */
+    線(筆.細, p => {
+      p.moveTo(411, 186); p.quadraticCurveTo(425, 177, 441, 185);
+      p.moveTo(459, 185); p.quadraticCurveTo(475, 177, 489, 186);
+      p.moveTo(413, 199); p.quadraticCurveTo(427, 194, 441, 199);
+      p.moveTo(459, 199); p.quadraticCurveTo(473, 194, 487, 199);
+      p.moveTo(450, 205); p.bezierCurveTo(451, 213, 449, 218, 443, 223);
+      p.quadraticCurveTo(449, 224, 455, 220);
+      p.moveTo(434, 239); p.bezierCurveTo(444, 242, 456, 242, 466, 239);
+      p.moveTo(439, 248); p.quadraticCurveTo(450, 252, 461, 248);
+    });
+    /* 白毫中心正是十二指錨；瞳只一點，以小圓線成點而不填。 */
+    橢圓(錨.白毫.x, 錨.白毫.y, 3.8, 3.8, 筆.細);
+    橢圓(428, 198, 1.25, 1.25, 筆.細);
+    橢圓(472, 198, 1.25, 1.25, 筆.細);
+  }
+
+  function 格網() {
+    if (!顯格) return;
+    ctx.save();
+    ctx.strokeStyle = 墨;
+    ctx.globalAlpha = .18;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 7]);
+    for (const 指 of [0, 12, 20, 24, 36, 48, 64, 68]) {
+      ctx.beginPath(); ctx.moveTo(112, Y(指)); ctx.lineTo(788, Y(指)); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.moveTo(錨.膝左.x, 690); ctx.lineTo(錨.膝右.x, 690); ctx.stroke();
+    ctx.restore();
+  }
+
+  function 畫() {
+    ctx.clearRect(0, 0, W, H);
+    鑿錄.length = 0;
+    /* 遠 → 近；凡前物與舊線相交，先 destination-out 鑿、後落線。 */
+    頭光();
+    蓮座後層();
+    身衣後層();
+    遠臂();
+    頭與螺髮();
+    結跏與前衣();
+    仰掌與藥壺();
+    施無畏手();
+    面相();
+    格網();
+    console.assert(鑿錄.length === 6, '破戒：遮擋鑿數異常', 鑿錄);
+    document.documentElement.dataset.rendered = 'true';
+  }
+
+  function 適幅() {
+    const r = 畫布.getBoundingClientRect();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    畫布.width = Math.round(r.width * dpr);
+    畫布.height = Math.round(r.width * H / W * dpr);
+    ctx.setTransform(畫布.width / W, 0, 0, 畫布.height / H, 0, 0);
+    畫();
+  }
+
+  window.addEventListener('resize', 適幅, { passive: true });
+  適幅();
+})();
+</script>
+
+<!--
+自校與返工實錄（Codex 5.6，2026-07-10）：
+
+首稿立意：
+- 以 u=10px 單源導出頂0、白毫12、頦20、頸底24、心窩36、臍48、盤線64、座面68；
+  膝外緣相距52指。所有 console.assert 所取，皆是肉髻尖、白毫圈心、頦尖、頸線端、
+  胸衣線、仰掌上緣、盤褶交點、座面線、膝外郭之實際 path 點。
+- 畫序為頭光／蓮座／後身衣／遠臂／頭／前膝／仰掌與壺／施無畏掌／面；六處以
+  destination-out 鑿隱，保持頭不透光、膝不透座、雙手不透衣、壺不透掌。
+- 三等線對頂至座面680px之比：骨5.1px約1:133、衣4.1px約1:166、細3.4px為1:200。
+
+截圖返工第一輪（chrome-headless-shell 1228／1000×1250，全頁）：
+- 親見儀軌可辨、錨比已去前卷頭大身促；然頭光下緣穿肩成叉，遂在身衣落筆前增
+  「身軀鑿去頭光下緣」一鑿，並將鑿數斷言由實際六處自證。
+- 肉髻首稿上尖而螺旋近珠冠，改外郭為圓丘、螺髮改開口短旋；白毫不移，眉瞼下調，
+  使白毫復居眉間而非與瞳爭位。
+- 施無畏腕口原與遠袖交叉，擴其鑿路後重落雙腕線；足趾短收，藥壺刪一重腹帶。
+截圖返工第二輪（同引擎同視口；載入 console 無 error／assert）：
+- 親見頭光與肩已各自斷開，面部錨位與腕口亦清；惟腹衣斜線仍透壺腹，判為壺鑿只沿
+  中軸、未覆鼓腹全寬。遂將壺鑿改為六十像素寬之縱向兩段，補壺底弧，使掌線與衣線
+  皆止於壺外；仰掌前三指各立短線，不復只成一枚橢圓盤。
+- 足趾內線由每足五道減為三道短收，避免與膝上環褶爭密。末次重渲再驗，見下。
+末次驗證（同引擎同視口，穩定後再取全頁）：畫布 backing/CSS 皆900×1080，頁面無橫向
+overflow；載入完成、rendered 標記已立，console 無 error、無 assert。親見壺腹已清，
+掌、衣、壺三層各自止線；頭光、五指、雙膝與兩列蓮瓣皆完整，遂止筆。
+-->
+</body>
+</html>
