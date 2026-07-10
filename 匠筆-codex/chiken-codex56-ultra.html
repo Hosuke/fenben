@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>金剛界大日如來・智拳印</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #ecebe8; }
+    body {
+      display: grid;
+      place-items: center;
+      padding: 32px;
+    }
+    canvas {
+      display: block;
+      width: min(1280px, calc(100vw - 64px), calc((100vh - 64px) * .8));
+      height: auto;
+      aspect-ratio: 4 / 5;
+      background: #fff;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, .10);
+    }
+    @media print {
+      html, body { background: #fff; }
+      body { padding: 0; }
+      canvas { width: 100vw; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="畫幅" aria-label="金剛界大日如來智拳印白描獨幅"></canvas>
+
+  <!--
+    考定：尊左手（觀者右）為金剛拳，獨豎頭指；尊右手（觀者左）四指裹握。
+    左頭指沒於右拳，惟端微露；右大指斜覆拳頂，端與左頭指端相拄。
+    據 docs/考據/手印體系.md，並參 SAT 圖像抄成身會、《五部心觀》及金剛界現圖。
+    舊說「右小指握」與「兩拳隙中露一節」俱不取。
+
+    headless 自校返工實錄（Playwright Core + chrome-headless-shell，1600×2000，DPR 2）：
+    第一輪：手勢可辨，然四裹指過齊、下拳三屈指過長；右拇又吞左頭指尖；錨斷言
+            另因 backing-store / DPR 座標未換算而有三項假敗。遂縮下拳屈指、分開端端
+            接觸的兩個閉郭、修正 isPointInPath 座標。
+    第二輪：八項錨斷言與頁面檢查全過；目視仍見下腕末端過圓、掌背筋線過長，拳意稍散。
+    第三輪：收短掌骨脊，右四裹指各加俯仰差，下腕斂窄；八斷言及十一項頁面檢查全過。
+    第四輪：只治腕端——遮擋閉郭仍閉，可見輪郭改為開筆出幅，不畫截肢式端面；復截圖，
+            八斷言、console/pageerror、邊界、覆蓋率與高 DPR 尺寸檢查悉過。
+  -->
+  <script>
+  (() => {
+    'use strict';
+
+    const W = 1280;
+    const H = 1600;
+    const canvas = document.getElementById('畫幅');
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+
+    const ctx = canvas.getContext('2d', { alpha: true });
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#151515';
+
+    // 可見三等筆皆在幅高 1:100–200 之間；鑿寬只供遮斷，不見於幅。
+    const 筆 = Object.freeze({
+      骨: H / 133,
+      節: H / 166,
+      紋: H / 195,
+      鑿: H / 55
+    });
+
+    const 錨 = Object.freeze({
+      左頭指端: Object.freeze({ x: 800, y: 322 }),
+      右大指端: Object.freeze({ x: 800, y: 322 }),
+      左頭指藏身: Object.freeze({ x: 758, y: 650 }),
+      左腕入拳: Object.freeze({ x: 980, y: 1220 }),
+      右腕入拳: Object.freeze({ x: 350, y: 760 })
+    });
+
+    const path = (寫) => {
+      const p = new Path2D();
+      寫(p);
+      return p;
+    };
+
+    const 勒 = (p, 寬 = 筆.骨, 濃 = 1) => {
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 濃;
+      ctx.lineWidth = 寬;
+      ctx.stroke(p);
+      ctx.restore();
+    };
+
+    const 鑿 = (p, 寬 = 筆.鑿) => {
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fill(p);
+      ctx.lineWidth = 寬;
+      ctx.stroke(p);
+      ctx.restore();
+    };
+
+    const 蔽而勒 = (p, 寬 = 筆.骨, 鑿寬 = 筆.鑿) => {
+      鑿(p, 鑿寬);
+      勒(p, 寬);
+      return p;
+    };
+
+    const 曲線 = (寫, 寬 = 筆.節, 濃 = 1) => 勒(path(寫), 寬, 濃);
+
+    const 節紋 = (x1, y1, x2, y2, 弓 = 0) => {
+      曲線(p => {
+        p.moveTo(x1, y1);
+        p.quadraticCurveTo((x1 + x2) / 2, (y1 + y2) / 2 + 弓, x2, y2);
+      }, 筆.紋, .92);
+    };
+
+    // ── 遠層：尊左前臂與下拳（觀者右） ─────────────────────────────
+    const 左拳郭 = path(p => {
+      p.moveTo(600, 875);
+      p.bezierCurveTo(540, 905, 510, 995, 525, 1085);
+      p.bezierCurveTo(538, 1165, 590, 1220, 670, 1250);
+      p.bezierCurveTo(730, 1272, 790, 1280, 850, 1270);
+      p.bezierCurveTo(930, 1270, 1000, 1305, 1065, 1345);
+      p.bezierCurveTo(1105, 1370, 1145, 1375, 1170, 1355);
+      p.bezierCurveTo(1195, 1336, 1190, 1305, 1168, 1288);
+      p.bezierCurveTo(1090, 1220, 1035, 1152, 1015, 1085);
+      p.bezierCurveTo(1030, 1000, 1005, 925, 930, 875);
+      p.bezierCurveTo(840, 820, 690, 825, 600, 875);
+      p.closePath();
+    });
+    鑿(左拳郭, 筆.鑿);
+    // 前臂在畫外續行，閉郭只供遮擋；可見郭線於幅內斷收，不畫截肢式端面。
+    勒(path(p => {
+      p.moveTo(600, 875);
+      p.bezierCurveTo(540, 905, 510, 995, 525, 1085);
+      p.bezierCurveTo(538, 1165, 590, 1220, 670, 1250);
+      p.bezierCurveTo(730, 1272, 790, 1280, 850, 1270);
+      p.bezierCurveTo(930, 1270, 1000, 1305, 1065, 1345);
+      p.bezierCurveTo(1105, 1370, 1145, 1375, 1170, 1355);
+    }), 筆.骨);
+    勒(path(p => {
+      p.moveTo(1168, 1288);
+      p.bezierCurveTo(1090, 1220, 1035, 1152, 1015, 1085);
+      p.bezierCurveTo(1030, 1000, 1005, 925, 930, 875);
+      p.bezierCurveTo(840, 820, 690, 825, 600, 875);
+    }), 筆.骨);
+
+    // 左頭指全形先落；上拳後至，將其身鑿去，只留拳頂一端。
+    const 左頭指 = path(p => {
+      p.moveTo(錨.左頭指端.x, 錨.左頭指端.y);
+      p.bezierCurveTo(800, 360, 792, 390, 790, 430);
+      p.bezierCurveTo(785, 560, 790, 760, 800, 930);
+      p.bezierCurveTo(777, 958, 720, 960, 692, 928);
+      p.bezierCurveTo(705, 760, 700, 555, 704, 390);
+      p.bezierCurveTo(704, 330, 718, 278, 750, 260);
+      p.bezierCurveTo(773, 256, 796, 281, 錨.左頭指端.x, 錨.左頭指端.y);
+      p.closePath();
+    });
+    蔽而勒(左頭指, 筆.骨);
+    曲線(p => {
+      p.moveTo(718, 309);
+      p.bezierCurveTo(737, 291, 770, 294, 790, 315);
+    }, 筆.紋);
+    節紋(708, 430, 783, 430, 8);
+    節紋(705, 604, 787, 604, 10);
+
+    // 左拳之中、無名、小三指：由遠及近，各節閉郭，覆掌骨而不露暗線。
+    const 左屈指 = (x, y, w, h, 斜, 名) => {
+      const p = path(q => {
+        q.moveTo(x - w * .46, y + 18);
+        q.bezierCurveTo(x - w * .42, y - 22, x + w * .28, y - 28, x + w * .48, y + 12);
+        q.bezierCurveTo(x + w * .62, y + h * .30, x + w * .49, y + h * .68, x + w * .22 + 斜, y + h * .91);
+        q.bezierCurveTo(x - w * .06 + 斜, y + h * 1.04, x - w * .42 + 斜, y + h * .88, x - w * .48, y + h * .62);
+        q.bezierCurveTo(x - w * .58, y + h * .37, x - w * .56, y + h * .16, x - w * .46, y + 18);
+        q.closePath();
+      });
+      蔽而勒(p, 筆.節, 筆.鑿 * .78);
+      節紋(x - w * .40, y + h * .31, x + w * .43, y + h * .29, 7);
+      節紋(x - w * .33 + 斜 * .3, y + h * .62, x + w * .29 + 斜 * .4, y + h * .66, 8);
+      曲線(q => {
+        q.moveTo(x - w * .18 + 斜 * .55, y + h * .79);
+        q.quadraticCurveTo(x + 斜 * .7, y + h * .90, x + w * .19 + 斜 * .6, y + h * .78);
+      }, 筆.紋, .84);
+      return Object.freeze({ 名, p });
+    };
+
+    const 左中 = 左屈指(610, 925, 148, 180, 8, '左中指・忍');
+    const 左無名 = 左屈指(758, 930, 140, 185, 11, '左無名指・戒');
+    const 左小 = 左屈指(892, 946, 122, 168, 13, '左小指・檀');
+
+    // 左掌背骨脊、拇丘與腕；左拇（禪）入掌，知隱不畫其輪廓。
+    曲線(p => {
+      p.moveTo(608, 1114);
+      p.bezierCurveTo(648, 1140, 677, 1166, 710, 1194);
+      p.moveTo(744, 1121);
+      p.bezierCurveTo(777, 1148, 806, 1177, 838, 1207);
+      p.moveTo(869, 1122);
+      p.bezierCurveTo(897, 1148, 918, 1173, 944, 1203);
+    }, 筆.節, .9);
+    曲線(p => {
+      p.moveTo(950, 1036);
+      p.bezierCurveTo(922, 1096, 930, 1162, 982, 1205);
+      p.moveTo(610, 1138);
+      p.bezierCurveTo(706, 1160, 816, 1162, 920, 1145);
+      p.moveTo(870, 1218);
+      p.bezierCurveTo(912, 1229, 958, 1230, 1000, 1218);
+      p.moveTo(971, 1231);
+      p.bezierCurveTo(1016, 1260, 1057, 1297, 1102, 1326);
+      p.moveTo(993, 1261);
+      p.bezierCurveTo(1032, 1285, 1068, 1314, 1094, 1339);
+    }, 筆.紋, .84);
+
+    // ── 近層：尊右前臂與上拳（觀者左），拳郭真鑿左頭指之身 ───────────
+    const 右拳蔽郭 = path(p => {
+      p.moveTo(105, 675);
+      p.bezierCurveTo(250, 655, 360, 640, 455, 610);
+      p.bezierCurveTo(465, 520, 505, 430, 585, 385);
+      p.bezierCurveTo(640, 352, 676, 340, 692, 360);
+      p.lineTo(698, 455);
+      p.lineTo(818, 455);
+      p.lineTo(824, 360);
+      p.bezierCurveTo(900, 345, 1015, 390, 1065, 485);
+      p.bezierCurveTo(1110, 570, 1108, 690, 1075, 805);
+      p.bezierCurveTo(1055, 870, 1005, 910, 930, 935);
+      p.bezierCurveTo(840, 968, 690, 962, 590, 930);
+      p.bezierCurveTo(520, 905, 455, 865, 405, 830);
+      p.bezierCurveTo(300, 840, 190, 845, 92, 830);
+      p.bezierCurveTo(58, 792, 60, 720, 105, 675);
+      p.closePath();
+    });
+    鑿(右拳蔽郭, 筆.鑿);
+
+    // 郭線分兩筆，在豎指出口處留真缺口；遮蔽用閉郭之底邊不重現。
+    const 右拳上左郭 = path(p => {
+      p.moveTo(105, 675);
+      p.bezierCurveTo(250, 655, 360, 640, 455, 610);
+      p.bezierCurveTo(465, 520, 505, 430, 585, 385);
+      p.bezierCurveTo(640, 352, 676, 340, 692, 360);
+      p.lineTo(698, 424);
+    });
+    const 右拳餘郭 = path(p => {
+      p.moveTo(818, 424);
+      p.lineTo(824, 360);
+      p.bezierCurveTo(900, 345, 1015, 390, 1065, 485);
+      p.bezierCurveTo(1110, 570, 1108, 690, 1075, 805);
+      p.bezierCurveTo(1055, 870, 1005, 910, 930, 935);
+      p.bezierCurveTo(840, 968, 690, 962, 590, 930);
+      p.bezierCurveTo(520, 905, 455, 865, 405, 830);
+      p.bezierCurveTo(300, 840, 190, 845, 92, 830);
+    });
+    勒(右拳上左郭, 筆.骨);
+    勒(右拳餘郭, 筆.骨);
+
+    // 腕之交代：橈尺兩骨、腕橫紋皆止於拳根。
+    曲線(p => {
+      p.moveTo(126, 724);
+      p.bezierCurveTo(240, 708, 340, 688, 447, 660);
+      p.moveTo(122, 790);
+      p.bezierCurveTo(238, 806, 334, 808, 424, 787);
+    }, 筆.節, .9);
+    曲線(p => {
+      p.moveTo(390, 722);
+      p.bezierCurveTo(430, 741, 478, 748, 523, 735);
+      p.moveTo(394, 758);
+      p.bezierCurveTo(438, 780, 490, 784, 536, 766);
+      p.moveTo(480, 638);
+      p.bezierCurveTo(543, 588, 608, 548, 676, 523);
+    }, 筆.紋, .84);
+
+    // 右四指（力、願、方、慧）自下而上裹左頭指；逐指閉郭，畫序即相壓之序。
+    const 右裹指 = (y, 左, 右, 高, 名, 彎, 傾) => {
+      const p = path(q => {
+        q.moveTo(右 - 12, y - 高 * .48);
+        q.bezierCurveTo(右 - 76, y - 高 * .68, 左 + 120, y + 傾 - 高 * .66, 左 + 56, y + 傾 - 高 * .42);
+        q.bezierCurveTo(左 + 20, y + 傾 - 高 * .28, 左 - 8, y + 傾 - 2, 左, y + 傾 + 高 * .22);
+        q.bezierCurveTo(左 + 10, y + 傾 + 高 * .52, 左 + 58, y + 傾 + 高 * .66, 左 + 112, y + 傾 + 高 * .60);
+        q.bezierCurveTo(左 + 184, y + 高 * .55, 右 - 42, y + 高 * .42, 右 - 10, y + 高 * .16);
+        q.bezierCurveTo(右 + 12, y - 高 * .02, 右 + 14, y - 高 * .34, 右 - 12, y - 高 * .48);
+        q.closePath();
+      });
+      蔽而勒(p, 筆.節, 筆.鑿 * .82);
+      曲線(q => {
+        q.moveTo(左 + 25, y + 傾 - 3);
+        q.quadraticCurveTo(左 + 57, y + 傾 + 18 + 彎, 左 + 94, y + 傾 + 8);
+      }, 筆.紋, .9);
+      節紋(左 + 138, y + 傾 * .65 - 高 * .43, 左 + 156, y + 傾 * .45 + 高 * .46, 彎);
+      節紋(右 - 82, y - 高 * .48, 右 - 58, y + 高 * .30, 彎 * .5);
+      return Object.freeze({ 名, p });
+    };
+
+    const 右小 = 右裹指(820, 742, 1000, 91, '右小指・慧', 7, 11);
+    const 右無名 = 右裹指(736, 730, 1022, 100, '右無名指・方', 3, 5);
+    const 右中 = 右裹指(642, 718, 1040, 108, '右中指・願', -2, -3);
+    const 右頭 = 右裹指(540, 714, 1024, 105, '右頭指・力', -5, -9);
+
+    // 右拳背脊：四根丘與腕相貫；止於裹指閉郭，不穿暗處。
+    曲線(p => {
+      p.moveTo(505, 833);
+      p.bezierCurveTo(572, 788, 640, 744, 710, 718);
+      p.moveTo(492, 757);
+      p.bezierCurveTo(557, 710, 625, 672, 704, 646);
+      p.moveTo(504, 679);
+      p.bezierCurveTo(558, 634, 616, 600, 681, 576);
+    }, 筆.節, .86);
+    曲線(p => {
+      p.moveTo(1010, 468);
+      p.quadraticCurveTo(1050, 498, 1063, 538);
+      p.moveTo(1027, 579);
+      p.quadraticCurveTo(1070, 611, 1076, 652);
+      p.moveTo(1025, 690);
+      p.quadraticCurveTo(1067, 720, 1069, 760);
+      p.moveTo(1006, 797);
+      p.quadraticCurveTo(1046, 822, 1049, 850);
+    }, 筆.紋, .9);
+
+    // 最前層右大指（智）：斜覆拳頂，其端實取同一接觸錨。
+    const 右大指 = path(p => {
+      p.moveTo(錨.右大指端.x, 錨.右大指端.y);
+      p.bezierCurveTo(828, 318, 852, 337, 878, 364);
+      p.bezierCurveTo(910, 410, 964, 448, 1028, 468);
+      p.bezierCurveTo(1060, 478, 1080, 510, 1075, 545);
+      p.bezierCurveTo(1068, 585, 1032, 610, 995, 600);
+      p.bezierCurveTo(930, 580, 875, 530, 840, 474);
+      p.bezierCurveTo(818, 440, 807, 390, 錨.右大指端.x, 錨.右大指端.y);
+      p.closePath();
+    });
+    蔽而勒(右大指, 筆.骨, 筆.鑿 * .9);
+    曲線(p => {
+      p.moveTo(817, 350);
+      p.bezierCurveTo(834, 341, 855, 354, 866, 373);
+      p.moveTo(847, 410);
+      p.bezierCurveTo(854, 421, 884, 445, 899, 472);
+    }, 筆.紋, .9);
+    節紋(897, 425, 943, 481, 5);
+
+    // 接觸處只加一筆極短回鋒，非填點；兩端仍可分讀。
+    曲線(p => {
+      p.moveTo(791, 315);
+      p.quadraticCurveTo(800, 322, 808, 315);
+    }, 筆.紋, .88);
+
+    // ── 幅下小注 ───────────────────────────────────────────────────
+    曲線(p => {
+      p.moveTo(198, 1444);
+      p.bezierCurveTo(430, 1438, 842, 1438, 1082, 1444);
+    }, 筆.紋, .72);
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#151515';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = '34px "Kaiti TC", "STKaiti", "Songti TC", serif';
+    ctx.fillText('智拳印　金剛界大日如來', W / 2, 1490);
+    ctx.font = '21px "Songti TC", "Hiragino Mincho ProN", "STSong", serif';
+    ctx.fillText('左手金剛拳獨豎頭指，右四指裹握之；右大指端拄左頭指端。', W / 2, 1532);
+    ctx.fillText('據不空譯《一切時處念誦成佛儀軌》及《大日經疏》卷十三，參成身會與《五部心觀》。', W / 2, 1568);
+    ctx.restore();
+
+    // ── 載入自證：諸錨即上列實落筆座標，不另造測試座標 ─────────────────
+    const 距 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+    // isPointInPath 取 backing-store 座標；落筆錨為邏輯座標，故在此明乘 DPR。
+    const 命中 = (p, a) => ctx.isPointInPath(p, a.x * dpr, a.y * dpr);
+    console.assert(距(錨.左頭指端, 錨.右大指端) < .01,
+      '端端相拄：右大指端與左頭指端同錨', 錨.左頭指端);
+    console.assert(命中(右拳蔽郭, 錨.左頭指藏身),
+      '拳裹成立：左頭指藏身錨落在右拳閉郭內', 錨.左頭指藏身);
+    console.assert(!命中(右拳蔽郭, { x: 錨.左頭指端.x, y: 錨.左頭指端.y - 2 }),
+      '惟端微露：左頭指端在右拳閉郭之外', 錨.左頭指端);
+    console.assert(命中(左拳郭, 錨.左腕入拳),
+      '尊左腕由觀者右下承拳', 錨.左腕入拳);
+    console.assert(命中(右拳蔽郭, 錨.右腕入拳),
+      '尊右腕由觀者左入拳', 錨.右腕入拳);
+    console.assert([筆.骨, 筆.節, 筆.紋].every(v => v >= H / 200 && v <= H / 100),
+      '可見線身皆守幅高一比一百至二百', 筆);
+    console.assert([左中, 左無名, 左小, 右小, 右無名, 右中, 右頭].every(v => v.p instanceof Path2D),
+      '七屈指皆有獨立閉郭，拇與豎指另列');
+    console.assert(ctx.globalCompositeOperation === 'source-over',
+      '遮斷畢，合成模式已歸 source-over');
+
+    document.documentElement.dataset.rendered = 'true';
+  })();
+  </script>
+</body>
+</html>
