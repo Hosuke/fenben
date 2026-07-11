@@ -67,6 +67,7 @@ import { 千手觀音 } from './senju-h.js';
 import { 一字金輪 } from './kinrin-h.js';
 import { 十一面觀自在 } from './juichimen-t.js';
 import { 不動明王 } from './fudo-t.js';
+import { 北斗星君 } from './hokuto-h.js';
 export const 落筆簿 = {
     'center|k': 大日金剛界,
     'fugen|k': 金剛薩埵,
@@ -139,6 +140,13 @@ export const 落筆簿 = {
     'kinrin|h': 一字金輪,
     'juichimen|t': 十一面觀自在,
     'fudo|t': 不動明王,
+    'hokuto-tanro|h': 北斗星君,
+    'hokuto-komon|h': 北斗星君,
+    'hokuto-rokuson|h': 北斗星君,
+    'hokuto-monkyoku|h': 北斗星君,
+    'hokuto-renjo|h': 北斗星君,
+    'hokuto-mukyoku|h': 北斗星君,
+    'hokuto-hagun|h': 北斗星君,
     // 漢傳十二神將滿員（2026-07-09）；星供曼荼羅候波；複雜像波啟（降三世首筆）
 };
 // 候審筆：儀軌信雖已核（字段出典俱足），**筆**未經主人過目者——
