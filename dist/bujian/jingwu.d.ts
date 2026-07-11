@@ -1,0 +1,14 @@
+import type { 筆具 } from '../bi.js';
+export declare function 寶蓋(bi: 筆具, x: number, z: number, 比?: number, 淡?: number): void;
+export declare function 雙鹿法輪(bi: 筆具, x: number, z: number, 比?: number, 淡?: number): void;
+export declare function 蓮池(bi: 筆具, x: number, z: number, 半闊?: number, 比?: number, 淡?: number): void;
+export declare function 菩提樹(bi: 筆具, x: number, z: number, 比?: number, 淡?: number): void;
+export declare function 日月(bi: 筆具, x日: number, x月: number, z: number, 比?: number, 淡?: number): void;
+export declare function 供水碗列(bi: 筆具, x: number, z: number, n?: number, 距?: number, 比?: number, 淡?: number): void;
+export declare function 連珠帶(bi: 筆具, x0: number, x1: number, z: number, 徑?: number, 淡?: number): void;
+export declare function 卷草帶(bi: 筆具, x0: number, x1: number, z: number, 高?: number, 淡?: number): void;
+export declare function 火焰帶(bi: 筆具, x0: number, x1: number, z: number, 高?: number, 淡?: number): void;
+export declare function 欄楯(bi: 筆具, x0: number, x1: number, z: number, 高?: number, 柱距?: number, 淡?: number): void;
+export declare function 寶樹(bi: 筆具, x: number, z: number, 高?: number, 比?: number, 淡?: number): void;
+export declare function 榜題牌(bi: 筆具, x: number, z: number, 寬?: number, 高?: number, 淡?: number): void;
+export declare function 山石(bi: 筆具, x: number, z: number, 比?: number, 鏡?: 1 | -1, 淡?: number): void;

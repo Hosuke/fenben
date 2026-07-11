@@ -1,5 +1,6 @@
 export { 月輪, 頭光 } from './guang.js';
 export { 舉身光, 如意雲 } from './jing.js';
+export { 寶蓋, 雙鹿法輪, 蓮池, 菩提樹, 日月, 供水碗列, 連珠帶, 卷草帶, 火焰帶, 欄楯, 寶樹, 榜題牌, 山石 } from './jingwu.js';
 export { 蓮華座 } from './zuo.js';
 export { 菩薩開臉, 點睛, 垂埵耳, 頸三道, 忿怒開臉, 忿怒點睛 } from './lian.js';
 export { 寶髻, 垂髮, 天髻, 五髻, 焰髮 } from './fa.js';
