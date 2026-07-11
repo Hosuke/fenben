@@ -1,0 +1,587 @@
+// 風格館・尼瓦爾室首展精密二稿 —— 金剛薩埵 paubha 背屏式一幀
+//
+// 參攷目驗（2026-07-12；playwright-core + chrome-headless-shell 逐張開圖截屏）：
+// 1. Cleveland 1970.156 綠度母：全幀以六拏具背屏為骨。象、立獅、回首羱羊逐級
+//    上承，肩摩羯之尾噴成卷草，頂獸面吐雙蛇；拱、柱、座、台無一素帶。蓮瓣肥大
+//    如卷雲，端頭內旋且瓣內套芯；龕外椰、芭蕉、花樹層層壓入，頂緣三塔。
+// 2. Cleveland 1973.69 說法佛：上欄諸尊各居火焰小龕，四周敘事格與中堂互相咬合；
+//    大尊、脅侍、供養眾以尺度與交疊分尊卑，邊欄不是一線框而是連續小畫面。
+// 3. Cleveland 1960.211 勝樂曼荼羅：圓、方、蓮輪多層相套，每一同心帶皆另有尊、
+//    杵、卷草或火焰；四角亦以卷草地及圓龕填實，證「帶帶皆紋、餘地不留白」。
+// 4. Met 2015.299 財續母曼荼羅：上欄七尊等格，中央方城外再套多重蓮環、彩帶環；
+//    下欄供養人滿列。此稿取其欄、堂、供養三段及小尊相切成行之密度。
+// 5. Met 2004.444 財續母／俱毘羅／難近母：畫稿簿長橫幅以極細單線成像；衣、冠、
+//    光、座皆用內套線與微小織紋，不借色塊。此稿遂守單色白描，密度全由線紋。
+//
+// headless 自校記：
+// - 輪一：全幀結構與密度已立，四拱帶、滿植、上下欄皆可讀；惟上欄橫檐穿佛首，
+//   林葉與柱線又壓沒獸鏈。二輪改疊壓次序：清佛龕內地、獸身負形，不減外圍密度。
+// - 輪二：五佛已各自清楚入龕，尊首不再受檐線；獸鏈亦自林柱中分出。惟獸序尚有
+//   浮置感，三輪再為象、獅、羱羊、摩羯逐級補出跳寶檐，使「一獸承一獸」一眼可讀。
+// - 輪三／參攷並排：與 1970.156 等高並觀，背屏四拱、五級側檐、卷雲座、七格
+//   獸面台及皮肉疏／嚴飾密之分層已同律；發現三塔後仍偏素，末輪只補放射樹冠並將
+//   塔提至冠前。五佛上欄乃特命新增，故不求與綠度母原圖逐格雷同。
+// - 輪四／末輪並排：`/tmp/fenben-nepal-round4-final-compare.png` 等高對照確認：三塔
+//   已出林冠，五佛各居塔龕；四條拱帶紋樣互異，雙蛇、摩羯與象獅羱羊獸座皆可循級
+//   找到；雙層卷雲瓣及七格獅象台在縮覽仍清楚。與主範之差乃庫尊結跏坐及特命五佛
+//   上欄，均屬有意守戒；中尊膚面留息、背屏與外地滿紋之疏密關係已得。
+//
+// 戒：中尊只由 dist/yigui.js 依號.fugen.k + dist/baimiao.js 的 fugen|k 活渲；
+// 尊身一線不改。外加裙裳織紋只置尊身輪廓之外。五佛亦逐尊由庫筆活渲。
+
+const { 合幀 } = require('../../tools/lib/幀具.cjs');
+
+(async () => {
+  await 合幀({
+    出: '圖錄/風格館/尼瓦爾-精密二稿.png',
+    幀: page => page.evaluate(async () => {
+      const { 依號 } = await import('/dist/yigui.js');
+      const { 白描 } = await import('/dist/baimiao.js');
+
+      const W = 1800, H = 2400;
+      const 墨 = '#d8b36a', 地 = '#0d1124';
+      const ink = document.createElement('canvas');
+      ink.width = W; ink.height = H;
+      const x = ink.getContext('2d');
+      x.strokeStyle = 墨; x.fillStyle = 墨;
+      x.lineCap = 'round'; x.lineJoin = 'round';
+
+      const 筆 = (w = 2) => { x.lineWidth = w; x.strokeStyle = 墨; x.fillStyle = 墨; };
+      const 線 = (pts, w = 2, close = false) => {
+        筆(w); x.beginPath(); x.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length; i++) x.lineTo(pts[i][0], pts[i][1]);
+        if (close) x.closePath(); x.stroke();
+      };
+      const 圓 = (cx, cy, r, w = 2) => { 筆(w); x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.stroke(); };
+      const 橢 = (cx, cy, rx, ry, w = 2, rot = 0) => { 筆(w); x.beginPath(); x.ellipse(cx, cy, rx, ry, rot, 0, Math.PI * 2); x.stroke(); };
+      const 貝 = (p0, c1, c2, p1, w = 2) => {
+        筆(w); x.beginPath(); x.moveTo(...p0); x.bezierCurveTo(...c1, ...c2, ...p1); x.stroke();
+      };
+      const 雙鏡 = fn => {
+        fn(); x.save(); x.translate(W, 0); x.scale(-1, 1); fn(); x.restore();
+      };
+      const 葉 = (cx, cy, len, wid, a, w = 1.45) => {
+        x.save(); x.translate(cx, cy); x.rotate(a); 筆(w);
+        x.beginPath(); x.moveTo(0, 0);
+        x.bezierCurveTo(len * .28, -wid, len * .78, -wid * .65, len, 0);
+        x.bezierCurveTo(len * .72, wid * .65, len * .28, wid, 0, 0); x.stroke();
+        x.beginPath(); x.moveTo(len * .08, 0); x.lineTo(len * .88, 0); x.stroke();
+        x.restore();
+      };
+      const 花 = (cx, cy, r, n = 8, w = 1.5) => {
+        圓(cx, cy, r * .18, w);
+        for (let k = 0; k < n; k++) {
+          const a = Math.PI * 2 * k / n;
+          x.save(); x.translate(cx, cy); x.rotate(a); 筆(w);
+          x.beginPath(); x.moveTo(r * .2, 0);
+          x.bezierCurveTo(r * .42, -r * .22, r * .82, -r * .18, r, 0);
+          x.bezierCurveTo(r * .8, r * .2, r * .42, r * .22, r * .2, 0); x.stroke();
+          x.restore();
+        }
+        圓(cx, cy, r * .42, w * .72);
+      };
+      const 三葉 = (cx, cy, r, a = 0, w = 1.25) => {
+        for (let k = -1; k <= 1; k++) 葉(cx, cy, r, r * .26, a + k * .66, w);
+      };
+
+      // ── 四周五重紋界：卷草、連珠、寶石菱格、仰覆卷雲瓣皆各居一帶 ─────────
+      const 珠橫 = (x0, x1, y, step, r, w = 1.6) => {
+        線([[x0, y - r - 5], [x1, y - r - 5]], w);
+        線([[x0, y + r + 5], [x1, y + r + 5]], w);
+        for (let px = x0 + step / 2; px < x1; px += step) { 圓(px, y, r, w); 圓(px, y, r * .27, w * .65); }
+      };
+      const 菱橫 = (x0, x1, y, step, h, w = 1.5) => {
+        線([[x0, y - h], [x1, y - h]], w); 線([[x0, y + h], [x1, y + h]], w);
+        for (let px = x0; px < x1; px += step) {
+          線([[px, y], [px + step / 2, y - h * .72], [px + step, y], [px + step / 2, y + h * .72]], w, true);
+          圓(px + step / 2, y, Math.min(3.4, h * .25), w * .72);
+        }
+      };
+      const 卷草橫 = (x0, x1, y, step, amp, w = 1.45) => {
+        線([[x0, y - amp - 5], [x1, y - amp - 5]], w); 線([[x0, y + amp + 5], [x1, y + amp + 5]], w);
+        筆(w); x.beginPath(); x.moveTo(x0, y);
+        for (let px = x0; px < x1; px += step) {
+          x.bezierCurveTo(px + step * .24, y - amp, px + step * .32, y - amp, px + step / 2, y);
+          x.bezierCurveTo(px + step * .68, y + amp, px + step * .76, y + amp, px + step, y);
+        } x.stroke();
+        for (let px = x0 + step * .25, k = 0; px < x1; px += step / 2, k++) {
+          const s = k % 2 ? 1 : -1;
+          筆(w); x.beginPath(); x.moveTo(px, y + s * amp * .55);
+          x.bezierCurveTo(px + 13, y + s * amp * 1.3, px + 25, y + s * amp * .68, px + 12, y + s * amp * .2);
+          x.bezierCurveTo(px + 4, y, px - 2, y + s * amp * .24, px + 5, y + s * amp * .4); x.stroke();
+          三葉(px + 15, y + s * amp * .76, 10, s > 0 ? .8 : -.8, w * .8);
+        }
+      };
+      const 轉直 = (fn, y0, y1, xx, ...args) => {
+        x.save(); x.translate(xx, y0); x.rotate(Math.PI / 2); fn(0, y1 - y0, 0, ...args); x.restore();
+      };
+
+      筆(3.2); x.strokeRect(34, 34, W - 68, H - 68);
+      筆(1.6); x.strokeRect(48, 48, W - 96, H - 96);
+      珠橫(54, W - 54, 67, 22, 6.2, 1.5); 珠橫(54, W - 54, H - 67, 22, 6.2, 1.5);
+      轉直(珠橫, 54, H - 54, 67, 22, 6.2, 1.5);
+      轉直(珠橫, 54, H - 54, W - 67, 22, 6.2, 1.5);
+      菱橫(92, W - 92, 100, 30, 9, 1.35); 菱橫(92, W - 92, H - 100, 30, 9, 1.35);
+      轉直(菱橫, 92, H - 92, 100, 30, 9, 1.35);
+      轉直(菱橫, 92, H - 92, W - 100, 30, 9, 1.35);
+      卷草橫(118, W - 118, 126, 74, 10, 1.4); 卷草橫(118, W - 118, H - 126, 74, 10, 1.4);
+      轉直(卷草橫, 118, H - 118, 126, 74, 10, 1.4);
+      轉直(卷草橫, 118, H - 118, W - 126, 74, 10, 1.4);
+      筆(2.4); x.strokeRect(145, 145, W - 290, H - 290);
+
+      // ── 頂緣三塔：層層枋面各加珠、菱、蓮；林木自其後交疊而出 ─────────────
+      const 塔 = (cx, base, s = 1) => {
+        x.save(); x.translate(cx, base); x.scale(s, s);
+        for (const [yy, ww] of [[0, 126], [-14, 112], [-28, 96], [-42, 80]]) {
+          線([[-ww / 2, yy], [ww / 2, yy]], 1.8);
+          for (let px = -ww / 2 + 8; px < ww / 2; px += 16) 圓(px, yy - 6, 2.6, 1.05);
+        }
+        筆(1.8); x.beginPath(); x.moveTo(-40, -42);
+        x.bezierCurveTo(-54, -76, -34, -110, 0, -118);
+        x.bezierCurveTo(34, -110, 54, -76, 40, -42); x.stroke();
+        for (const yy of [-66, -82, -98]) 橢(0, yy, 34 - (-yy - 66) * .32, 6, 1.2);
+        線([[0, -118], [0, -168]], 1.7);
+        for (const [yy, ww] of [[-126, 24], [-136, 19], [-146, 14], [-156, 9]]) 線([[-ww, yy], [ww, yy]], 1.35);
+        圓(0, -166, 5, 1.5); 線([[-7, -174], [0, -186], [7, -174]], 1.5);
+        x.restore();
+      };
+      // ── 滿植背景：椰、芭蕉、花樹；葉脈逐片落線，左右鏡像而層次錯開 ───────
+      const 椰樹 = (cx, base, h, lean = 0) => {
+        筆(1.6); x.beginPath(); x.moveTo(cx - 7, base); x.bezierCurveTo(cx - 18, base - h * .36, cx + lean * h - 7, base - h * .72, cx + lean * h, base - h); x.stroke();
+        x.beginPath(); x.moveTo(cx + 7, base); x.bezierCurveTo(cx - 3, base - h * .35, cx + lean * h + 8, base - h * .72, cx + lean * h + 12, base - h); x.stroke();
+        for (let k = 1; k < 10; k++) {
+          const yy = base - h * k / 10, cc = cx + lean * h * k / 10;
+          貝([cc - 7, yy], [cc - 1, yy + 3], [cc + 5, yy + 3], [cc + 10, yy], 1.05);
+        }
+        const tx = cx + lean * h + 6, ty = base - h;
+        for (let k = 0; k < 9; k++) {
+          const a = -Math.PI * .92 + k * Math.PI * .23;
+          const len = k % 2 ? 150 : 178;
+          x.save(); x.translate(tx, ty); x.rotate(a); 筆(1.45);
+          x.beginPath(); x.moveTo(0, 0); x.bezierCurveTo(len * .32, -22, len * .72, -18, len, 10); x.stroke();
+          for (let j = 2; j < 12; j++) {
+            const px = len * j / 13, py = -16 * Math.sin(Math.PI * j / 13) + 10 * j / 13;
+            葉(px, py, 28 - j * .65, 6.8, -.8, 1.0); 葉(px, py, 28 - j * .65, 6.8, .8, 1.0);
+          }
+          x.restore();
+        }
+        for (let a = 0; a < Math.PI * 2; a += Math.PI * 2 / 5) 圓(tx + Math.cos(a) * 16, ty + Math.sin(a) * 11 + 8, 7, 1.2);
+      };
+      const 芭蕉 = (cx, base, h) => {
+        線([[cx - 6, base], [cx - 2, base - h]], 1.5); 線([[cx + 6, base], [cx + 4, base - h]], 1.5);
+        for (let k = 0; k < 7; k++) {
+          const yy = base - h * (.45 + k * .075), dir = k % 2 ? 1 : -1;
+          葉(cx + dir * 2, yy, 135 - k * 6, 30, dir > 0 ? -.62 : Math.PI + .62, 1.45);
+          x.save(); x.translate(cx + dir * 2, yy); x.rotate(dir > 0 ? -.62 : Math.PI + .62);
+          for (let j = 2; j < 9; j++) 線([[j * 13, 0], [j * 13 - 9, (j % 2 ? 1 : -1) * 19]], .82);
+          x.restore();
+        }
+        貝([cx, base - h * .72], [cx + 28, base - h * .78], [cx + 44, base - h * .68], [cx + 34, base - h * .61], 1.35);
+        for (let j = 0; j < 7; j++) 橢(cx + 32 + (j % 2) * 9, base - h * .61 + j * 12, 5, 9, 1.0, -.2);
+      };
+      const 花樹 = (cx, base, h) => {
+        貝([cx - 8, base], [cx - 18, base - h * .45], [cx + 22, base - h * .72], [cx, base - h], 1.7);
+        貝([cx + 8, base], [cx + 6, base - h * .42], [cx + 30, base - h * .7], [cx + 12, base - h], 1.3);
+        const branches = [[-.1,.78,-120], [.03,.7,132], [-.03,.56,-145], [.08,.46,135], [0,.34,-105]];
+        for (const [q, p, dx] of branches) {
+          const sy = base - h * p, sx = cx + q * h;
+          貝([sx, sy], [sx + dx * .25, sy - 58], [sx + dx * .72, sy - 68], [sx + dx, sy - 112], 1.25);
+          for (let j = 1; j < 5; j++) {
+            const px = sx + dx * j / 5, py = sy - 112 * j / 5 - Math.sin(j) * 10;
+            葉(px, py, 48, 13, dx > 0 ? -.62 : Math.PI + .62, 1.0);
+            if (j % 2) 花(px + (dx > 0 ? 22 : -22), py - 10, 12, 6, 1.0);
+          }
+        }
+      };
+      雙鏡(() => {
+        椰樹(245, 1570, 1180, -.035);
+        椰樹(365, 1420, 970, .055);
+        芭蕉(190, 1505, 720);
+        芭蕉(435, 1460, 610);
+        花樹(275, 1320, 850);
+        花樹(435, 1160, 650);
+      });
+      // 主範三塔皆出於中央大樹與林冠之前；白描以放射枝、脈葉、花果密成塔後林海。
+      筆(1.7); x.beginPath(); x.moveTo(884,292); x.bezierCurveTo(800,238,692,206,548,183); x.stroke();
+      x.beginPath(); x.moveTo(916,292); x.bezierCurveTo(1000,238,1108,206,1252,183); x.stroke();
+      線([[892,292],[900,152],[908,292]],1.55);
+      for(let k=0;k<17;k++){
+        const xx=250+k*82, yy=190+Math.sin(k*.91)*32, dir=k<8?Math.PI+.18:k>8?-.18:-Math.PI/2;
+        葉(xx,yy,84-(k%3)*9,24,dir,1.2);
+        if(k%2===0) 花(xx+(k<8?-24:24),yy-18,12+(k%3)*2,7,.95);
+      }
+      for(let k=0;k<11;k++){
+        const a=-2.82+k*.25, len=180+(k%3)*32;
+        貝([900,260],[900+Math.cos(a)*len*.36,238+Math.sin(a)*34],[900+Math.cos(a)*len*.75,202+Math.sin(a)*22],[900+Math.cos(a)*len,174+Math.sin(a)*18],1.05);
+        葉(900+Math.cos(a)*len*.72,203+Math.sin(a)*18,66,19,a+(a<-1.57?Math.PI:0),.92);
+      }
+      塔(430, 245, .86); 塔(900, 238, 1.08); 塔(1370, 245, .86);
+
+      // ── 中堂背屏紋地：中心尊身域留疏，外圍花眼相切成密織 ─────────────────
+      for (let yy = 520, row = 0; yy < 1770; yy += 58, row++) {
+        for (let xx = 430 + (row % 2) * 29; xx <= 1370; xx += 58) {
+          const ex = (xx - 900) / 445, ey = (yy - 1275) / 570;
+          if (ex * ex + ey * ey < 1.0) continue;
+          花(xx, yy, 10.5, 6, .82);
+          圓(xx, yy, 16.5, .68);
+        }
+      }
+
+      // ── 上欄五方佛塔龕：每格有檐、珠、卷草、蓮托；稍後庫筆活渲 ───────────
+      const 上欄L = 150, 上欄R = 1650, 欄頂 = 166, 欄底 = 493, cell = (上欄R - 上欄L) / 5;
+      // 原作以色域隔龕；白描改以蔽後景成深素龕面，使五佛不為林葉所穿。
+      x.save(); x.globalCompositeOperation='destination-out'; x.fillStyle='#000';
+      x.fillRect(上欄L + 2, 258, 上欄R - 上欄L - 4, 欄底 - 258); x.restore();
+      x.strokeStyle=墨; x.fillStyle=墨;
+      線([[上欄L, 欄底], [上欄R, 欄底]], 3);
+      線([[上欄L, 欄底 + 12], [上欄R, 欄底 + 12]], 1.4);
+      for (let k = 0; k < 5; k++) {
+        const l = 上欄L + cell * k, r = l + cell, c = (l + r) / 2;
+        筆(1.8); x.beginPath(); x.moveTo(l + 12, 欄底);
+        x.lineTo(l + 12, 286); x.bezierCurveTo(l + 22, 228, c - 48, 202, c, 188);
+        x.bezierCurveTo(c + 48, 202, r - 22, 228, r - 12, 286); x.lineTo(r - 12, 欄底); x.stroke();
+        for (const o of [12, 23]) {
+          筆(1.15); x.beginPath(); x.moveTo(l + 12 + o, 欄底 - 6);
+          x.lineTo(l + 12 + o, 292); x.bezierCurveTo(l + 34, 244 - o * .25, c - 42, 216 + o * .12, c, 204 + o * .16);
+          x.bezierCurveTo(c + 42, 216 + o * .12, r - 34, 244 - o * .25, r - 12 - o, 292); x.lineTo(r - 12 - o, 欄底 - 6); x.stroke();
+        }
+        線([[l + 4, 286], [l + 38, 286]], 2.3); 線([[r - 38, 286], [r - 4, 286]], 2.3);
+        線([[l - 4, 300], [l + 28, 300]], 1.6); 線([[r - 28, 300], [r + 4, 300]], 1.6);
+        珠橫(l + 18, r - 18, 458, 18, 4, .95);
+        卷草橫(l + 16, r - 16, 471, 58, 7, .85);
+        for (let px = l + 28; px < r - 16; px += 30) {
+          筆(.95); x.beginPath(); x.moveTo(px - 11, 449); x.quadraticCurveTo(px, 432, px + 11, 449); x.stroke();
+          x.beginPath(); x.moveTo(px - 7, 449); x.quadraticCurveTo(px, 439, px + 7, 449); x.stroke();
+        }
+        if (k) 線([[l, 176], [l, 欄底 + 12]], 1.25);
+      }
+
+      // ── torana 四重同心拱：四帶分別置連珠、卷草、寶石菱格、細蓮瓣 ───────
+      const cub = (p0, p1, p2, p3, u) => {
+        const v = 1 - u;
+        return {
+          x: v*v*v*p0.x + 3*v*v*u*p1.x + 3*v*u*u*p2.x + u*u*u*p3.x,
+          y: v*v*v*p0.y + 3*v*v*u*p1.y + 3*v*u*u*p2.y + u*u*u*p3.y,
+          dx: 3*v*v*(p1.x-p0.x) + 6*v*u*(p2.x-p1.x) + 3*u*u*(p3.x-p2.x),
+          dy: 3*v*v*(p1.y-p0.y) + 6*v*u*(p2.y-p1.y) + 3*u*u*(p3.y-p2.y),
+        };
+      };
+      const 拱點 = (t, o = 0) => {
+        const P0={x:425-o*.82,y:1575+o*.12}, P1={x:405-o,y:1080-o*.25}, P2={x:626-o*.35,y:760-o*.73}, P3={x:900,y:690-o};
+        if (t <= .5) return cub(P0,P1,P2,P3,t*2);
+        const q = cub(P0,P1,P2,P3,(1-t)*2); return {x:W-q.x,y:q.y,dx:-q.dx,dy:-q.dy};
+      };
+      const 拱線 = (o, w = 2) => {
+        筆(w); x.beginPath();
+        for (let i = 0; i <= 120; i++) { const p = 拱點(i/120,o); if (!i) x.moveTo(p.x,p.y); else x.lineTo(p.x,p.y); }
+        x.stroke();
+      };
+      for (const [o,w] of [[0,3.2],[25,1.5],[54,2.2],[84,1.4],[116,3.0]]) 拱線(o,w);
+      for (let t = .018; t < .982; t += .024) { const p=拱點(t,12); 圓(p.x,p.y,4.5,1.1); 圓(p.x,p.y,1.35,.65); }
+      for (let t=.025,k=0;t<.975;t+=.047,k++) {
+        const p=拱點(t,39), a=Math.atan2(p.dy,p.dx);
+        x.save(); x.translate(p.x,p.y); x.rotate(a); 筆(1.12);
+        x.beginPath(); x.moveTo(-13,0); x.bezierCurveTo(-5,-14,9,-14,13,0); x.bezierCurveTo(9,14,-5,14,-13,0); x.stroke();
+        x.beginPath(); x.moveTo(-4,0); x.bezierCurveTo(9,(k%2?1:-1)*12,14,(k%2?1:-1)*2,4,0); x.stroke();
+        x.restore();
+      }
+      for (let t=.02;t<.98;t+=.038) {
+        const p=拱點(t,69), a=Math.atan2(p.dy,p.dx);
+        x.save(); x.translate(p.x,p.y); x.rotate(a); 線([[-12,0],[0,-9],[12,0],[0,9]],1.15,true); 圓(0,0,2.2,.7); x.restore();
+      }
+      for (let t=.02,k=0;t<.98;t+=.04,k++) {
+        const p=拱點(t,100), a=Math.atan2(p.dy,p.dx), s=k%2?1:-1;
+        x.save(); x.translate(p.x,p.y); x.rotate(a); 筆(1.0);
+        x.beginPath(); x.moveTo(-11,0); x.bezierCurveTo(-5,s*15,6,s*15,11,0); x.bezierCurveTo(5,s*8,-5,s*8,-11,0); x.stroke(); x.restore();
+      }
+
+      // ── 雙蛇自獸面口出繞拱：雙輪廓、腹鱗、尾端蛇首 ───────────────────────
+      const 蛇半 = right => {
+        const ts = [], start = right ? .525 : .475, end = right ? .985 : .015, n=48;
+        for (let i=0;i<=n;i++) {
+          const t=start+(end-start)*i/n, p=拱點(t,-10), a=Math.atan2(p.dy,p.dx), nx=-Math.sin(a), ny=Math.cos(a), wav=Math.sin(i*.88)*4;
+          ts.push({x:p.x+nx*wav,y:p.y+ny*wav,a,nx,ny});
+        }
+        for (const off of [-4,4]) { 筆(1.4); x.beginPath(); ts.forEach((p,i)=>{const xx=p.x+p.nx*off,yy=p.y+p.ny*off;i?x.lineTo(xx,yy):x.moveTo(xx,yy)}); x.stroke(); }
+        for (let i=2;i<ts.length-2;i+=3) { const p=ts[i]; 線([[p.x-p.nx*4,p.y-p.ny*4],[p.x+p.nx*4,p.y+p.ny*4]],.8); }
+        const h=ts[ts.length-1]; x.save(); x.translate(h.x,h.y); x.rotate(h.a); 筆(1.4);
+        x.beginPath(); x.moveTo(-3,-5); x.bezierCurveTo(13,-13,25,-8,28,0); x.bezierCurveTo(25,8,13,13,-3,5); x.stroke();
+        圓(17,-3,1.7,.85); 線([[28,0],[36,-4],[31,1],[36,5]],.85); x.restore();
+      };
+      蛇半(false); 蛇半(true);
+
+      // ── 多層柱檐：每枋自身填紋；枋間一龕一小坐像 ─────────────────────────
+      const 小坐像 = (cx,cy,s=1) => {
+        圓(cx,cy-25*s,25*s,1.05); 橢(cx,cy-27*s,9*s,12*s,1.2);
+        線([[cx-13*s,cy-14*s],[cx-20*s,cy+8*s],[cx-12*s,cy+28*s],[cx+12*s,cy+28*s],[cx+20*s,cy+8*s],[cx+13*s,cy-14*s]],1.15);
+        貝([cx-12*s,cy+4*s],[cx-4*s,cy+13*s],[cx+4*s,cy+13*s],[cx+12*s,cy+4*s],1.0);
+        貝([cx-12*s,cy+28*s],[cx-32*s,cy+36*s],[cx-28*s,cy+48*s],[cx,cy+45*s],1.15);
+        貝([cx+12*s,cy+28*s],[cx+32*s,cy+36*s],[cx+28*s,cy+48*s],[cx,cy+45*s],1.15);
+        橢(cx,cy+48*s,34*s,7*s,1.0);
+      };
+      const 左柱 = () => {
+        const ys=[515,690,865,1040,1215,1390,1565,1740,1915,2058];
+        線([[188,500],[188,2058]],2.4); 線([[318,500],[318,2058]],2.4);
+        for (let i=0;i<ys.length;i++) {
+          const yy=ys[i], out=i%2?14:28;
+          線([[160-out,yy],[344+out,yy]],2.2); 線([[168-out,yy+10],[336+out,yy+10]],1.25);
+          菱橫(175-out,329+out,yy+22,22,5,.78);
+          if(i<ys.length-1){
+            const mid=(yy+ys[i+1])/2+10;
+            筆(1.1); x.beginPath(); x.moveTo(202,mid+55); x.lineTo(202,mid-37);
+            x.bezierCurveTo(206,mid-66,226,mid-73,253,mid-83);
+            x.bezierCurveTo(280,mid-73,300,mid-66,304,mid-37); x.lineTo(304,mid+55); x.stroke();
+            小坐像(253,mid, .72);
+            for(let px=190;px<=316;px+=14) 圓(px,yy+34,2.3,.72);
+          }
+        }
+      };
+      雙鏡(左柱);
+
+      // ── 六拏具逐級：柱礎象 → 立獅 → 回首羱羊 → 摩羯 → 頂獸面 ────────────
+      const 象 = () => {
+        筆(2.3); x.beginPath(); x.moveTo(300,1960);
+        x.bezierCurveTo(292,1905,310,1848,365,1832); x.bezierCurveTo(402,1822,432,1843,444,1873);
+        x.bezierCurveTo(456,1904,446,1938,423,1953); x.lineTo(393,1968); x.stroke();
+        x.beginPath(); x.moveTo(300,1960); x.bezierCurveTo(320,1985,374,1988,393,1968); x.stroke();
+        橢(414,1874,31,38,2.0,-.2); 橢(402,1878,20,28,1.15,-.2);
+        圓(433,1862,3.2,1.1);
+        筆(2); x.beginPath(); x.moveTo(446,1878); x.bezierCurveTo(478,1893,470,1935,444,1946); x.bezierCurveTo(430,1952,430,1934,443,1932); x.stroke();
+        貝([438,1888],[450,1890],[458,1900],[459,1912],1.2); 貝([431,1891],[439,1895],[443,1904],[443,1914],1.2);
+        for(const px of [315,350,386,417]) { 線([[px,1952],[px-3,2028],[px+19,2028],[px+16,1952]],1.8); for(let j=0;j<3;j++) 貝([px+j*7-2,2028],[px+j*7,2021],[px+j*7+4,2021],[px+j*7+6,2028],.85); }
+        筆(1.2); x.beginPath(); x.moveTo(318,1848); x.lineTo(380,1830); x.lineTo(414,1852); x.lineTo(389,1908); x.lineTo(320,1912); x.closePath(); x.stroke();
+        for(let px=326;px<396;px+=18) for(let yy=1850;yy<1905;yy+=17) 線([[px-5,yy],[px,yy-5],[px+5,yy],[px,yy+5]],.75,true);
+        貝([300,1855],[277,1871],[282,1895],[297,1901],1.3);
+      };
+      const 獅 = () => {
+        筆(2.2); x.beginPath(); x.moveTo(305,1778); x.bezierCurveTo(296,1725,314,1662,366,1648);
+        x.bezierCurveTo(399,1639,425,1654,440,1682); x.bezierCurveTo(454,1710,441,1741,414,1750);
+        x.bezierCurveTo(387,1760,345,1767,305,1778); x.stroke();
+        for(let j=0;j<10;j++){ const a=Math.PI*2*j/10; const cx=425+Math.cos(a)*25,cy=1663+Math.sin(a)*27; 筆(1.4);x.beginPath();x.arc(cx,cy,9,a,a+Math.PI*1.45);x.stroke(); }
+        橢(428,1664,18,16,1.5); 圓(435,1658,2.5,.9);
+        筆(1.4); x.beginPath(); x.moveTo(443,1667); x.lineTo(463,1672); x.lineTo(446,1682); x.stroke();
+        for(let j=0;j<4;j++) 線([[447+j*4,1671],[449+j*4,1677]],.75);
+        for(const px of [330,371]) { 線([[px,1758],[px-3,1820],[px+18,1820],[px+16,1752]],1.8); for(let j=0;j<3;j++) 貝([px+j*6,1820],[px+j*6+2,1813],[px+j*6+5,1813],[px+j*6+7,1820],.8); }
+        線([[410,1742],[427,1798],[447,1807],[455,1799]],1.8); 線([[427,1740],[447,1786],[465,1793]],1.5);
+        筆(1.6); x.beginPath(); x.moveTo(311,1705); x.bezierCurveTo(270,1686,268,1649,295,1642); x.bezierCurveTo(310,1638,312,1655,298,1658); x.stroke();
+        for(let j=0;j<5;j++) 貝([321+j*15,1672+j%2*8],[330+j*15,1656],[339+j*15,1657],[346+j*15,1670],.9);
+      };
+      const 羱羊 = () => {
+        筆(2.0); x.beginPath(); x.moveTo(305,1570); x.bezierCurveTo(306,1512,342,1462,401,1464);
+        x.bezierCurveTo(435,1466,449,1493,438,1521); x.bezierCurveTo(424,1554,371,1572,305,1570); x.stroke();
+        // 身向內而首回望外
+        貝([330,1480],[310,1442],[280,1438],[263,1466],1.8); 橢(270,1468,21,17,1.5,-.15); 圓(262,1463,2.3,.8);
+        筆(1.5); x.beginPath(); x.moveTo(258,1450); x.bezierCurveTo(231,1429,226,1397,248,1392); x.bezierCurveTo(270,1388,277,1412,261,1422); x.stroke();
+        x.beginPath(); x.moveTo(272,1452); x.bezierCurveTo(253,1425,259,1403,277,1400); x.bezierCurveTo(291,1398,296,1414,286,1423); x.stroke();
+        葉(253,1461,24,7,Math.PI+.3,1.0);
+        for(const px of [329,376,414]) 線([[px,1550],[px-2,1605],[px+15,1605],[px+13,1548]],1.55);
+        貝([432,1480],[465,1467],[472,1494],[452,1505],1.3);
+        for(let j=0;j<6;j++) 貝([327+j*17,1504+j%2*7],[337+j*17,1490],[344+j*17,1492],[350+j*17,1505],.8);
+      };
+      const 摩羯 = () => {
+        const mx=430,my=1115;
+        筆(2.2); x.beginPath(); x.moveTo(mx-8,my+26); x.bezierCurveTo(mx-45,my-5,mx-39,my-63,mx+7,my-76);
+        x.bezierCurveTo(mx+43,my-86,mx+79,my-59,mx+77,my-22); x.bezierCurveTo(mx+73,my+8,mx+40,my+33,mx-8,my+26); x.stroke();
+        // 上卷長吻、張口、齒列
+        筆(2); x.beginPath(); x.moveTo(mx+67,my-45); x.bezierCurveTo(mx+118,my-65,mx+125,my-112,mx+91,my-123);
+        x.bezierCurveTo(mx+65,my-131,mx+55,my-108,mx+73,my-98); x.bezierCurveTo(mx+87,my-90,mx+98,my-101,mx+88,my-108); x.stroke();
+        x.beginPath(); x.moveTo(mx+73,my-25); x.bezierCurveTo(mx+107,my-13,mx+117,my-35,mx+96,my-50); x.stroke();
+        for(let j=0;j<6;j++) 線([[mx+78+j*5,my-31-j*.8],[mx+80+j*5,my-23-j*.8]],.75);
+        圓(mx+44,my-57,5,1.1); 圓(mx+45,my-57,1.5,.7);
+        葉(mx+18,my-72,31,10,-2.15,1.1); 葉(mx+2,my-58,28,9,-2.5,1.0);
+        // 魚鱗甲與尾噴卷草
+        for(let j=0;j<4;j++) for(let k=0;k<3;k++) 貝([mx-5-j*10,my-34+k*17],[mx+3-j*10,my-45+k*17],[mx+12-j*10,my-42+k*17],[mx+17-j*10,my-31+k*17],.75);
+        筆(1.8); x.beginPath(); x.moveTo(mx-8,my+19); x.bezierCurveTo(mx-67,my+44,mx-101,my+4,mx-75,my-28);
+        x.bezierCurveTo(mx-54,my-53,mx-31,my-28,mx-47,my-14); x.stroke();
+        x.beginPath(); x.moveTo(mx-45,my+18); x.bezierCurveTo(mx-108,my+72,mx-145,my+18,mx-118,my-18); x.bezierCurveTo(mx-97,my-45,mx-78,my-19,mx-93,my-5); x.stroke();
+        for(let j=0;j<4;j++) 三葉(mx-65-j*23,my+25-j*3,23,-2.1+j*.18,.9);
+      };
+      // 林、柱仍滿植滿紋，惟獸身本位先作貼形蔽後景，方顯逐級承托而非線團。
+      const 蔽獸鏈 = () => {
+        x.save(); x.globalCompositeOperation='destination-out'; x.fillStyle='#000';
+        for (const [cx,cy,rx,ry] of [[335,1925,145,126],[332,1702,138,118],[327,1495,132,112],[393,1112,142,134]]) {
+          x.beginPath(); x.ellipse(cx,cy,rx,ry,0,0,Math.PI*2); x.fill();
+        }
+        x.restore(); x.strokeStyle=墨; x.fillStyle=墨;
+      };
+      雙鏡(蔽獸鏈);
+      const 外移 = fn => { x.save(); x.translate(-38,0); fn(); x.restore(); };
+      雙鏡(() => 外移(象)); 雙鏡(() => 外移(獅)); 雙鏡(() => 外移(羱羊)); 雙鏡(() => 外移(摩羯));
+      const 獸座左 = () => {
+        const tiers=[
+          {y:2034,l:205,r:484,kind:'diamond'},
+          {y:1826,l:220,r:468,kind:'pearl'},
+          {y:1612,l:226,r:458,kind:'leaf'},
+          {y:1210,l:250,r:520,kind:'diamond'},
+        ];
+        for(const [i,t] of tiers.entries()){
+          線([[t.l-13,t.y],[t.r+13,t.y]],2.25); 線([[t.l,t.y+10],[t.r,t.y+10]],1.15);
+          if(t.kind==='diamond') 菱橫(t.l+3,t.r-3,t.y+20,24,5,.78);
+          else if(t.kind==='pearl') 珠橫(t.l+3,t.r-3,t.y+19,17,3.2,.72);
+          else {
+            for(let px=t.l+8;px<t.r-8;px+=19){
+              筆(.82);x.beginPath();x.moveTo(px-7,t.y+19);x.quadraticCurveTo(px,t.y+8,px+7,t.y+19);x.stroke();
+              x.beginPath();x.moveTo(px-4,t.y+19);x.quadraticCurveTo(px,t.y+13,px+4,t.y+19);x.stroke();
+            }
+          }
+          線([[t.l-5,t.y+30],[t.r+5,t.y+30]],i===0?1.65:1.0);
+        }
+      };
+      雙鏡(獸座左);
+
+      const 獸面 = () => {
+        const cx=900,cy=650;
+        // 火焰鬃冠
+        for(let k=-5;k<=5;k++){
+          const px=cx+k*22,hh=42-Math.abs(k)*3;
+          筆(1.8); x.beginPath(); x.moveTo(px-11,cy-74+Math.abs(k)*4);
+          x.bezierCurveTo(px-18,cy-100-hh*.25,px-4,cy-112-hh,px+2,cy-127-hh*.2);
+          x.bezierCurveTo(px+14,cy-104-hh*.28,px+18,cy-92,px+11,cy-74+Math.abs(k)*4); x.stroke();
+          x.beginPath(); x.moveTo(px-3,cy-82); x.quadraticCurveTo(px+2,cy-104,px+8,cy-88); x.stroke();
+        }
+        // 額、焰眉、同心目
+        貝([cx-108,cy-54],[cx-62,cy-102],[cx+62,cy-102],[cx+108,cy-54],2.4);
+        for(const d of [-1,1]){
+          貝([cx+d*12,cy-63],[cx+d*42,cy-88],[cx+d*83,cy-82],[cx+d*106,cy-54],2.4);
+          貝([cx+d*17,cy-55],[cx+d*45,cy-70],[cx+d*75,cy-70],[cx+d*94,cy-50],1.2);
+          圓(cx+d*48,cy-38,19,2.0); 圓(cx+d*48,cy-38,8,1.4); 圓(cx+d*48,cy-38,2.6,.85);
+          // 耳卷
+          筆(1.8);x.beginPath();x.moveTo(cx+d*102,cy-36);x.bezierCurveTo(cx+d*148,cy-57,cx+d*156,cy-8,cx+d*127,cy+4);x.bezierCurveTo(cx+d*107,cy+13,cx+d*104,cy-7,cx+d*119,cy-12);x.stroke();
+        }
+        // 鼻與闊口；無下顎
+        貝([cx-21,cy-28],[cx-28,cy-4],[cx-16,cy+10],[cx,cy+2],1.8); 貝([cx+21,cy-28],[cx+28,cy-4],[cx+16,cy+10],[cx,cy+2],1.8);
+        圓(cx-9,cy-2,2.5,.8); 圓(cx+9,cy-2,2.5,.8);
+        貝([cx-112,cy+10],[cx-64,cy+44],[cx+64,cy+44],[cx+112,cy+10],3.0);
+        貝([cx-105,cy+20],[cx-55,cy+4],[cx+55,cy+4],[cx+105,cy+20],1.3);
+        for(let k=-5;k<=5;k++){ const yy=cy+18+Math.abs(k)*1.4; 線([[cx+k*17-6,yy],[cx+k*17-5,yy+17],[cx+k*17+6,yy+17],[cx+k*17+7,yy]],1.0,true); }
+        for(const d of [-1,1]){
+          筆(2); x.beginPath(); x.moveTo(cx+d*92,cy+16); x.quadraticCurveTo(cx+d*106,cy+48,cx+d*77,cy+63); x.quadraticCurveTo(cx+d*69,cy+43,cx+d*75,cy+26,cx+d*92,cy+16); x.stroke();
+        }
+        花(cx,cy-101,13,8,1.05);
+      };
+      獸面();
+
+      // ── 中尊背景遮讓：只蔽後層線，庫尊本體仍稍後在獨立透明層原樣活渲 ─────
+      x.save(); x.globalCompositeOperation='destination-out'; x.fillStyle='#000';
+      x.beginPath(); x.ellipse(900,925,132,118,0,0,Math.PI*2); x.fill();
+      x.beginPath(); x.moveTo(720,1015); x.bezierCurveTo(630,1060,610,1240,632,1405);
+      x.bezierCurveTo(560,1455,500,1540,480,1650); x.bezierCurveTo(630,1718,1170,1718,1320,1650);
+      x.bezierCurveTo(1300,1540,1240,1455,1168,1405); x.bezierCurveTo(1190,1240,1170,1060,1080,1015);
+      x.bezierCurveTo(1025,985,775,985,720,1015); x.closePath(); x.fill(); x.restore();
+      x.strokeStyle=墨; x.fillStyle=墨;
+
+      // ── 尊外雙肩青蓮：莖繞尊外，不穿身線 ─────────────────────────────────
+      雙鏡(() => {
+        貝([606,1618],[570,1440],[535,1230],[558,1044],2.1);
+        貝([618,1618],[585,1430],[554,1235],[571,1044],1.0);
+        葉(570,1270,92,22,-2.65,1.45); 葉(578,1375,82,20,-2.55,1.35);
+        花(565,1020,52,18,1.7); 圓(565,1020,18,1.3);
+        for(let k=0;k<8;k++) 貝([565,1020],[552+k*4,1030],[548+k*5,1050],[550+k*5,1066],.78);
+      });
+
+      // ── 尊外裙裳織紋帶：只落兩腿外側，菱格內一花，邊線雙鉤 ───────────────
+      const 裙帶左 = () => {
+        const p = new Path2D(); p.moveTo(500,1378); p.bezierCurveTo(535,1350,590,1362,623,1412);
+        p.bezierCurveTo(643,1480,631,1586,588,1684); p.lineTo(474,1710);
+        p.bezierCurveTo(501,1602,488,1482,500,1378); p.closePath();
+        x.save(); x.clip(p); 筆(.92);
+        for(let yy=1360;yy<1730;yy+=28) for(let xx=450;xx<660;xx+=28) {
+          線([[xx,yy],[xx+14,yy-14],[xx+28,yy],[xx+14,yy+14]],.82,true);
+          花(xx+14,yy,4.2,4,.62);
+        }
+        x.restore(); 筆(2.0); x.stroke(p);
+        筆(1.0); x.beginPath(); x.moveTo(512,1393); x.bezierCurveTo(538,1375,575,1385,605,1422);
+        x.bezierCurveTo(620,1490,605,1580,566,1663); x.lineTo(492,1682); x.stroke();
+        for(let yy=1420;yy<1660;yy+=34) 圓(500+(yy-1420)*.02,yy,3.2,.75);
+      };
+      雙鏡(裙帶左);
+
+      // ── 卷雲蓮座：瓣端內卷、瓣內套芯、前後兩層反向錯位 ─────────────────
+      const 卷雲瓣 = (cx, base, ww, hh, flip=1) => {
+        筆(2.0); x.beginPath(); x.moveTo(cx-ww/2,base);
+        x.bezierCurveTo(cx-ww*.48,base-hh*.42,cx-ww*.2,base-hh*.9,cx,base-hh);
+        x.bezierCurveTo(cx+ww*.18,base-hh*.83,cx+ww*.21,base-hh*.58,cx+ww*.02,base-hh*.48);
+        x.bezierCurveTo(cx-ww*.12,base-hh*.4,cx-ww*.1,base-hh*.25,cx+ww*.05,base-hh*.29);
+        x.bezierCurveTo(cx+ww*.34,base-hh*.38,cx+ww*.48,base-hh*.2,cx+ww/2,base); x.stroke();
+        筆(1.15); x.beginPath(); x.moveTo(cx-ww*.32,base-hh*.06);
+        x.bezierCurveTo(cx-ww*.28,base-hh*.38,cx-ww*.08,base-hh*.72,cx+ww*.04,base-hh*.75);
+        x.bezierCurveTo(cx+ww*.15,base-hh*.72,cx+ww*.13,base-hh*.55,cx+ww*.02,base-hh*.52); x.stroke();
+        筆(.9); x.beginPath(); x.moveTo(cx-ww*.2,base-hh*.04);
+        x.bezierCurveTo(cx-ww*.08,base-hh*.3,cx+ww*.12,base-hh*.34*flip,cx+ww*.26,base-hh*.12); x.stroke();
+      };
+      線([[342,1708],[1458,1708]],2.7); 線([[326,1723],[1474,1723]],1.25);
+      for(let k=0;k<12;k++) 卷雲瓣(372+k*96,1740,104,92,k%2?1:-1);
+      線([[324,1741],[1476,1741]],2.1); 線([[344,1755],[1456,1755]],1.15);
+      for(let k=0;k<13;k++) {
+        x.save(); x.translate(0,3525); x.scale(1,-1); 卷雲瓣(330+k*95,1767,102,80,k%2?-1:1); x.restore();
+      }
+      線([[350,1822],[1450,1822]],2.8); 線([[332,1838],[1468,1838]],1.3);
+
+      // ── 須彌台：七格獅面象面交替；各格有龕弧、柱、花眼與負重神情 ─────────
+      const 獅面 = (cx,cy,s=1) => {
+        for(let j=0;j<12;j++){const a=Math.PI*2*j/12;筆(1.0);x.beginPath();x.arc(cx+Math.cos(a)*28*s,cy+Math.sin(a)*25*s,9*s,a,a+4.5);x.stroke();}
+        橢(cx,cy,23*s,20*s,1.45); 圓(cx-8*s,cy-5*s,3.2*s,.9); 圓(cx+8*s,cy-5*s,3.2*s,.9);
+        橢(cx,cy+5*s,7*s,5*s,1.0); 貝([cx-13*s,cy+11*s],[cx-6*s,cy+22*s],[cx+6*s,cy+22*s],[cx+13*s,cy+11*s],1.2);
+        for(let j=-2;j<=2;j++) 線([[cx+j*6*s-2*s,cy+14*s],[cx+j*6*s,cy+22*s],[cx+j*6*s+2*s,cy+14*s]],.72);
+      };
+      const 象面 = (cx,cy,s=1) => {
+        橢(cx,cy-4*s,23*s,25*s,1.45); 橢(cx-31*s,cy-3*s,18*s,27*s,1.15,.28); 橢(cx+31*s,cy-3*s,18*s,27*s,1.15,-.28);
+        圓(cx-8*s,cy-9*s,2.8*s,.85); 圓(cx+8*s,cy-9*s,2.8*s,.85);
+        筆(1.5);x.beginPath();x.moveTo(cx,cy+7*s);x.bezierCurveTo(cx-9*s,cy+28*s,cx-7*s,cy+48*s,cx+8*s,cy+54*s);x.bezierCurveTo(cx+17*s,cy+56*s,cx+18*s,cy+44*s,cx+10*s,cy+42*s);x.stroke();
+        for(const d of [-1,1]) 貝([cx+d*10*s,cy+10*s],[cx+d*20*s,cy+22*s],[cx+d*18*s,cy+34*s],[cx+d*14*s,cy+40*s],1.0);
+        貝([cx-18*s,cy-22*s],[cx-8*s,cy-37*s],[cx+8*s,cy-37*s],[cx+18*s,cy-22*s],1.0);
+      };
+      const SL=315,SR=1485,top=1840,bot=2072,n=7,cw=(SR-SL)/n;
+      for(const yy of [top,top+15,top+36,bot-34,bot-15,bot]) 線([[SL-(yy===top||yy===bot?28:0),yy],[SR+(yy===top||yy===bot?28:0),yy]],yy===top||yy===bot?2.8:1.15);
+      菱橫(SL,SR,top+26,27,6,.8); 卷草橫(SL,SR,bot-24,62,7,.82);
+      for(let k=0;k<=n;k++) 線([[SL+cw*k,top+36],[SL+cw*k,bot-34]],1.25);
+      for(let k=0;k<n;k++){
+        const cx=SL+cw*(k+.5),cy=(top+bot)/2+2;
+        筆(1.0);x.beginPath();x.moveTo(cx-cw*.39,bot-38);x.lineTo(cx-cw*.39,cy-32);
+        x.bezierCurveTo(cx-cw*.32,cy-74,cx-34,cy-83,cx,cy-91);
+        x.bezierCurveTo(cx+34,cy-83,cx+cw*.32,cy-74,cx+cw*.39,cy-32);x.lineTo(cx+cw*.39,bot-38);x.stroke();
+        k%2?象面(cx,cy,1):獅面(cx,cy,1);
+        花(cx,bot-53,6,6,.72);
+      }
+
+      // ── 下欄供養：跪供養人、滿瓶、中央火壇；欄帶仍以珠卷草收界 ───────────
+      const lowerTop=2082,lowerBot=2262;
+      珠橫(170,1630,lowerTop+12,20,4,1.0); 卷草橫(170,1630,lowerBot-10,66,8,1.0);
+      線([[170,lowerTop],[1630,lowerTop]],2.5); 線([[170,lowerBot],[1630,lowerBot]],2.5);
+      for(let k=1;k<7;k++) 線([[170+k*(1460/7),lowerTop+22],[170+k*(1460/7),lowerBot-24]],1.0);
+      const 供養人 = (cx,cy,flip=1) => {
+        圓(cx,cy-43,17,1.15); 葉(cx-7*flip,cy-59,22,7,flip>0?-2.2:-.95,1.0);
+        筆(1.35);x.beginPath();x.moveTo(cx-16,cy-27);x.bezierCurveTo(cx-34,cy+4,cx-25,cy+45,cx,cy+55);x.bezierCurveTo(cx+30,cy+48,cx+34,cy+9,cx+16,cy-27);x.stroke();
+        for(let j=0;j<5;j++) 貝([cx-20,cy+j*14-10],[cx-4,cy+j*14-1],[cx+8,cy+j*14-1],[cx+22,cy+j*14-10],.75);
+        線([[cx+4*flip,cy-6],[cx+30*flip,cy+8],[cx+18*flip,cy+18]],1.25); 線([[cx-4*flip,cy-4],[cx+24*flip,cy+14]],1.1);
+        貝([cx,cy+52],[cx-35,cy+66],[cx-48,cy+75],[cx-64,cy+75],1.25); 貝([cx+4,cy+52],[cx+35,cy+64],[cx+51,cy+73],[cx+70,cy+72],1.25);
+      };
+      供養人(330,2168,1); 供養人(540,2168,1); 供養人(1260,2168,-1); 供養人(1470,2168,-1);
+      const 滿瓶=(cx,cy)=>{ 橢(cx,cy+17,35,43,1.5); 線([[cx-20,cy-28],[cx+20,cy-28]],1.4); 線([[cx-27,cy-18],[cx+27,cy-18]],1.0); 花(cx,cy+18,13,8,.9); 貝([cx,cy-29],[cx-6,cy-65],[cx-2,cy-88],[cx,cy-109],1.3); 三葉(cx,cy-79,54,-1.5,1.1); 花(cx,cy-111,15,8,1.0); };
+      滿瓶(725,2203); 滿瓶(1075,2203);
+      筆(1.8);x.strokeRect(846,2170,108,54);x.strokeRect(858,2181,84,32);
+      for(const [dx,hh] of [[-32,52],[0,78],[32,52]]){筆(1.6);x.beginPath();x.moveTo(900+dx-13,2170);x.bezierCurveTo(884+dx,2142-hh*.4,890+dx,2117-hh*.5,900+dx,2110-hh*.65);x.bezierCurveTo(916+dx,2130-hh*.3,918+dx,2154,913+dx,2170);x.stroke();x.beginPath();x.moveTo(897+dx,2164);x.quadraticCurveTo(900+dx,2141,906+dx,2132);x.stroke();}
+
+      // ── 庫筆活渲：各尊獨立透明全幅 canvas，免 destination-out 鑿後景 ───────
+      const 落尊 = (id,cx,cy,R) => {
+        const c=document.createElement('canvas'); c.width=W; c.height=H;
+        const q=c.getContext('2d'); q.translate(cx,cy); q.strokeStyle=墨; q.fillStyle=墨;
+        q.globalAlpha=1; q.globalCompositeOperation='source-over';
+        白描(q,R,依號[id].k,`${id}|k`); x.drawImage(c,0,0);
+      };
+      const 五佛=['east','south','center','west','north'];
+      for(let k=0;k<5;k++) 落尊(五佛[k],上欄L+cell*(k+.5),356,155);
+      落尊('fugen',900,1270,780);
+      // 庫座之上層瓣仍原樣保留；於瓣心另添細內卷，令其與外加卷雲瓣同調而不蔽原線。
+      for(let k=0;k<11;k++) {
+        const cx=614+k*57;
+        筆(.95); x.beginPath(); x.moveTo(cx-13,1704); x.bezierCurveTo(cx-7,1682,cx+15,1680,cx+17,1695);
+        x.bezierCurveTo(cx+19,1707,cx+4,1711,cx+3,1701); x.bezierCurveTo(cx+2,1695,cx+9,1693,cx+10,1698); x.stroke();
+      }
+
+      const out=document.createElement('canvas'); out.width=W; out.height=H;
+      const o=out.getContext('2d'); o.fillStyle=地; o.fillRect(0,0,W,H); o.drawImage(ink,0,0);
+      return out.toDataURL('image/png');
+    }),
+  });
+})().catch(e => { console.error(e); process.exit(1); });
