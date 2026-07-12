@@ -1,3 +1,4 @@
+// 已退役候展原稿：僅供留存；新制見「漢地-唐吳家樣-框飾層.js」。
 // 粉本線上博物館・席三候展稿 —— 漢地・唐吳家樣「釋迦說法立像」
 //
 // 頭註／製展牌素材（研究性復原・候審）
@@ -52,7 +53,7 @@ const { 合幀 } = require('../../tools/lib/幀具.cjs');
 
 (async () => {
   await 合幀({
-    出: '圖錄/風格館/漢地-唐吳家樣-候展稿.png',
+    出: '圖錄/風格館/漢地-唐吳家樣-候展稿-已退役.png',
     幀: page => page.evaluate(async () => {
       const { 錨點, 誦戒 } = await import('/dist/liangdu.js');
       const { 造線筆, 提按貝 } = await import('/匠筆-codex/風格館/lib/白描幀具.js');
