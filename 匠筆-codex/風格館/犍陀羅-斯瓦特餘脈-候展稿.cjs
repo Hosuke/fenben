@@ -1,3 +1,4 @@
+// 已退役候展原稿：留作舊輸出追溯；正式席改由景／尊／飾分層合成。
 // 粉本線上博物館・席二——犍陀羅／斯瓦特餘脈・釋迦立像執衣角式
 // （研究性復原／期段歸屬待核）
 //
@@ -50,7 +51,7 @@ const { 合幀 } = require('../../tools/lib/幀具.cjs');
 
 (async () => {
   await 合幀({
-    出: '圖錄/風格館/犍陀羅-斯瓦特餘脈-候展稿.png',
+    出: '圖錄/風格館/犍陀羅-斯瓦特餘脈-候展稿-已退役.png',
     幀: page => page.evaluate(async () => {
       const { 錨點 } = await import('/dist/liangdu.js');
       const { 造線筆, 連珠橫, 菱花橫, 轉直 } = await import('/匠筆-codex/風格館/lib/白描幀具.js');

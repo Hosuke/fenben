@@ -1,3 +1,4 @@
+// 已退役候展原稿：僅供留存；新制見 東密-鎌倉大成期-框飾層.js。
 // 粉本線上博物館·東密室·鎌倉大成期候展稿
 // 不動明王二童子·覚禪鈔式（研究性復原／待核）
 //
@@ -54,7 +55,7 @@ const { 合幀 } = require('../../tools/lib/幀具.cjs');
 
 (async () => {
   await 合幀({
-    出: '圖錄/風格館/東密-鎌倉大成期-候展稿.png',
+    出: '圖錄/風格館/東密-鎌倉大成期-候展稿-已退役.png',
     幀: page => page.evaluate(async () => {
       const { 依號 } = await import('/dist/yigui.js');
       const { 白描 } = await import('/dist/baimiao.js');
