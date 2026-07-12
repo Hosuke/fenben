@@ -46,7 +46,7 @@ const { 候展合幀 } = require('./lib/候展共具.cjs');
 
 (async () => {
   await 候展合幀({
-    出: '圖錄/風格館/藏地-齊烏崗巴-候展稿.png',
+    出: '圖錄/風格館/藏地-齊烏崗巴-舊單體存卷.png',
     幀: page => page.evaluate(() => {
       const { 開布, 守, 錨斷言, TAU } = window.候展共具;
       const b = 開布(1800, 2500, '#d8b36a', '#0d1124');

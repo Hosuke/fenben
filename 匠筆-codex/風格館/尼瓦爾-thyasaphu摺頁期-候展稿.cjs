@@ -61,7 +61,7 @@ const { 候展合幀 } = require('./lib/候展共具.cjs');
 
 (async () => {
   await 候展合幀({
-    出: '圖錄/風格館/尼瓦爾-thyasaphu摺頁期-候展稿.png',
+    出: '圖錄/風格館/尼瓦爾-thyasaphu摺頁期-舊單體存卷.png',
     幀: page => page.evaluate(() => {
       const 格 = Object.freeze({ 白毫: 12, 頦: 20, 心窩: 36, 臍: 48, 座面: 68 });
       const C = window.候展共具.開布(2200, 2500, '#d6b36e', '#0e1322');

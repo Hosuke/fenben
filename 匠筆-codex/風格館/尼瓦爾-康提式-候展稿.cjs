@@ -67,7 +67,7 @@ const { 候展合幀 } = require('./lib/候展共具.cjs');
 
 (async () => {
   await 候展合幀({
-    出: '圖錄/風格館/尼瓦爾-康提式-候展稿.png',
+    出: '圖錄/風格館/尼瓦爾-康提式-舊單體存卷.png',
     幀: page => page.evaluate(async () => {
       const { 坐像 } = await import('/dist/liangdu.js');
       const { 依號 } = await import('/dist/yigui.js');
