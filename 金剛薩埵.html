@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>金剛薩埵</title>
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1124; }
-  canvas { display: block; width: 100vw; height: 100vh; cursor: grab; touch-action: none; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1124; overscroll-behavior: none; }
+  canvas { display: block; width: 100vw; height: 100vh; height: 100dvh; cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; }
   canvas.拖 { cursor: grabbing; }
 </style>
 </head>
@@ -68,17 +68,80 @@ cv.addEventListener('wheel', (e) => {
   縮 = 新; 速覽();
 }, { passive: false });
 
-let 拖 = null;
-cv.addEventListener('pointerdown', (e) => { 拖 = { x: e.clientX, y: e.clientY }; cv.classList.add('拖'); cv.setPointerCapture(e.pointerId); });
-cv.addEventListener('pointermove', (e) => {
-  if (!拖) return;
-  const d = dpr();
-  平x += (e.clientX - 拖.x) * d; 平y += (e.clientY - 拖.y) * d;
-  拖 = { x: e.clientX, y: e.clientY }; 速覽();
+// 觸與鼠一體：指 Map 追多點——一指拖、二指捏（向捏合中點縮放＋隨中點平移）、
+// 觸屏雙觸復位（iOS 無 dblclick 可恃）。
+let 拖 = null, 捏 = null, 多指 = 0;
+const 指 = new Map();
+let 觸前 = 0, 觸前x = 0, 觸前y = 0;
+cv.addEventListener('pointerdown', (e) => {
+  try { cv.setPointerCapture(e.pointerId); } catch {}
+  指.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY });
+  多指 = Math.max(多指, 指.size);
+  if (指.size === 2) {
+    const [a, b] = [...指.values()];
+    捏 = { 距: Math.hypot(a.x - b.x, a.y - b.y), 中x: (a.x + b.x) / 2, 中y: (a.y + b.y) / 2 };
+    拖 = null; cv.classList.remove('拖');
+  } else if (指.size === 1) { 拖 = { x: e.clientX, y: e.clientY }; cv.classList.add('拖'); }
+  else 拖 = null;
 });
-cv.addEventListener('pointerup', (e) => { 拖 = null; cv.classList.remove('拖'); cv.releasePointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', (e) => {
+  const p = 指.get(e.pointerId);
+  if (p) { p.x = e.clientX; p.y = e.clientY; }
+  if (捏 && 指.size >= 2) {
+    const [a, b] = [...指.values()];
+    const 距 = Math.hypot(a.x - b.x, a.y - b.y), 中x = (a.x + b.x) / 2, 中y = (a.y + b.y) / 2;
+    if (捏.距 > 8 && 距 > 8) {
+      // 錨於舊中點之世界點：平' = 新中*d − (舊中*d − 平)·k，縮平一式合成無漂移
+      const d = dpr();
+      const 新 = Math.min(Math.max(縮 * (距 / 捏.距), 0.05), 512), k = 新 / 縮;
+      平x = 中x * d - (捏.中x * d - 平x) * k;
+      平y = 中y * d - (捏.中y * d - 平y) * k;
+      縮 = 新; 速覽();
+    }
+    捏 = { 距, 中x, 中y };
+  } else if (拖 && p) {
+    const d = dpr();
+    平x += (e.clientX - 拖.x) * d; 平y += (e.clientY - 拖.y) * d;
+    拖 = { x: e.clientX, y: e.clientY }; 速覽();
+  }
+});
+const 指收 = (e) => {
+  const p = 指.get(e.pointerId);
+  指.delete(e.pointerId);
+  try { cv.releasePointerCapture(e.pointerId); } catch {}
+  if (指.size >= 2) {
+    // 三指落二指（或對換）：以現存前二指重建基準，防驟跳
+    const [a, b] = [...指.values()];
+    捏 = { 距: Math.hypot(a.x - b.x, a.y - b.y), 中x: (a.x + b.x) / 2, 中y: (a.y + b.y) / 2 };
+  } else 捏 = null;
+  if (指.size === 1) { const [q] = [...指.values()]; 拖 = { x: q.x, y: q.y }; }
+  else if (指.size === 0) {
+    拖 = null; cv.classList.remove('拖');
+    if (e.type === 'pointerup' && e.pointerType === 'touch' && p && 多指 === 1
+        && Math.hypot(e.clientX - p.x0, e.clientY - p.y0) < 12) {
+      const 今 = e.timeStamp;
+      if (今 - 觸前 < 320 && Math.hypot(e.clientX - 觸前x, e.clientY - 觸前y) < 30) { 觸前 = 0; 復位(); 繪(); }
+      else { 觸前 = 今; 觸前x = e.clientX; 觸前y = e.clientY; }
+    } else 觸前 = 0; // 拖・捏・cancel 之末不留雙觸伏筆
+    多指 = 0;
+  }
+};
+cv.addEventListener('pointerup', 指收);
+cv.addEventListener('pointercancel', 指收);
 cv.addEventListener('dblclick', () => { 復位(); 繪(); });
-addEventListener('resize', () => { 復位(); 繪(); });
+// resize（含 iOS 地址欄伸縮・轉屏）：保視野中心與縮率，不復位打斷觀圖。
+// 自持幕尺寸（cv.width 於 繪中 滯後，連發 resize 倚之則中心逐次漂移）
+let 幕w = Math.round(innerWidth * dpr()), 幕h = Math.round(innerHeight * dpr());
+addEventListener('resize', () => {
+  const d = dpr(), vw = Math.round(innerWidth * d), vh = Math.round(innerHeight * d);
+  const cx = (幕w / 2 - 平x) / 縮, cy = (幕h / 2 - 平y) / 縮;
+  平x = vw / 2 - cx * 縮; 平y = vh / 2 - cy * 縮;
+  幕w = vw; 幕h = vh;
+  繪();
+});
+// iOS Safari 頁級雙指手勢之防（毋令整頁被捏縮）
+for (const t of ['gesturestart', 'gesturechange', 'gestureend'])
+  document.addEventListener(t, (e) => e.preventDefault());
 
 // ── 畫身（機轉自 尼瓦爾-精密二稿.cjs；勿手改） ────────────────────────────────
 async function __描(__cv, __T) {
