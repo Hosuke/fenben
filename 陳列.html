@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>粉本 · 諸尊陳列</title>
+<style>
+  /* 諸尊陳列：白晝卷首 → 幽暗壇場。月輪浮於夜，金線自語。 */
+  :root {
+    --骨白: #EBE5D6;
+    --紙: #F2EDDF;
+    --炭: #29261F;
+    --墨灰: #6B6555;
+    --朱: #9E3922;
+    --夜: #090C17;
+    --靛: #10152B;
+    --淡絹: #D8D0BA;
+    --夜灰: #8D91A4;
+    --金暗: #8A7448;
+    --明線: rgba(41, 38, 31, .16);
+    --暗線: rgba(201, 164, 92, .15);
+    --航偏: 0px;
+    /* 筆色契約：canvas 引擎自此取金泥 */
+    --金泥: #d8b36a;
+    --金明: #f2d9a4;
+    --絹: #e8e1cf;
+    --墨淡: #8d91a4;
+  }
+  @media (min-width: 961px) { :root { --航偏: 92px; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scrollbar-color: var(--墨灰) var(--骨白); }
+  body {
+    background: var(--骨白);
+    color: var(--炭);
+    font-family: "Noto Serif TC", "Songti TC", "Source Han Serif TC", "Yu Mincho", "Hiragino Mincho ProN", serif;
+    line-height: 2;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+  ::selection { background: rgba(158, 57, 34, .18); }
+  [data-tone="暗"] ::selection { background: rgba(216, 179, 106, .3); color: #F2E5C9; }
+  a { color: inherit; text-decoration-color: rgba(41, 38, 31, .35); text-underline-offset: 4px; }
+  a:hover { color: var(--朱); text-decoration-color: currentColor; }
+  [data-tone="暗"] a { text-decoration-color: rgba(216, 208, 186, .35); }
+  [data-tone="暗"] a:hover { color: #EFE4C8; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  button { font: inherit; }
+  :focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
+
+  /* ── 館路（桌面固定直航） ── */
+  nav.諸頁 {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 30;
+    width: var(--航偏);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 22px; padding: 24px 0;
+    color: var(--墨灰);
+    transition: color .8s ease;
+  }
+  nav.諸頁[data-tone="暗"] { color: var(--夜灰); }
+  nav.諸頁 .印記 {
+    position: absolute; top: 26px;
+    padding: 7px 5px 6px;
+    border: 1px solid rgba(158, 57, 34, .6);
+    color: var(--朱);
+    font-size: 12px; line-height: 1.25; letter-spacing: .2em;
+    writing-mode: vertical-rl; text-decoration: none;
+  }
+  nav.諸頁 a:not(.印記) {
+    position: relative; display: block; padding-left: 13px;
+    font-size: 11px; letter-spacing: .34em;
+    writing-mode: vertical-rl; text-decoration: none; color: inherit;
+    opacity: .55; transition: opacity .5s, color .5s;
+  }
+  nav.諸頁 a:not(.印記):hover { opacity: 1; }
+  nav.諸頁 a.今 { opacity: 1; color: var(--朱); }
+  nav.諸頁[data-tone="暗"] a.今 { color: var(--金泥); }
+  nav.諸頁 a.今::before {
+    content: ""; position: absolute; top: 50%; left: 0;
+    width: 3px; height: 3px; margin-top: -2px;
+    background: currentColor;
+  }
+  @media (max-width: 960px) {
+    nav.諸頁 {
+      position: static; width: auto; flex-direction: row; justify-content: flex-start;
+      gap: 20px; padding: 22px clamp(18px, 5vw, 40px) 0; flex-wrap: wrap;
+    }
+    nav.諸頁 .印記 { position: static; order: -1; margin-right: 8px; }
+    nav.諸頁 a:not(.印記) { writing-mode: horizontal-tb; padding-left: 0; font-size: 11.5px; letter-spacing: .2em; }
+    nav.諸頁 a.今::before { top: auto; bottom: -4px; left: 0; right: 0; width: auto; height: 1px; margin: 0; }
+  }
+
+  .身 {
+    max-width: calc(1320px + var(--航偏));
+    margin: 0 auto;
+    padding-left: calc(var(--航偏) + clamp(22px, 5vw, 84px));
+    padding-right: clamp(22px, 5vw, 84px);
+  }
+
+  /* ── 卷首：白晝 ── */
+  header.卷首 { position: relative; min-height: 88svh; display: grid; align-content: center; }
+  .卷首 .題簽 {
+    position: absolute; top: 50%; right: clamp(4%, 8vw, 12%);
+    transform: translateY(-50%);
+    margin: 0;
+    writing-mode: vertical-rl; white-space: nowrap;
+    font-size: clamp(64px, 16svh, 150px); line-height: 1.1;
+    letter-spacing: .3em; color: var(--炭); font-weight: 500;
+  }
+  .卷首 .題簽 small {
+    display: block; margin-top: 1.6em;
+    font-size: .14em; font-weight: 400; letter-spacing: .7em; color: var(--墨灰);
+  }
+  .啟 { max-width: 34em; padding: 10svh 0; }
+  .八字 { font-size: clamp(15px, 1.6vw, 19px); letter-spacing: .5em; color: var(--炭); margin-bottom: 30px; }
+  .引 p { color: var(--炭); font-size: 14.5px; line-height: 2.35; text-align: justify; }
+  .引 p b { font-weight: 600; }
+  .觀例引 {
+    margin-top: 24px; font-size: 11.5px; letter-spacing: .16em; color: var(--墨灰);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .觀例引::before { content: ""; width: 26px; height: 1px; background: var(--墨灰); flex: none; }
+  .進度 { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 7px; align-items: center; max-width: 30em; }
+  .進度 i { width: 7px; height: 7px; border: 1px solid var(--墨灰); opacity: .5; display: block; }
+  .進度 i.成 { background: var(--朱); border-color: var(--朱); opacity: 1; }
+  .進度 em { font-style: normal; font-size: 11.5px; color: var(--墨灰); margin-left: 10px; letter-spacing: .14em; }
+
+  /* ── 門檻：入壇 ── */
+  .門檻 {
+    height: 56svh;
+    background: linear-gradient(180deg,
+      var(--骨白) 0%, #CFC8B3 22%, #8D8A85 46%, #3A3E52 68%, #151A30 84%, var(--夜) 96%);
+    position: relative;
+  }
+  .門檻::before {
+    content: ""; position: absolute; top: 18%; left: 50%;
+    width: 1px; height: 46%;
+    background: linear-gradient(rgba(235,229,214,0), rgba(235,229,214,.6) 50%, rgba(235,229,214,0));
+  }
+
+  /* ── 壇場：幽暗 ── */
+  .壇場 { color: var(--淡絹); background: var(--夜); padding-bottom: 1px; }
+  section.帖 { display: grid; grid-template-columns: 112px 1fr; gap: 10px 46px; padding-top: clamp(80px, 14vh, 170px); }
+  .帖題 { display: flex; gap: 16px; justify-content: flex-end; align-self: start; position: sticky; top: 46px; }
+  .帖題 h2 {
+    writing-mode: vertical-rl; font-weight: 500; font-size: 27px; letter-spacing: .3em;
+    color: #EFE7CF; line-height: 1.3;
+  }
+  .帖題 .帖序 { writing-mode: vertical-rl; font-size: 10px; letter-spacing: .62em; color: var(--朱); padding-top: 8px; }
+  .帖註 {
+    font-size: 12px; color: var(--夜灰); letter-spacing: .2em;
+    display: flex; align-items: center; gap: 14px; margin-bottom: 8px;
+  }
+  .帖註::after { content: ""; flex: 1; height: 1px; background: var(--暗線); }
+  .帖身 h3 {
+    font-weight: 400; font-size: 12px; letter-spacing: .42em; color: var(--金暗);
+    margin: 46px 0 4px; display: flex; align-items: center; gap: 16px;
+  }
+  .帖身 h3::after { content: ""; flex: 1; height: 1px; background: rgba(201, 164, 92, .07); }
+  .列 { display: flex; flex-wrap: wrap; gap: 46px 32px; padding: 22px 0 4px; }
+
+  /* ── 尊卡：月輪 ── */
+  .尊卡 {
+    text-align: center; width: 172px;
+    animation: 顯 .9s cubic-bezier(.2, .7, .2, 1) both;
+    animation-delay: calc(var(--i) * 55ms);
+  }
+  .輪 {
+    position: relative; width: 172px; height: 172px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 44%, var(--靛) 0%, #0B0F1F 74%);
+    box-shadow: inset 0 0 0 1px rgba(201, 164, 92, .17);
+    transition: box-shadow .5s, transform .5s;
+  }
+  .尊卡.可觀 { cursor: zoom-in; }
+  .尊卡.可觀:hover .輪 {
+    transform: translateY(-3px);
+    box-shadow: inset 0 0 0 1px rgba(201, 164, 92, .5);
+  }
+  .輪 canvas { width: 100%; height: 100%; display: block; border-radius: 50%; }
+  .尊卡.候筆 .輪 { box-shadow: none; background: transparent; border: 1px dashed rgba(201, 164, 92, .22); }
+  .尊卡.候筆 .輪::after {
+    content: "候筆"; position: absolute; inset: 0; display: grid; place-items: center;
+    font-size: 11px; letter-spacing: .5em; text-indent: .5em; color: rgba(201, 164, 92, .34);
+  }
+  .尊卡.候筆 figcaption b { color: var(--夜灰); }
+  .尊卡.候審 .輪 { box-shadow: inset 0 0 0 1px rgba(158, 57, 34, .6); }
+  .章 {
+    position: absolute; top: 8px; right: 2px; transform: rotate(-7deg);
+    background: var(--朱); color: #f3e6d8; font-size: 10px; letter-spacing: .18em; text-indent: .18em;
+    padding: 3px 5px 2px; line-height: 1.5;
+  }
+  .章.審 { background: transparent; color: #C4553A; border: 1px solid rgba(158, 57, 34, .8); }
+  .尊卡 figcaption { margin-top: 14px; }
+  .尊卡 figcaption b { display: block; font-weight: 500; font-size: 15px; letter-spacing: .12em; color: var(--淡絹); }
+  .尊卡 figcaption small { display: block; font-size: 11px; color: var(--夜灰); letter-spacing: .06em; margin-top: 3px; }
+
+  /* ── 觀：研究之暗室 ── */
+  dialog.觀 {
+    position: fixed; inset: 0; margin: 0; border: none; border-radius: 0; padding: 0;
+    width: 100dvw; height: 100dvh; max-width: 100dvw; max-height: 100dvh;
+    background: #06080F; color: var(--淡絹);
+  }
+  dialog.觀[open] { animation: 觀顯 .45s ease both; }
+  @keyframes 觀顯 { from { opacity: 0; } to { opacity: 1; } }
+  dialog.觀::backdrop { background: rgba(4, 6, 13, .7); }
+  .觀身 { display: flex; height: 100%; }
+  .觀圖 {
+    position: relative; flex: 1 1 auto; min-width: 0; min-height: 0;
+    display: grid; place-items: center; padding: 30px; overflow: hidden;
+  }
+  .觀圖 canvas { display: block; max-width: 100%; max-height: 100%; height: auto; object-fit: contain; touch-action: none; cursor: grab; }
+  .觀圖 canvas.拖中 { cursor: grabbing; }
+  .觀例 {
+    position: absolute; left: 32px; bottom: 20px; font-size: 10.5px; letter-spacing: .2em;
+    color: var(--夜灰); pointer-events: none; display: flex; gap: 18px;
+  }
+  .觀例 b { font-weight: 400; color: var(--金暗); }
+  .觀文 {
+    flex: 0 0 380px; padding: 64px 44px 40px; overflow-y: auto;
+    border-left: 1px solid var(--暗線);
+    scrollbar-width: thin;
+  }
+  .觀文 h4 { font-size: 26px; font-weight: 500; letter-spacing: .16em; color: #EFE7CF; margin-bottom: 6px; }
+  .觀文 .側名 { font-size: 11px; color: var(--金暗); letter-spacing: .24em; margin-bottom: 30px; }
+  .觀文 dl { font-size: 13px; display: grid; grid-template-columns: 4.6em 1fr; gap: 0 16px; }
+  .觀文 dt { color: var(--金暗); letter-spacing: .3em; font-size: 10.5px; padding: 8px 0; }
+  .觀文 dd { color: var(--淡絹); padding: 8px 0; border-bottom: 1px solid rgba(201, 164, 92, .07); }
+  .觀文 .典 { margin-top: 28px; border-top: 1px solid var(--暗線); padding-top: 18px; }
+  .觀文 .典 h5 { font-size: 10.5px; font-weight: 400; letter-spacing: .34em; color: var(--金暗); margin-bottom: 12px; }
+  .觀文 .典 p { font-size: 12px; color: var(--夜灰); margin-bottom: 12px; line-height: 2; }
+  .觀文 .典 p b { color: var(--淡絹); font-weight: 500; display: block; }
+  .合 {
+    position: absolute; top: 16px; right: 20px; background: none; z-index: 2;
+    border: 1px solid var(--暗線); min-width: 44px; min-height: 44px;
+    color: var(--夜灰); font-size: 17px; cursor: pointer; font-family: inherit;
+  }
+  .合:hover { color: #EFE7CF; border-color: var(--金暗); }
+
+  /* ── 暮：出壇 ── */
+  .暮 { height: 26vh; background: linear-gradient(180deg, var(--夜) 0%, #4A4A50 55%, var(--骨白) 100%); }
+  footer {
+    color: var(--炭);
+  }
+  footer .身 {
+    padding-top: 28px; padding-bottom: 50px;
+    border-top: 1px solid var(--明線);
+    font-size: 10.5px; color: var(--墨灰); letter-spacing: .12em;
+    display: flex; flex-wrap: wrap; gap: 8px 30px; justify-content: space-between;
+  }
+
+  @keyframes 顯 { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation: none !important; transition: none !important; }
+  }
+  @media (max-width: 960px) {
+    .觀身 { flex-direction: column; }
+    .觀文 { flex: 0 1 auto; max-height: 42vh; border-left: none; border-top: 1px solid var(--暗線); padding: 26px 26px 30px; }
+    .觀例 { display: none; }
+    section.帖 { display: block; padding-top: clamp(70px, 11vh, 120px); }
+    .帖題 { position: static; justify-content: flex-start; flex-direction: column-reverse; gap: 8px; margin-bottom: 8px; }
+    .帖題 h2 { writing-mode: horizontal-tb; font-size: 22px; }
+    .帖題 .帖序 { writing-mode: horizontal-tb; padding: 0; }
+  }
+  @media (max-width: 720px) {
+    header.卷首 { min-height: 0; padding-top: 6svh; }
+    .卷首 .題簽 { position: static; transform: none; margin: 0 0 40px; font-size: clamp(56px, 18vw, 84px); }
+    .啟 { padding: 0 0 10svh; }
+    .門檻 { height: 42svh; }
+    .列 { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="諸頁" aria-label="全站之航" data-tone="明">
+  <a class="印記" href="陳列.html">粉本</a>
+  <a href="陳列.html" class="今" aria-current="page">諸尊陳列</a>
+  <a href="shouyin.html">手印譜</a>
+  <a href="sanmaya.html">三昧耶譜</a>
+  <a href="index.html">博物館</a>
+  <a href="競本.html">評卷廳</a>
+</nav>
+
+<header class="卷首 身" data-screen-label="卷首" data-tone="明">
+  <h1 class="題簽">粉本<small>FENBEN</small></h1>
+  <div class="啟">
+    <p class="八字">雲施法雨 · 留形住世</p>
+    <div class="引">
+      <p><b>粉本</b>者，畫工世守之底樣也。刺孔撲粉，形隨本轉——本在，則形不失。
+      此卷所陳，非圖片也：諸尊皆<b>程序白描</b>，量度起《造像量度經解》之格網，
+      儀軌逐尊繫於出典，金泥一線，實時運筆於紺紙之上。月輪虛白者候筆，
+      朱界未鈐者候審，鈐朱印者已核。</p>
+      <div class="觀例引">凡有像者，點之即放——矢量重運，纖毫不糊；滾輪再放，拖曳平移。</div>
+      <div class="進度" id="進度"></div>
+    </div>
+  </div>
+</header>
+
+<div class="門檻" aria-hidden="true"></div>
+
+<div class="壇場" data-tone="暗">
+  <main id="壇" class="身" data-screen-label="諸尊陳列"></main>
+  <div class="暮" aria-hidden="true"></div>
+</div>
+
+<footer data-tone="明">
+  <div class="身">
+    <span>粉本 fenben · CC BY-NC-SA 4.0 · <a href="shouyin.html">手印譜</a> · <a href="sanmaya.html">三昧耶譜</a> · <a href="https://github.com/Hosuke/mandala">姊妹壇 · 金胎曼荼羅引擎</a></span>
+    <span>律在則形正 · 形存則法傳</span>
+  </div>
+</footer>
+
+<dialog class="觀" id="帖觀" data-screen-label="全屏展觀">
+  <button class="合" id="合" aria-label="閉">✕</button>
+  <div class="觀身">
+    <div class="觀圖">
+      <canvas id="觀布"></canvas>
+      <div class="觀例"><span><b>滾輪</b> 放大</span><span><b>拖曳</b> 平移</span><span><b>雙擊</b> 復原</span><span><b>ESC</b> 閉</span><span id="觀倍"></span></div>
+    </div>
+    <div class="觀文" id="帖文"></div>
+  </div>
+</dialog>
+
+<script type="module">
+import { 依號, 已核之 } from './dist/yigui.js';
+import { 白描 } from './dist/baimiao.js';
+import { 候審筆 } from './dist/zun/index.js';
+
+// 三十七尊之目（金剛界成身會）＋胎藏五佛；尊號承 mandala deities.js
+const 帖目 = [
+  { 帖: '金剛界 · 成身會', 註: '三十七尊——五佛既成，餘尊候筆', 側: 'k', 組: [
+    { 名: '五佛', 目: [['center','大日如來'],['east','阿閦如來'],['south','寶生如來'],['west','阿彌陀如來'],['north','不空成就如來']] },
+    { 名: '四波羅蜜', 目: [['p-kon','金剛波羅蜜'],['p-ho','寶波羅蜜'],['p-hou','法波羅蜜'],['p-katsu','業波羅蜜']] },
+    { 名: '十六大菩薩 · 東方阿閦四親近', 目: [['fugen','金剛薩埵'],['k-o','金剛王'],['k-ai','金剛愛'],['k-ki','金剛喜']] },
+    { 名: '十六大菩薩 · 南方寶生四親近', 目: [['kokuzo','金剛寶'],['k-ko','金剛光'],['k-do','金剛幢'],['k-sho','金剛笑']] },
+    { 名: '十六大菩薩 · 西方彌陀四親近', 目: [['kannon','金剛法'],['monju','金剛利'],['miroku','金剛因'],['k-go','金剛語']] },
+    { 名: '十六大菩薩 · 北方不空成就四親近', 目: [['k-gyo','金剛業'],['k-gou','金剛護'],['k-ge','金剛牙'],['k-ken','金剛拳']] },
+    { 名: '內四供養', 目: [['g-ki','金剛嬉'],['g-man','金剛鬘'],['g-ka','金剛歌'],['g-bu','金剛舞']] },
+    { 名: '外四供養', 目: [['g-ko','金剛香'],['g-ke','金剛華'],['g-to','金剛燈'],['g-zu','金剛塗']] },
+    { 名: '四攝', 目: [['s-ko','金剛鉤'],['s-saku','金剛索'],['s-sa','金剛鎖'],['s-rei','金剛鈴']] },
+  ]},
+  { 帖: '金剛界 · 五大明王', 註: '複雜像波首筆——降三世（四面八臂踏二天）；餘四尊候波', 側: 'k', 組: [
+    { 名: '明王', 目: [['gozanze','降三世明王']] },
+  ]},
+  { 帖: '漢傳 · 橫三世', 註: '三寶佛（面南觀之：左西彌陀・中釋迦・右東藥師）——豎三世諸題候波', 側: 'h', 組: [
+    { 名: '橫三世佛', 目: [['mida','阿彌陀如來'],['shaka','釋迦牟尼佛'],['yakushi','藥師如來']] },
+    { 名: '藥師二脅侍（立像）', 目: [['gakko','月光菩薩'],['nikko','日光菩薩']] },
+    { 名: '千手千眼觀自在（複雜像波・十一面四十二臂）', 目: [['senju','千手觀音']] },
+    { 名: '星供中尊（釋迦金輪）', 目: [['kinrin','一字金輪佛頂']] },
+    { 名: '北斗七星（星供二院・菩薩形持笏，七鍵一筆）', 目: [
+      ['hokuto-tanro','貪狼星'], ['hokuto-komon','巨門星'], ['hokuto-rokuson','祿存星'],
+      ['hokuto-monkyoku','文曲星'], ['hokuto-renjo','廉貞星'], ['hokuto-mukyoku','武曲星'],
+      ['hokuto-hagun','破軍星'],
+    ] },
+    { 名: '十二神將（八搩忿怒・持物依作例）', 目: [
+      ['kubira','宮毘羅大將'], ['basara','伐折羅大將'], ['mekira','迷企羅大將'],
+      ['antera','安底羅大將'], ['anira','頞儞羅大將'], ['santera','珊底羅大將'],
+      ['indara','因達羅大將'], ['haira','波夷羅大將'], ['makora','摩虎羅大將'],
+      ['shindara','真達羅大將'], ['shotora','招杜羅大將'], ['bikara','毘羯羅大將'],
+    ] },
+  ]},
+  { 帖: '胎藏 · 中臺', 註: '中臺八葉院滿——諸院首波啟（蘇悉地・持明）', 側: 't', 組: [
+    { 名: '五佛', 目: [['center','大日如來'],['east','寶幢如來'],['south','開敷華王如來'],['west','無量壽如來'],['north','天鼓雷音如來']] },
+    { 名: '八葉四菩薩', 目: [['fugen','普賢菩薩'],['monju','文殊師利菩薩'],['kannon','觀自在菩薩'],['miroku','彌勒菩薩']] },
+    { 名: '諸院首波（蘇悉地院・持明院）', 目: [['juichimen','十一面觀自在'],['fudo','不動明王']] },
+  ]},
+];
+
+const dpr = Math.min(window.devicePixelRatio || 1, 2);
+const 金泥色 = () => getComputedStyle(document.documentElement).getPropertyValue('--金泥').trim() || '#d8b36a';
+
+function 描(canvas, cssSize, face, 鍵) {
+  canvas.width = canvas.height = cssSize * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.translate(cssSize / 2, cssSize / 2);
+  ctx.strokeStyle = 金泥色();
+  ctx.fillStyle = ctx.strokeStyle;
+  白描(ctx, cssSize / 2, face, 鍵);
+}
+
+const 壇 = document.getElementById('壇');
+const 漢序 = ['其一','其二','其三','其四','其五','其六','其七','其八','其九'];
+let 序 = 0, 成數 = 0, 總數 = 0, 金剛界總 = 0, 金剛界成 = 0, 帖數 = 0;
+
+for (const 帖 of 帖目) {
+  const sec = document.createElement('section');
+  sec.className = '帖';
+  sec.setAttribute('data-screen-label', 帖.帖);
+  const 題 = document.createElement('div');
+  題.className = '帖題';
+  const 帖序 = document.createElement('div');
+  帖序.className = '帖序'; 帖序.textContent = 漢序[帖數++] || '';
+  const h2 = document.createElement('h2');
+  h2.textContent = 帖.帖;
+  題.appendChild(h2); 題.appendChild(帖序);
+  const 身 = document.createElement('div');
+  身.className = '帖身';
+  const 帖註 = document.createElement('div');
+  帖註.className = '帖註'; 帖註.textContent = 帖.註;
+  身.appendChild(帖註);
+  for (const 組 of 帖.組) {
+    const h3 = document.createElement('h3');
+    h3.textContent = 組.名;
+    身.appendChild(h3);
+    const 列 = document.createElement('div');
+    列.className = '列';
+    for (const [id, 名] of 組.目) {
+      總數++; if (帖.側 === 'k') 金剛界總++;
+      const 條 = 依號[id];
+      const face = 條 && 條[帖.側];
+      // 已核之章：儀軌信已核**且**筆非候審（新筆必經主人過目乃摘朱界）
+      const 核 = face && face.信 === '已核' && !候審筆.has(`${id}|${帖.側}`);
+      if (核) { 成數++; if (帖.側 === 'k') 金剛界成++; }
+      const 卡 = document.createElement('figure');
+      卡.className = '尊卡 ' + (核 ? '已核 可觀' : face ? '候審 可觀' : '候筆');
+      卡.style.setProperty('--i', 序++ % 12);
+      const 輪 = document.createElement('div');
+      輪.className = '輪';
+      if (face) {
+        const c = document.createElement('canvas');
+        描(c, 172, face, `${id}|${帖.側}`);
+        輪.appendChild(c);
+        const 章 = document.createElement('span');
+        章.className = 核 ? '章' : '章 審';
+        章.textContent = 核 ? '已核' : '候審';
+        輪.appendChild(章);
+        卡.addEventListener('click', () => 開帖(id, 帖.側, 名, face));
+      }
+      卡.appendChild(輪);
+      const cap = document.createElement('figcaption');
+      const b = document.createElement('b'); b.textContent = 名;
+      const s = document.createElement('small');
+      s.textContent = face ? `${face.印} · ${face.形}` : '候考據落筆';
+      cap.appendChild(b); cap.appendChild(s);
+      卡.appendChild(cap);
+      列.appendChild(卡);
+    }
+    身.appendChild(列);
+  }
+  sec.appendChild(題); sec.appendChild(身);
+  壇.appendChild(sec);
+}
+
+// 進度：金剛界三十七尊之籌
+const 進度 = document.getElementById('進度');
+for (let i = 0; i < 金剛界總; i++) {
+  const dot = document.createElement('i');
+  if (i < 金剛界成) dot.className = '成';
+  進度.appendChild(dot);
+}
+const em = document.createElement('em');
+em.textContent = `三十七尊 · 成 ${金剛界成}`;
+進度.appendChild(em);
+
+// ── 觀：全屏展觀（矢量重繪，滾輪局部再放，拖曳平移）──
+const 帖觀 = document.getElementById('帖觀');
+const 帖文 = document.getElementById('帖文');
+const 觀布 = document.getElementById('觀布');
+const 觀倍 = document.getElementById('觀倍');
+const 觀狀 = { size: 720, zoom: 1, px: 0, py: 0, 筆: null };
+
+function 觀量() {
+  const 欄 = window.innerWidth > 960 ? 380 : 0;
+  const 縱留 = window.innerWidth <= 960 ? Math.floor(window.innerHeight * .42) : 0;
+  const m = Math.min(window.innerWidth - 欄, window.innerHeight - 縱留) - 60;
+  觀狀.size = Math.min(1100, Math.floor(m * .92), Math.max(720, Math.floor(m * .84)));
+}
+function 觀夾() {
+  const 界 = 觀狀.size * 觀狀.zoom * 0.55;
+  觀狀.px = Math.max(-界, Math.min(界, 觀狀.px));
+  觀狀.py = Math.max(-界, Math.min(界, 觀狀.py));
+}
+function 觀繪() {
+  const s = 觀狀.size;
+  觀布.width = 觀布.height = s * dpr;
+  觀布.style.width = s + 'px';
+  const ctx = 觀布.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.translate(s / 2 + 觀狀.px, s / 2 + 觀狀.py);
+  ctx.strokeStyle = ctx.fillStyle = 金泥色();
+  觀狀.筆(ctx, (s / 2) * 觀狀.zoom);
+  觀倍.textContent = 觀狀.zoom > 1.01 ? `× ${觀狀.zoom.toFixed(1)}` : '';
+}
+觀布.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = 觀布.getBoundingClientRect();
+  const k = 觀狀.size / r.width;
+  const mx = (e.clientX - r.left) * k - 觀狀.size / 2;
+  const my = (e.clientY - r.top) * k - 觀狀.size / 2;
+  const z0 = 觀狀.zoom;
+  const z = Math.min(8, Math.max(1, z0 * (e.deltaY < 0 ? 1.14 : 1 / 1.14)));
+  觀狀.px = mx - (mx - 觀狀.px) * (z / z0);
+  觀狀.py = my - (my - 觀狀.py) * (z / z0);
+  觀狀.zoom = z;
+  if (z === 1) { 觀狀.px = 觀狀.py = 0; }
+  觀夾(); 觀繪();
+}, { passive: false });
+let 拖 = null;
+觀布.addEventListener('pointerdown', e => {
+  拖 = { x: e.clientX, y: e.clientY, px: 觀狀.px, py: 觀狀.py };
+  觀布.setPointerCapture(e.pointerId);
+  觀布.classList.add('拖中');
+});
+觀布.addEventListener('pointermove', e => {
+  if (!拖) return;
+  const r = 觀布.getBoundingClientRect();
+  const k = 觀狀.size / r.width;
+  觀狀.px = 拖.px + (e.clientX - 拖.x) * k;
+  觀狀.py = 拖.py + (e.clientY - 拖.y) * k;
+  觀夾(); 觀繪();
+});
+觀布.addEventListener('pointerup', () => { 拖 = null; 觀布.classList.remove('拖中'); });
+觀布.addEventListener('pointercancel', () => { 拖 = null; 觀布.classList.remove('拖中'); });
+觀布.addEventListener('dblclick', () => { 觀狀.zoom = 1; 觀狀.px = 觀狀.py = 0; 觀繪(); });
+window.addEventListener('resize', () => { if (帖觀.open) { 觀量(); 觀繪(); } });
+
+function 行(dl, k, v) {
+  if (!v) return;
+  const dt = document.createElement('dt'); dt.textContent = k;
+  const dd = document.createElement('dd'); dd.textContent = v;
+  dl.appendChild(dt); dl.appendChild(dd);
+}
+function 開帖(id, 側, 名, face) {
+  觀狀.筆 = (ctx, R) => 白描(ctx, R, face, `${id}|${側}`);
+  觀狀.zoom = 1; 觀狀.px = 觀狀.py = 0;
+  觀量(); 觀繪();
+  帖文.textContent = '';
+  const h4 = document.createElement('h4'); h4.textContent = 名;
+  const 側名 = document.createElement('div'); 側名.className = '側名';
+  側名.textContent = (側 === 't' ? '胎藏界' : 側 === 'h' ? '漢傳' : '金剛界') + ` · ${id} · 信＝${face.信}`;
+  帖文.appendChild(h4); 帖文.appendChild(側名);
+  const dl = document.createElement('dl');
+  行(dl, '形', face.形);
+  行(dl, '搩度', `${face.搩度} 搩（${face.搩度 * 12} 指）`);
+  行(dl, '面臂', `${face.面臂.面} 面 ${face.面臂.臂} 臂`);
+  行(dl, '印', face.印);
+  行(dl, '印法', face.印法);
+  行(dl, '持物', face.持物 && face.持物.length ? face.持物.join('・') : '');
+  行(dl, '身色', face.身色 ? `経軌 ${face.身色.経軌} · 現図 ${face.身色.現図}` : '');
+  行(dl, '座', face.座);
+  行(dl, '光', Object.keys(face.光 || {}).filter(k => face.光[k]).join('・'));
+  行(dl, '異說', face.異說);
+  帖文.appendChild(dl);
+  if (face.出典 && face.出典.length) {
+    const 典 = document.createElement('div'); 典.className = '典';
+    const h5 = document.createElement('h5'); h5.textContent = '出典';
+    典.appendChild(h5);
+    for (const t of face.出典) {
+      const p = document.createElement('p');
+      const b = document.createElement('b'); b.textContent = t.典;
+      p.appendChild(b);
+      p.appendChild(document.createTextNode(t.引 || t.註 || t.據 || ''));
+      典.appendChild(p);
+    }
+    帖文.appendChild(典);
+  }
+  帖觀.showModal();
+}
+document.getElementById('合').addEventListener('click', () => 帖觀.close());
+帖觀.addEventListener('click', e => { if (e.target === 帖觀) 帖觀.close(); });
+
+// 館路明暗：隨所在色域換色
+if ('IntersectionObserver' in window) {
+  const 航 = document.querySelector('nav.諸頁');
+  const els = Array.from(document.querySelectorAll('[data-tone]')).filter(el => el !== 航);
+  const seen = new Map();
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => seen.set(en.target, en.intersectionRatio));
+    let top = null, best = 0;
+    els.forEach(el => { const r = seen.get(el) || 0; if (r > best) { best = r; top = el; } });
+    if (top) 航.dataset.tone = top.dataset.tone;
+  }, { rootMargin: '-45% 0px -45% 0px', threshold: [0, .01, .1, .3, .6, 1] });
+  els.forEach(el => io.observe(el));
+}
+</script>
+</body>
+</html>
