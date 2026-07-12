@@ -6,893 +6,1044 @@
 <meta name="description" content="粉本線上博物館：循地區、朝代與線質，並觀犍陀羅、漢地、藏地、東密、尼瓦爾南傳之程序白描。">
 <title>粉本線上博物館</title>
 <style>
+  /* ══════════════════════════════════════════════════
+     一座由白晝走入幽暗的無牆之殿
+     明域：骨白・石灰・生絹・炭字・克制之朱
+     暗域：夜墨・礦靛・淡絹字・舊金（只予作品與基準）
+     ══════════════════════════════════════════════════ */
   :root {
-    --紺紙: #0d1124;
-    --紺深: #080b19;
-    --紺亮: #151b38;
-    --金泥: #d8b36a;
-    --金明: #f2d9a4;
-    --金暗: #8a7448;
-    --朱: #b0402c;
-    --絹: #e8e1cf;
-    --墨淡: #8b91a8;
-    --線: rgba(216, 179, 106, .18);
-    --線明: rgba(216, 179, 106, .42);
-    --側航: 78px;
+    --骨白: #EBE5D6;
+    --紙: #F2EDDF;
+    --石灰: #DCD5C2;
+    --炭: #29261F;
+    --墨灰: #6B6555;
+    --朱: #9E3922;
+    --夜: #090C17;
+    --靛: #10152B;
+    --淡絹: #D8D0BA;
+    --夜灰: #8D91A4;
+    --金: #C9A45C;
+    --金暗: #8A7448;
+    --明線: rgba(41, 38, 31, .16);
+    --暗線: rgba(201, 164, 92, .15);
+    --航偏: 0px;
   }
+  @media (min-width: 961px) { :root { --航偏: 92px; } }
 
   * { box-sizing: border-box; }
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 118px;
-    scrollbar-color: var(--金暗) var(--紺深);
+    scroll-padding-top: 24px;
+    scrollbar-color: var(--墨灰) var(--骨白);
   }
   body {
     margin: 0;
     min-width: 320px;
-    min-height: 100vh;
-    color: var(--絹);
-    background:
-      radial-gradient(1100px 760px at 76% -8%, #171d3d 0%, transparent 62%),
-      radial-gradient(900px 900px at -8% 100%, #11162e 0%, transparent 58%),
-      var(--紺紙);
+    color: var(--炭);
+    background: var(--骨白);
     font-family: "Noto Serif TC", "Songti TC", "Source Han Serif TC", "Yu Mincho", "Hiragino Mincho ProN", serif;
-    line-height: 1.85;
+    line-height: 2;
+    font-size: 15px;
   }
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: .42;
-    background-image:
-      repeating-linear-gradient(90deg, transparent 0 379px, rgba(0, 0, 0, .2) 379px 380px, rgba(232, 225, 207, .018) 380px 381px, transparent 381px 382px),
-      repeating-linear-gradient(0deg, transparent 0 5px, rgba(232, 225, 207, .012) 5px 6px),
-      radial-gradient(1.2px 1.2px at 12% 22%, var(--金泥) 50%, transparent 51%),
-      radial-gradient(1px 1px at 78% 8%, var(--金暗) 50%, transparent 51%),
-      radial-gradient(1.2px 1.2px at 55% 61%, var(--金暗) 50%, transparent 51%);
-    background-size: auto, auto, 620px 540px, 480px 700px, 740px 560px;
-  }
-  ::selection { background: rgba(216, 179, 106, .28); color: var(--金明); }
+  ::selection { background: rgba(158, 57, 34, .18); }
+  [data-tone="暗"] ::selection, .並觀廳 ::selection { background: rgba(201, 164, 92, .3); color: #F2E5C9; }
   [hidden] { display: none !important; }
-  a { color: inherit; }
+  img { max-width: 100%; }
   button, a { -webkit-tap-highlight-color: transparent; }
   button { font: inherit; }
-  img { max-width: 100%; }
-  section[id], article[id] { scroll-margin-top: 118px; }
+  a { color: inherit; text-decoration-color: rgba(41, 38, 31, .35); text-underline-offset: 4px; }
+  a:hover { color: var(--朱); text-decoration-color: currentColor; }
+  [data-tone="暗"] a { text-decoration-color: rgba(216, 208, 186, .35); }
+  [data-tone="暗"] a:hover { color: #EFE4C8; }
+  section[id], article[id] { scroll-margin-top: 24px; }
+  :focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
+
+  /* 眼睛適應：緩顯 */
+  html.動 [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+  }
+  html.動 [data-reveal].入 { opacity: 1; transform: none; }
+  html.動 .展圖 img {
+    opacity: 0;
+    transform: scale(.965);
+    transition: opacity 1.4s ease, transform 2s cubic-bezier(.22, .61, .21, 1);
+  }
+  html.動 .展圖.入 img { opacity: 1; transform: none; }
 
   .跳 {
     position: fixed;
     top: 10px;
-    left: 96px;
-    z-index: 30;
-    transform: translateY(-150%);
-    padding: 7px 12px;
-    color: var(--紺深);
-    background: var(--金明);
+    left: 110px;
+    z-index: 40;
+    transform: translateY(-160%);
+    padding: 8px 14px;
+    color: var(--骨白);
+    background: var(--炭);
     text-decoration: none;
   }
   .跳:focus { transform: none; }
 
-  .卷 {
-    position: relative;
-    z-index: 1;
-    width: min(100%, 1440px);
-    margin: 0 auto;
-    padding: 0 44px 120px 140px;
-  }
-
-  /* ── 全站書籤 ── */
-  nav.諸頁 {
+  /* ── 館路：建築平面索引（桌面） ── */
+  nav.館路 {
     position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
-    z-index: 20;
-    width: var(--側航);
+    z-index: 30;
+    width: var(--航偏);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 39px;
-    padding: 26px 0 30px;
-    border-right: 1px solid rgba(216, 179, 106, .14);
-    background: rgba(8, 11, 25, .68);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    justify-content: center;
+    gap: 22px;
+    padding: 24px 0;
+    color: var(--墨灰);
+    transition: color .8s ease;
   }
-  nav.諸頁 a {
-    color: var(--墨淡);
-    font-size: 13px;
-    letter-spacing: .38em;
-    text-decoration: none;
-    writing-mode: vertical-rl;
-    transition: color .25s, border-color .25s;
-  }
-  nav.諸頁 a:hover { color: var(--金明); }
-  nav.諸頁 .印記 {
-    margin-bottom: 12px;
-    padding: 8px 6px 5px;
-    border: 1px solid rgba(216, 179, 106, .45);
-    color: var(--金泥);
-    line-height: 1.2;
-    letter-spacing: .3em;
-  }
-  nav.諸頁 .今 {
-    padding-left: 8px;
-    border-left: 1px solid rgba(216, 179, 106, .55);
-    color: var(--金泥);
-  }
-
-  /* ── 館首 ── */
-  .館首 {
-    min-height: 92svh;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: clamp(42px, 7vw, 100px);
-    align-items: stretch;
-    padding: 66px 0 58px;
-    border-bottom: 1px solid var(--線);
-  }
-  .館首文 {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    max-width: 760px;
-  }
-  .眉題 {
-    margin: 0 0 auto;
-    color: var(--金暗);
-    font-size: 11px;
-    letter-spacing: .42em;
-    text-transform: uppercase;
-  }
-  .開館章 {
-    width: max-content;
-    margin: 0 0 42px;
-    padding: 5px 10px 4px;
-    border: 1px solid var(--朱);
+  nav.館路[data-tone="暗"] { color: var(--夜灰); }
+  nav.館路 .印記 {
+    position: absolute;
+    top: 26px;
+    padding: 7px 5px 6px;
+    border: 1px solid rgba(158, 57, 34, .6);
     color: var(--朱);
-    font-size: 11px;
-    letter-spacing: .28em;
-    transform: rotate(-2deg);
-  }
-  .館首 h1 {
-    margin: 0;
-    color: var(--金明);
-    font-size: clamp(42px, 6.4vw, 86px);
-    font-weight: 500;
-    line-height: 1.16;
-    letter-spacing: .12em;
-    text-wrap: balance;
-    text-shadow: 0 0 36px rgba(216, 179, 106, .16);
-  }
-  .館首 h1 span { display: block; }
-  .館首 h1 span:first-child {
-    color: var(--金泥);
-    font-size: .42em;
-    letter-spacing: .55em;
-    margin-bottom: .8em;
-  }
-  .館引 {
-    max-width: 650px;
-    margin: 36px 0 0;
-    color: var(--墨淡);
-    font-size: 15px;
-    line-height: 2.2;
-    text-align: justify;
-  }
-  .館引 b { color: var(--絹); font-weight: 500; }
-  .館訓 {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-top: 28px;
-    color: var(--金泥);
-    font-size: 13px;
-    letter-spacing: .32em;
-  }
-  .館訓::before {
-    content: "";
-    width: 34px;
-    height: 1px;
-    background: var(--金暗);
-  }
-  .館數 {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(86px, 1fr));
-    gap: 1px;
-    margin-top: 42px;
-    border: 1px solid var(--線);
-    background: var(--線);
-  }
-  .館數 div {
-    min-height: 92px;
-    padding: 14px 12px;
-    background: rgba(8, 11, 25, .72);
-  }
-  .館數 b {
-    display: block;
-    color: var(--金明);
-    font-size: 25px;
-    font-weight: 400;
-    letter-spacing: .08em;
-  }
-  .館數 small {
-    color: var(--墨淡);
-    font-size: 10.5px;
-    letter-spacing: .18em;
-  }
-  .題簽 {
-    align-self: flex-start;
-    min-height: 530px;
-    padding: 34px 22px 28px;
-    border: 1px solid rgba(216, 179, 106, .42);
-    color: var(--金明);
-    background: rgba(8, 11, 25, .55);
-    box-shadow: 0 28px 80px rgba(0, 0, 0, .46);
-    font-size: clamp(48px, 5.8vw, 78px);
-    font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: .22em;
+    font-size: 12px;
+    line-height: 1.25;
+    letter-spacing: .2em;
     writing-mode: vertical-rl;
-    white-space: nowrap;
-    inline-size: max-content;
-    text-shadow: 0 0 34px rgba(216, 179, 106, .24);
+    text-decoration: none;
   }
-  .題簽 small {
+  nav.館路 a.步 {
+    position: relative;
     display: block;
-    margin-top: 2.2em;
-    color: var(--金泥);
-    font-size: .18em;
-    font-weight: 400;
-    letter-spacing: .55em;
+    padding-left: 13px;
+    font-size: 11px;
+    letter-spacing: .34em;
+    writing-mode: vertical-rl;
+    text-decoration: none;
+    color: inherit;
+    opacity: .78;
+    transition: opacity .5s, color .5s;
   }
+  nav.館路 a.步::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 3px;
+    height: 3px;
+    margin-top: -2px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity .5s, background .5s;
+  }
+  nav.館路 a.步:hover { opacity: 1; }
+  nav.館路 a.步.已過 { opacity: .85; }
+  nav.館路 a.步.已過::before { opacity: .7; background: currentColor; }
+  nav.館路 a.步[aria-current="location"] { opacity: 1; color: var(--朱); }
+  nav.館路[data-tone="暗"] a.步[aria-current="location"] { color: var(--金); }
+  nav.館路 a.步[aria-current="location"]::before {
+    opacity: 1;
+    background: currentColor;
+    border-color: currentColor;
+    border-radius: 0;
+  }
+  @media (max-width: 960px) { nav.館路 { display: none; } }
 
-  /* ── 五室之航 ── */
-  .館航 {
+  /* ── 袖航：手持題簽（手機） ── */
+  .袖航 {
     position: sticky;
     top: 0;
-    z-index: 12;
-    display: grid;
-    grid-template-columns: repeat(5, minmax(120px, 1fr)) minmax(132px, .9fr);
-    margin: 0 -10px;
-    padding: 12px 10px;
-    border-bottom: 1px solid var(--線);
-    background: rgba(8, 11, 25, .91);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-  }
-  .館航 a {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    min-height: 62px;
-    padding: 7px 12px 8px;
-    border-right: 1px solid rgba(216, 179, 106, .11);
-    color: var(--墨淡);
-    text-decoration: none;
-    transition: color .25s, background .25s;
-  }
-  .館航 a:last-child { border-right: 0; }
-  .館航 a:hover, .館航 a[aria-current="location"] {
-    color: var(--金明);
-    background: rgba(216, 179, 106, .05);
-  }
-  .館航 a[aria-current="location"]::after {
-    content: "";
-    position: absolute;
-    right: 12px;
-    bottom: -13px;
-    left: 12px;
-    height: 1px;
-    background: var(--金泥);
-  }
-  .航序 {
-    color: var(--朱);
-    font-size: 9px;
-    letter-spacing: .2em;
-  }
-  .館航 strong {
-    color: currentColor;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: .18em;
-  }
-  .館航 small {
-    color: var(--金暗);
-    font-size: 9px;
-    letter-spacing: .08em;
-  }
-
-  /* ── 同尊卷 ── */
-  .同尊卷 {
-    margin: 96px 0 132px;
-    padding: 32px 0 0;
-    border-top: 1px solid var(--線明);
-  }
-  .卷段首 {
-    display: grid;
-    grid-template-columns: 92px minmax(0, 1fr) auto;
-    gap: 24px;
-    align-items: end;
-    margin-bottom: 28px;
-  }
-  .卷段首 .卷序 {
-    color: var(--朱);
-    font-size: 11px;
-    letter-spacing: .46em;
-  }
-  .卷段首 h2 {
-    margin: 0;
-    color: var(--金明);
-    font-size: clamp(25px, 3vw, 38px);
-    font-weight: 500;
-    letter-spacing: .18em;
-  }
-  .卷段首 p {
-    margin: 5px 0 0;
-    color: var(--墨淡);
-    font-size: 12px;
-    letter-spacing: .12em;
-  }
-  .並觀鈕 {
-    min-height: 44px;
-    padding: 9px 16px;
-    border: 1px solid var(--線明);
-    color: var(--金泥);
-    background: transparent;
-    cursor: pointer;
-    letter-spacing: .16em;
-    transition: color .25s, border-color .25s, background .25s;
-  }
-  .並觀鈕:hover {
-    border-color: var(--金泥);
-    color: var(--金明);
-    background: rgba(216, 179, 106, .05);
-  }
-  .並觀鈕::after { content: " ↗"; color: var(--朱); }
-  .同尊軌 {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(260px, 1fr);
-    gap: 14px;
-    overflow-x: auto;
-    padding: 0 2px 18px;
-    scroll-snap-type: x proximity;
-    scrollbar-width: thin;
-  }
-  .同尊軸 {
-    min-height: 330px;
-    scroll-snap-align: start;
-    border: 1px solid var(--線);
-    background: rgba(8, 11, 25, .52);
-  }
-  .同尊軸.主軸 { min-width: min(650px, 78vw); }
-  .同尊軸 header {
-    display: flex;
+    z-index: 30;
+    display: none;
+    align-items: center;
     justify-content: space-between;
-    gap: 20px;
-    padding: 13px 16px;
-    border-bottom: 1px solid var(--線);
+    gap: 12px;
+    min-height: 48px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--明線);
+    color: var(--炭);
+    background: var(--骨白);
+    transition: background .8s ease, color .8s ease, border-color .8s ease;
   }
-  .同尊軸 h3 {
-    margin: 0;
-    color: var(--絹);
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: .18em;
+  .袖航[data-tone="暗"] {
+    color: var(--淡絹);
+    background: var(--夜);
+    border-color: var(--暗線);
   }
-  .同尊軸 header small {
-    color: var(--金暗);
-    font-size: 10px;
-    letter-spacing: .14em;
-  }
-  .三體縮圖 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    min-height: 286px;
-  }
-  .三體縮圖 a {
-    position: relative;
-    min-width: 0;
-    overflow: hidden;
-    border-right: 1px solid var(--線);
-    color: var(--絹);
+  .袖航 .袖印 {
+    font-size: 12px;
+    letter-spacing: .3em;
+    color: var(--朱);
     text-decoration: none;
   }
-  .三體縮圖 a:last-child { border-right: 0; }
-  .三體縮圖 img {
-    display: block;
-    width: 100%;
-    height: 240px;
-    object-fit: cover;
-    object-position: center 35%;
-    opacity: .82;
-    transition: opacity .3s, transform .5s;
-  }
-  .三體縮圖 a:hover img { opacity: 1; transform: scale(1.025); }
-  .三體縮圖 a:nth-child(2) img {
-    object-position: center;
-    transform: scale(1.38);
-  }
-  .三體縮圖 a:nth-child(2):hover img { transform: scale(1.42); }
-  .三體縮圖 span {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    padding: 23px 10px 9px;
-    background: linear-gradient(transparent, rgba(8, 11, 25, .96));
-    color: var(--金明);
-    font-size: 11px;
-    letter-spacing: .14em;
-    text-align: center;
-  }
-  .同尊軸.候軸 {
-    display: flex;
-    flex-direction: column;
-    border-style: dashed;
-  }
-  .候軸身 {
-    flex: 1;
-    display: grid;
-    place-items: center;
-    padding: 24px;
-    color: rgba(216, 179, 106, .34);
-    font-size: 12px;
-    letter-spacing: .32em;
-    text-align: center;
-  }
-  .候軸身 span {
-    display: block;
-    margin-top: 16px;
-    color: var(--墨淡);
-    font-size: 10px;
-    line-height: 1.8;
-    letter-spacing: .14em;
-  }
-
-  /* ── 五室 ── */
-  .室 {
-    margin: 0 0 168px;
-    padding-top: 24px;
-  }
-  .室題 {
-    display: grid;
-    grid-template-columns: 94px minmax(0, 1fr) minmax(180px, 280px);
-    gap: 24px;
-    align-items: start;
-    margin-bottom: 30px;
-    padding-top: 34px;
-    border-top: 1px solid var(--線明);
-  }
-  .室序 {
-    padding-top: 9px;
-    color: var(--朱);
-    font-size: 11px;
-    letter-spacing: .45em;
-  }
-  .室題 h2 {
-    margin: 0;
-    color: var(--金明);
-    font-size: clamp(32px, 4.2vw, 56px);
-    font-weight: 500;
-    line-height: 1.25;
-    letter-spacing: .16em;
-  }
-  .室題 h2 small {
-    display: block;
-    margin-top: 8px;
-    color: var(--金泥);
-    font-size: 11px;
-    font-weight: 400;
-    letter-spacing: .22em;
-  }
-  .室題 > p {
-    margin: 8px 0 0;
-    color: var(--墨淡);
-    font-size: 12px;
-    line-height: 2;
-    text-align: justify;
-  }
-  .室據 {
-    padding: 13px 15px;
-    border-left: 1px solid var(--線);
-    color: var(--墨淡);
-    font-size: 10.5px;
-    line-height: 1.9;
-  }
-  .室據 b {
-    display: block;
-    margin-bottom: 4px;
-    color: var(--金泥);
-    font-weight: 400;
-    letter-spacing: .22em;
-  }
-  .室據 a {
-    color: var(--絹);
-    text-decoration-color: rgba(216, 179, 106, .34);
-    text-underline-offset: 4px;
-  }
-
-  .分期 {
-    border: 1px solid var(--線);
-    background: rgba(8, 11, 25, .38);
-  }
-  .段籤 {
-    display: grid;
-    grid-template-columns: repeat(var(--段數), minmax(135px, 1fr));
-    overflow-x: auto;
-    border-bottom: 1px solid var(--線);
-    scrollbar-width: thin;
-  }
-  .段籤 button {
-    position: relative;
-    min-height: 72px;
-    padding: 10px 13px;
+  .袖航[data-tone="暗"] .袖印 { color: var(--金); }
+  .袖航 button {
+    min-height: 44px;
+    padding: 0 4px;
     border: 0;
-    border-right: 1px solid var(--線);
-    color: var(--墨淡);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 12px;
+    letter-spacing: .22em;
+  }
+  .袖航 button::after { content: " ▾"; font-size: 9px; opacity: .6; }
+  @media (max-width: 960px) {
+    .袖航 { display: flex; }
+    html { scroll-padding-top: 64px; }
+    section[id], article[id] { scroll-margin-top: 64px; }
+  }
+
+  dialog.全目 {
+    width: 100dvw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: var(--炭);
+    background: var(--骨白);
+  }
+  dialog.全目::backdrop { background: rgba(41, 38, 31, .4); }
+  .全目殼 { display: flex; flex-direction: column; min-height: 100%; padding: 18px 22px 40px; }
+  .全目首 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 34px; }
+  .全目首 p { margin: 0; font-size: 12px; letter-spacing: .3em; color: var(--朱); }
+  dialog.全目 nav { display: flex; flex-direction: column; gap: 4px; }
+  dialog.全目 nav a {
+    padding: 12px 2px;
+    border-bottom: 1px solid var(--明線);
+    font-size: 17px;
+    letter-spacing: .18em;
+    text-decoration: none;
+  }
+  dialog.全目 nav a small { margin-left: 14px; font-size: 10px; letter-spacing: .2em; color: var(--墨灰); }
+  dialog.全目 .目他 { margin-top: 34px; }
+  dialog.全目 .目他 p { margin: 0 0 6px; font-size: 10px; letter-spacing: .3em; color: var(--墨灰); }
+  dialog.全目 .目他 a { display: inline-block; margin-right: 20px; padding: 8px 0; font-size: 13px; letter-spacing: .14em; }
+
+  .閉 {
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--明線);
+    color: inherit;
     background: transparent;
     cursor: pointer;
-    text-align: left;
+    font-size: 16px;
   }
-  .段籤 button:last-child { border-right: 0; }
-  .段籤 button:hover { color: var(--金明); background: rgba(216, 179, 106, .035); }
-  .段籤 button[aria-selected="true"] {
-    color: var(--金明);
-    background: rgba(216, 179, 106, .07);
+  .閉:hover { border-color: currentColor; }
+
+  /* ── 容器 ── */
+  .室身 {
+    max-width: calc(1360px + var(--航偏));
+    margin: 0 auto;
+    padding-left: calc(var(--航偏) + clamp(22px, 5vw, 84px));
+    padding-right: clamp(22px, 5vw, 84px);
   }
-  .段籤 button[aria-selected="true"]::after {
-    content: "";
-    position: absolute;
-    right: 12px;
-    bottom: 0;
-    left: 12px;
-    height: 2px;
-    background: var(--朱);
-  }
-  .段籤 b {
+
+  /* ══════════ 第一幕：白晝前庭 ══════════ */
+  .前庭 { position: relative; }
+  .前庭首 {
+    position: relative;
+    min-height: 100svh;
     display: block;
-    font-size: 12px;
+    overflow: hidden;
+  }
+  .諸頁 {
+    position: absolute;
+    top: 30px;
+    right: clamp(22px, 5vw, 84px);
+    display: flex;
+    gap: 26px;
+    font-size: 10.5px;
+    letter-spacing: .22em;
+    color: var(--墨灰);
+  }
+  .諸頁 a { text-decoration: none; opacity: .8; }
+  .諸頁 a:hover { opacity: 1; }
+  .諸頁 a[aria-current="page"] {
+    color: var(--朱);
+    border-bottom: 1px solid rgba(158, 57, 34, .5);
+    opacity: 1;
+  }
+  .眉題 {
+    position: absolute;
+    top: 32px;
+    left: calc(var(--航偏) + clamp(22px, 5vw, 84px));
+    margin: 0;
+    font-size: 10px;
+    letter-spacing: .4em;
+    color: var(--墨灰);
+  }
+  .館名 {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 56%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(20px, 3vw, 44px);
+    margin: 0;
     font-weight: 500;
+    writing-mode: vertical-rl;
+  }
+  .館名 .名正 {
+    font-size: clamp(48px, 9.4svh, 122px);
+    line-height: 1.08;
     letter-spacing: .1em;
     white-space: nowrap;
+    color: var(--炭);
   }
-  .段籤 small {
-    display: block;
-    color: var(--金暗);
-    font-size: 9.5px;
-    letter-spacing: .05em;
+  .館名 .名副 {
+    align-self: center;
+    margin-top: .5em;
+    font-size: clamp(13px, 1.8svh, 19px);
+    font-weight: 400;
+    letter-spacing: .62em;
     white-space: nowrap;
+    color: var(--墨灰);
   }
-  .段面 { padding: 28px; }
-  .段標 {
-    display: grid;
-    grid-template-columns: 94px minmax(0, 1fr);
-    gap: 18px;
-    align-items: start;
-    margin-bottom: 24px;
-  }
-  .段標 .段代 {
-    margin: 5px 0 0;
+  .開館章 {
+    position: absolute;
+    bottom: clamp(20px, 4svh, 56px);
+    left: 56%;
+    margin-left: clamp(-8px, -0.5vw, -4px);
+    padding: 8px 6px 7px;
+    border: 1px solid var(--朱);
     color: var(--朱);
-    font-size: 9px;
-    letter-spacing: .26em;
+    font-size: 10.5px;
+    line-height: 1.3;
+    letter-spacing: .24em;
+    writing-mode: vertical-rl;
+    transform: rotate(-1.5deg);
   }
-  .段標 h3 {
+  .館訓 {
+    position: absolute;
+    top: 38%;
+    left: calc(var(--航偏) + clamp(22px, 5vw, 84px));
     margin: 0;
-    color: var(--金泥);
-    font-size: 16px;
-    font-weight: 500;
-    letter-spacing: .14em;
+    font-size: clamp(15px, 1.6vw, 19px);
+    letter-spacing: .5em;
+    color: var(--炭);
   }
-  .段標 p {
-    margin: 5px 0 0;
-    color: var(--墨淡);
-    font-size: 11px;
-    line-height: 1.8;
+  .館訓 small {
+    display: block;
+    margin-top: 14px;
+    font-size: 10px;
+    letter-spacing: .34em;
+    color: var(--墨灰);
+  }
+  .五室索引 {
+    position: absolute;
+    bottom: clamp(48px, 9svh, 110px);
+    left: calc(var(--航偏) + clamp(22px, 5vw, 84px));
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 12px;
+  }
+  .五室索引 a {
+    display: grid;
+    grid-template-columns: 44px auto auto;
+    gap: 18px;
+    align-items: baseline;
+    padding: 6px 0;
+    text-decoration: none;
+    letter-spacing: .2em;
+    color: var(--炭);
+  }
+  .五室索引 a i { font-style: normal; font-size: 10px; letter-spacing: .3em; color: var(--朱); }
+  .五室索引 a small { font-size: 10px; letter-spacing: .16em; color: var(--墨灰); }
+  .五室索引 a:hover { color: var(--朱); }
+  .基準線 {
+    position: absolute;
+    top: 68%;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: rgba(41, 38, 31, .12);
+    pointer-events: none;
+  }
+  .基準線 span {
+    position: absolute;
+    right: clamp(22px, 5vw, 84px);
+    top: 5px;
+    font-size: 8.5px;
+    letter-spacing: .3em;
+    color: rgba(41, 38, 31, .38);
+  }
+  .入館 {
+    position: absolute;
+    bottom: clamp(30px, 6svh, 70px);
+    left: 72%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--墨灰);
+    font-size: 10px;
+    letter-spacing: .4em;
+    writing-mode: vertical-rl;
+  }
+  .入館::after {
+    content: "";
+    width: 1px;
+    height: clamp(40px, 9svh, 96px);
+    background: currentColor;
+    opacity: .5;
+  }
+  .入館:hover { color: var(--朱); }
+
+  .前庭引 {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 34em) auto;
+    gap: clamp(40px, 8vw, 140px);
+    align-items: start;
+    padding-top: clamp(60px, 12vh, 150px);
+    padding-bottom: clamp(80px, 16vh, 190px);
+  }
+  .館引 {
+    margin: 0;
+    font-size: 15px;
+    line-height: 2.35;
+    text-align: justify;
+  }
+  .館引 b { font-weight: 600; }
+  .館數 {
+    margin: 44px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--明線);
+    font-size: 12px;
+    letter-spacing: .14em;
+    color: var(--墨灰);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 30px;
+  }
+  .館數 span b { margin-right: 8px; font-weight: 500; font-size: 17px; color: var(--炭); letter-spacing: .1em; }
+  .題簽 {
+    margin: 0;
+    align-self: start;
+    font-size: 13px;
+    letter-spacing: .55em;
+    color: var(--墨灰);
+    writing-mode: vertical-rl;
+    line-height: 1.6;
   }
 
-  /* ── 展位與說明牌 ── */
-  .展位 {
+  /* ══════════ 第二幕：門檻 ══════════ */
+  .室 { position: relative; }
+  .室暗 { color: var(--淡絹); background: var(--夜); }
+  .門檻 {
+    position: relative;
+    min-height: 92svh;
     display: grid;
-    grid-template-columns: minmax(300px, .96fr) minmax(340px, 1.04fr);
-    min-width: 0;
-    border: 1px solid var(--線明);
-    background: rgba(8, 11, 25, .62);
-    box-shadow: 0 24px 70px rgba(0, 0, 0, .2);
+    align-content: end;
+    overflow: hidden;
+    color: var(--淡絹);
+    background: linear-gradient(180deg,
+      var(--骨白) 0%,
+      #CFC8B3 16%,
+      #8D8A85 36%,
+      #3A3E52 58%,
+      #151A30 76%,
+      var(--夜) 92%);
   }
-  .展圖 {
-    min-width: 0;
+  .門檻::before {
+    content: "";
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    width: 1px;
+    height: 42%;
+    background: linear-gradient(rgba(235, 229, 214, 0), rgba(235, 229, 214, .65) 50%, rgba(235, 229, 214, 0));
+    pointer-events: none;
+  }
+  .檻文 { padding-bottom: clamp(30px, 6vh, 80px); }
+  .室號 {
+    margin: 0 0 22px;
+    font-size: 11px;
+    letter-spacing: .5em;
+    color: var(--金暗);
+  }
+  .室號 b { font-weight: 400; color: var(--朱); margin-right: 16px; }
+  .門檻 h2 {
     margin: 0;
-    padding: 18px;
-    border-right: 1px solid var(--線);
-    background:
-      radial-gradient(circle at 50% 44%, rgba(24, 31, 64, .62), transparent 72%),
-      var(--紺深);
+    font-size: clamp(38px, 5.4vw, 76px);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: .14em;
+    color: #EFE7CF;
+  }
+  .門檻 h2 small {
+    display: block;
+    margin-top: 14px;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: .3em;
+    color: var(--金暗);
+  }
+  .判語 {
+    max-width: 40em;
+    margin: 26px 0 0;
+    font-size: 13.5px;
+    line-height: 2.2;
+    color: var(--夜灰);
+    text-align: justify;
+  }
+  .裁名 {
+    display: block;
+    overflow: hidden;
+    height: .56em;
+    margin-top: clamp(26px, 5vh, 64px);
+    font-size: clamp(110px, 19vw, 300px);
+    line-height: 1;
+    letter-spacing: .06em;
+    white-space: nowrap;
+    color: rgba(216, 208, 186, .06);
+    pointer-events: none;
+  }
+  /* 東密：紙色門檻 */
+  .室明 { color: var(--炭); background: var(--紙); }
+  .室明 .門檻 {
+    color: var(--炭);
+    background: linear-gradient(180deg, var(--骨白) 0%, var(--石灰) 46%, var(--紙) 100%);
+  }
+  .室明 .門檻::before { background: linear-gradient(rgba(41, 38, 31, 0), rgba(41, 38, 31, .4) 50%, rgba(41, 38, 31, 0)); }
+  .室明 .門檻 h2 { color: var(--炭); }
+  .室明 .門檻 h2 small, .室明 .室號 { color: var(--墨灰); }
+  .室明 .判語 { color: var(--墨灰); }
+  .室明 .裁名 { color: rgba(41, 38, 31, .05); }
+
+  /* ── 分期：朝代時間線（tabs 契約不變） ── */
+  .分期 { padding-top: clamp(30px, 6vh, 72px); }
+  .段籤 {
+    display: grid;
+    grid-template-columns: repeat(var(--段數), minmax(150px, max-content));
+    gap: clamp(18px, 3vw, 54px);
+    overflow-x: auto;
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--暗線);
+    scrollbar-width: none;
+  }
+  .段籤::-webkit-scrollbar { display: none; }
+  .段籤 button {
+    position: relative;
+    min-height: 60px;
+    padding: 8px 0 14px;
+    border: 0;
+    background: none;
+    color: var(--夜灰);
+    cursor: pointer;
+    text-align: left;
+    transition: color .4s;
+  }
+  .室明 .段籤 button { color: var(--墨灰); }
+  .段籤 button b {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    white-space: nowrap;
+  }
+  .段籤 button small {
+    display: block;
+    margin-top: 3px;
+    font-size: 9.5px;
+    letter-spacing: .1em;
+    white-space: nowrap;
+    opacity: .85;
+  }
+  .段籤 button:hover { color: var(--淡絹); }
+  .室明 .段籤 button:hover { color: var(--炭); }
+  .段籤 button[aria-selected="true"] { color: #EFE7CF; }
+  .室明 .段籤 button[aria-selected="true"] { color: var(--炭); }
+  .段籤 button::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--朱);
+    transition: width .5s ease;
+  }
+  .段籤 button[aria-selected="true"]::after { width: 34px; }
+  .段標 { margin: clamp(26px, 5vh, 56px) 0 0; max-width: 44em; }
+  .段標 .段代 { margin: 0 0 6px; font-size: 10px; letter-spacing: .3em; color: var(--朱); }
+  .段標 h3 { margin: 0; font-size: 15px; font-weight: 500; letter-spacing: .2em; color: var(--金); }
+  .室明 .段標 h3 { color: var(--炭); }
+  .段標 p { margin: 6px 0 0; font-size: 12px; line-height: 2; color: var(--夜灰); }
+  .室明 .段標 p { color: var(--墨灰); }
+
+  /* ══════════ 第三幕：主尊相遇 ══════════ */
+  .展位 { display: block; }
+  .展圖 {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100svh;
+    padding: clamp(40px, 9svh, 120px) 0 clamp(20px, 4svh, 48px);
   }
   .展圖 img {
     display: block;
-    width: 100%;
+    width: auto;
     height: auto;
-    max-height: 780px;
-    margin: auto;
-    object-fit: contain;
+    max-width: min(100%, 880px);
+    max-height: 86svh;
   }
   .展圖 figcaption {
     display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 12px;
-    color: var(--金暗);
-    font-size: 9.5px;
-    letter-spacing: .11em;
+    gap: 26px;
+    margin-top: 18px;
+    font-size: 9px;
+    letter-spacing: .22em;
+    color: rgba(182, 156, 104, .95);
   }
-  .說明牌 { min-width: 0; padding: 28px clamp(22px, 3vw, 40px) 30px; }
-  .牌首 {
-    display: flex;
-    justify-content: space-between;
-    gap: 22px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--線);
+  .室明 .展圖 figcaption { color: var(--墨灰); }
+
+  /* ── 第四幕：壁牌 ── */
+  .說明牌 {
+    max-width: 37em;
+    margin: 0 auto;
+    padding: clamp(20px, 4vh, 44px) 0 clamp(64px, 12vh, 150px);
   }
+  .牌首 { margin-bottom: 30px; }
   .牌首 h4 {
     margin: 0;
-    color: var(--金明);
-    font-size: clamp(23px, 2.6vw, 34px);
+    font-size: clamp(26px, 3vw, 38px);
     font-weight: 500;
-    line-height: 1.35;
+    line-height: 1.4;
     letter-spacing: .12em;
+    color: #EFE7CF;
   }
+  .室明 .牌首 h4 { color: var(--炭); }
   .牌首 h4 small {
     display: block;
-    margin-top: 7px;
-    color: var(--金泥);
-    font-size: 10px;
+    margin-top: 12px;
+    font-size: 10.5px;
     font-weight: 400;
-    letter-spacing: .18em;
+    letter-spacing: .26em;
+    color: var(--金暗);
   }
-  .章列 {
-    flex: none;
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-  }
+  .室明 .牌首 h4 small { color: var(--墨灰); }
+  .章列 { display: flex; gap: 8px; margin-top: 18px; }
   .章 {
     display: inline-block;
-    padding: 2px 6px 1px;
-    border: 1px solid var(--朱);
-    border-radius: 2px;
-    color: var(--朱);
+    padding: 2px 7px 1px;
+    border: 1px solid rgba(158, 57, 34, .75);
+    color: #C4553A;
     font-size: 9px;
-    letter-spacing: .12em;
-    transform: rotate(-2deg);
+    letter-spacing: .16em;
     white-space: nowrap;
+    transform: rotate(-1.5deg);
   }
-  .章.實 {
-    color: #f3e6d8;
-    background: var(--朱);
-  }
-  .牌格 {
-    display: grid;
-    grid-template-columns: 84px minmax(0, 1fr);
-    gap: 0 18px;
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(216, 179, 106, .1);
-  }
-  .牌格 h5 {
-    margin: 2px 0 0;
-    color: var(--金泥);
+  .章.實 { color: #F2E5D5; background: rgba(158, 57, 34, .82); }
+  .室明 .章 { color: var(--朱); border-color: rgba(158, 57, 34, .6); }
+  .室明 .章.實 { color: var(--紙); background: var(--朱); }
+
+  .牌讀 { margin: 0 0 8px; }
+  .牌讀 h5, .深讀 h5 {
+    margin: 0 0 10px;
     font-size: 10px;
     font-weight: 400;
-    letter-spacing: .24em;
+    letter-spacing: .32em;
+    color: var(--金暗);
   }
-  .牌格 p, .牌格 ul {
-    margin: 0;
-    color: var(--墨淡);
-    font-size: 11.5px;
-    line-height: 1.95;
+  .室明 .牌讀 h5, .室明 .深讀 h5 { color: var(--朱); }
+  .牌讀 ul { margin: 0; padding: 0; list-style: none; counter-reset: 讀; }
+  .牌讀 ul li {
+    counter-increment: 讀;
+    position: relative;
+    padding: 10px 0 10px 44px;
+    border-top: 1px solid var(--暗線);
+    font-size: 13px;
+    line-height: 2.05;
+    color: var(--夜灰);
   }
-  .牌格 ul { padding-left: 1.2em; }
-  .牌格 strong { color: var(--絹); font-weight: 500; }
-  .牌格 a {
-    color: var(--絹);
-    text-decoration-color: rgba(216, 179, 106, .3);
-    text-underline-offset: 3px;
+  .室明 .牌讀 ul li { border-color: var(--明線); color: var(--墨灰); }
+  .牌讀 ul li::before {
+    content: counter(讀, cjk-ideographic);
+    position: absolute;
+    top: 12px;
+    left: 0;
+    font-size: 10px;
+    letter-spacing: .2em;
+    color: var(--金暗);
   }
-  .景物籤 {
+  .室明 .牌讀 ul li::before { color: var(--朱); }
+
+  details.深讀 { margin-top: 26px; border-top: 1px solid var(--暗線); }
+  .室明 details.深讀 { border-color: var(--明線); }
+  details.深讀 summary {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    padding: 6px 0;
+    cursor: pointer;
     list-style: none;
-    padding: 0 !important;
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: var(--金暗);
   }
-  .景物籤 li {
-    padding: 3px 7px;
-    border: 1px solid rgba(216, 179, 106, .16);
-    color: var(--墨淡);
-  }
-  .景物籤 b { color: var(--絹); font-weight: 500; }
+  .室明 details.深讀 summary { color: var(--墨灰); }
+  details.深讀 summary::-webkit-details-marker { display: none; }
+  details.深讀 summary::after { content: "＋"; font-size: 12px; opacity: .8; }
+  details.深讀[open] summary::after { content: "－"; }
+  details.深讀 summary:hover { color: var(--淡絹); }
+  .室明 details.深讀 summary:hover { color: var(--炭); }
+  .牌格 { padding: 14px 0 18px; border-top: 1px solid rgba(201, 164, 92, .08); }
+  .室明 .牌格 { border-color: rgba(41, 38, 31, .08); }
+  .牌格 p, .牌格 ul { margin: 0; font-size: 12.5px; line-height: 2.1; color: var(--夜灰); }
+  .室明 .牌格 p, .室明 .牌格 ul { color: var(--墨灰); }
+  .牌格 strong { color: var(--淡絹); font-weight: 500; }
+  .室明 .牌格 strong { color: var(--炭); }
+  .牌格 ul:not(.景物籤) { padding-left: 1.3em; }
+  .景物籤 { display: flex; flex-wrap: wrap; gap: 4px 22px; padding: 0; list-style: none; }
+  .景物籤 li { white-space: nowrap; }
+  .景物籤 b { color: var(--淡絹); font-weight: 500; }
+  .室明 .景物籤 b { color: var(--炭); }
   .牌尾 {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding-top: 18px;
+    gap: 14px;
+    margin-top: 26px;
+    padding-top: 20px;
+    border-top: 1px solid var(--暗線);
   }
-  .牌尾 p {
-    margin: 0;
-    color: var(--金泥);
-    font-size: 10.5px;
-    letter-spacing: .22em;
-  }
+  .室明 .牌尾 { border-color: var(--明線); }
+  .牌尾 > p { margin: 0; font-size: 10px; letter-spacing: .3em; color: var(--金暗); }
+  .室明 .牌尾 > p { color: var(--墨灰); }
 
-  /* ── 候展卡 ── */
+  .並觀鈕 {
+    display: inline-block;
+    min-height: 44px;
+    padding: 10px 2px;
+    border: 0;
+    border-bottom: 1px solid var(--金暗);
+    color: var(--金);
+    background: none;
+    cursor: pointer;
+    font-size: 12px;
+    letter-spacing: .24em;
+    text-decoration: none;
+    transition: color .4s, border-color .4s;
+  }
+  .並觀鈕:hover { color: #EFE4C8; border-color: var(--金); }
+  .室明 .並觀鈕, [data-tone="明"] .並觀鈕 { color: var(--朱); border-color: rgba(158, 57, 34, .45); }
+  .室明 .並觀鈕:hover, [data-tone="明"] .並觀鈕:hover { color: var(--炭); border-color: var(--炭); }
+
+  /* ── 候展：研究側室（紙上檔案） ── */
   .候展 {
-    min-height: 370px;
-    display: grid;
-    grid-template-columns: minmax(220px, .72fr) minmax(300px, 1.28fr);
-    border: 1px dashed rgba(216, 179, 106, .3);
-    background:
-      linear-gradient(135deg, transparent 49.8%, rgba(176, 64, 44, .1) 50%, transparent 50.2%),
-      rgba(8, 11, 25, .36);
+    max-width: 56em;
+    margin: clamp(36px, 7vh, 80px) auto clamp(70px, 13vh, 160px);
+    padding: clamp(28px, 4vw, 56px) clamp(24px, 4vw, 64px) clamp(30px, 4vw, 52px);
+    color: var(--炭);
+    background: var(--紙);
   }
-  .候主 {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 300px;
-    padding: 32px;
-    border-right: 1px dashed rgba(216, 179, 106, .24);
-  }
+  .室明 .候展 { background: var(--骨白); }
   .候狀 {
-    width: max-content;
-    margin-bottom: 28px;
+    display: inline-block;
+    margin-bottom: 24px;
     padding: 3px 8px 2px;
     border: 1px solid var(--朱);
     color: var(--朱);
     font-size: 9px;
-    letter-spacing: .24em;
-    transform: rotate(-3deg);
+    letter-spacing: .26em;
+    transform: rotate(-2deg);
   }
   .候主 h4 {
     margin: 0;
-    color: var(--絹);
-    font-size: clamp(22px, 2.7vw, 34px);
+    font-size: clamp(21px, 2.4vw, 29px);
     font-weight: 500;
-    line-height: 1.55;
     letter-spacing: .12em;
+    line-height: 1.6;
   }
-  .候主 p {
-    margin: 14px 0 0;
-    color: var(--金暗);
-    font-size: 11px;
-    line-height: 1.9;
-    letter-spacing: .08em;
-  }
-  .候牌 {
-    align-self: center;
-    padding: 30px clamp(24px, 4vw, 50px);
-  }
+  .候主 > p { margin: 8px 0 0; font-size: 11.5px; letter-spacing: .1em; color: var(--墨灰); }
+  .候牌 { margin-top: 26px; border-top: 1px solid var(--明線); }
   .候牌 dl {
     display: grid;
-    grid-template-columns: 76px minmax(0, 1fr);
-    gap: 13px 18px;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 0 26px;
     margin: 0;
-    font-size: 11.5px;
-    line-height: 1.9;
+    font-size: 12.5px;
+    line-height: 2.05;
   }
   .候牌 dt {
-    color: var(--金泥);
+    padding: 12px 0;
     font-size: 10px;
-    letter-spacing: .22em;
+    letter-spacing: .3em;
+    color: var(--朱);
   }
-  .候牌 dd { margin: 0; color: var(--墨淡); }
-  .候牌 dd b { color: var(--絹); font-weight: 500; }
-  .候訓 {
-    margin: 24px 0 0;
-    padding-top: 14px;
-    border-top: 1px solid var(--線);
-    color: var(--金暗);
+  .候牌 dd { margin: 0; padding: 12px 0; border-bottom: 1px solid rgba(41, 38, 31, .07); color: var(--墨灰); }
+  .候牌 dd b { color: var(--炭); font-weight: 500; }
+  .候訓 { margin: 18px 0 0; font-size: 9.5px; letter-spacing: .24em; color: var(--墨灰); }
+
+  /* ── 明亮的研究廊 ── */
+  .研究廊 {
+    position: relative;
+    color: var(--炭);
+    background: var(--骨白);
+    border-top: 1px solid rgba(235, 229, 214, .12);
+  }
+  .研究廊 .室身 {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) auto;
+    gap: clamp(24px, 4vw, 70px);
+    align-items: start;
+    padding-top: clamp(48px, 9vh, 110px);
+    padding-bottom: clamp(48px, 9vh, 110px);
+  }
+  .廊標 {
+    margin: 4px 0 0;
     font-size: 10px;
-    letter-spacing: .16em;
+    letter-spacing: .44em;
+    color: var(--朱);
+    writing-mode: vertical-rl;
+  }
+  .室據 { max-width: 33em; margin: 0; font-size: 12.5px; line-height: 2.15; color: var(--墨灰); }
+  .室據 b {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 400;
+    font-size: 10.5px;
+    letter-spacing: .3em;
+    color: var(--炭);
+  }
+  .次室 {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 0 8px;
+    text-decoration: none;
+    text-align: right;
+  }
+  .次室 small { font-size: 10px; letter-spacing: .3em; color: var(--墨灰); }
+  .次室 strong { font-size: clamp(19px, 2vw, 25px); font-weight: 500; letter-spacing: .2em; color: var(--炭); }
+  .次室:hover strong { color: var(--朱); }
+
+  /* ── 五室之各殊 ── */
+  .室-犍陀羅 .展圖 { min-height: 108svh; padding-top: clamp(70px, 14svh, 170px); }
+  .室-犍陀羅 .展圖 img { max-width: min(100%, 640px); max-height: 88svh; }
+  .室-犍陀羅 .說明牌 { max-width: 32em; text-align: left; }
+  .室-犍陀羅 .牌首 { text-align: center; }
+  .室-犍陀羅 .章列 { justify-content: center; }
+
+  @media (min-width: 1101px) {
+    .室-漢地 .展位 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr);
+      gap: clamp(40px, 6vw, 120px);
+      align-items: start;
+    }
+    .室-漢地 .展圖 { min-height: 100svh; }
+    .室-漢地 .說明牌 {
+      position: sticky;
+      top: 9svh;
+      margin: 0;
+      padding-top: 14svh;
+      padding-left: clamp(24px, 3vw, 56px);
+      border-left: 1px solid var(--暗線);
+    }
   }
 
-  /* ── 常設三廳 ── */
-  .常設 {
-    margin-top: 12px;
-    padding-top: 50px;
-    border-top: 1px solid var(--線明);
+  .室-藏地 .分期 .展位 {
+    border: 1px solid rgba(201, 164, 92, .13);
+    padding: clamp(18px, 3vw, 56px);
+    margin-top: clamp(26px, 5vh, 60px);
   }
-  .常設首 {
-    display: grid;
-    grid-template-columns: 94px minmax(0, 1fr);
-    gap: 24px;
-    margin-bottom: 48px;
+  .室-藏地 .展圖 {
+    min-height: 96svh;
+    border: 1px solid rgba(201, 164, 92, .08);
+    padding-left: clamp(14px, 2vw, 40px);
+    padding-right: clamp(14px, 2vw, 40px);
   }
-  .常設首 .室序 { padding-top: 7px; }
-  .常設首 h2 {
-    margin: 0;
-    color: var(--金明);
-    font-size: clamp(34px, 4.8vw, 62px);
-    font-weight: 500;
-    letter-spacing: .16em;
+  .室-藏地 .牌首 { text-align: center; }
+  .室-藏地 .章列 { justify-content: center; }
+
+  .室-東密 .展圖 img { border: 1px solid rgba(41, 38, 31, .2); }
+  @media (min-width: 1101px) {
+    .室-東密 .說明牌 {
+      max-width: 60em;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0 clamp(36px, 5vw, 90px);
+    }
+    .室-東密 .牌首 { grid-column: 1 / -1; }
+    .室-東密 .牌尾 { grid-column: 1 / -1; }
   }
-  .常設首 p {
-    margin: 7px 0 0;
-    color: var(--墨淡);
-    font-size: 12px;
-    letter-spacing: .12em;
-  }
-  .常設組 { margin: 0 0 92px; }
+
+  .室-尼瓦爾 .展圖 { min-height: 112svh; padding-top: clamp(80px, 15svh, 190px); }
+  .室-尼瓦爾 .展圖 img { max-width: min(94%, 700px); }
+  .室-尼瓦爾 .說明牌 { max-width: 30em; }
+  .室-尼瓦爾 .牌首 { text-align: center; }
+  .室-尼瓦爾 .章列 { justify-content: center; }
+
+  /* ══════════ 常設三廳 ══════════ */
+  .常設 { color: var(--淡絹); background: var(--夜); }
+  .常設 .門檻 { min-height: 74svh; }
+  .常設組 { padding-top: clamp(40px, 8vh, 100px); }
   .常設組題 {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin: 0 0 20px;
-    color: var(--金泥);
-    font-size: 18px;
+    margin: 0;
+    font-size: 15px;
     font-weight: 500;
-    letter-spacing: .18em;
+    letter-spacing: .3em;
+    color: var(--金);
   }
-  .常設組題::after { content: ""; flex: 1; height: 1px; background: var(--線); }
-  .常設組題 small { color: var(--金暗); font-size: 10px; font-weight: 400; letter-spacing: .12em; }
-  .常設網 {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
+  .常設組題 small {
+    display: block;
+    margin-top: 6px;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: .16em;
+    color: var(--夜灰);
   }
-  .常設卡 {
-    min-width: 0;
-    overflow: hidden;
-    border: 1px solid var(--線);
-    background: rgba(8, 11, 25, .55);
+  .常設卡 { border-top: 1px solid rgba(201, 164, 92, .09); margin-top: clamp(36px, 6vh, 72px); }
+  .常設卡:first-of-type { border-top: 0; margin-top: 0; }
+  .常設卡 figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: clamp(40px, 8svh, 100px) 0 clamp(16px, 3svh, 36px);
   }
-  .常設卡.獨 { grid-column: 1 / -1; }
-  .常設卡 figure { margin: 0; padding: 14px; background: var(--紺深); }
   .常設卡 img {
     display: block;
-    width: 100%;
+    width: auto;
     height: auto;
-    max-height: 580px;
-    object-fit: contain;
+    max-width: min(100%, 820px);
+    max-height: 82svh;
   }
-  .常設牌 { padding: 18px 20px 20px; border-top: 1px solid var(--線); }
-  .常設牌 header {
-    display: flex;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 12px;
-  }
-  .常設牌 h4 {
+  .常設牌 { max-width: 37em; margin: 0 auto; padding-bottom: clamp(40px, 8vh, 90px); }
+  .常設牌 header h4 {
     margin: 0;
-    color: var(--絹);
-    font-size: 17px;
+    font-size: clamp(21px, 2.4vw, 30px);
     font-weight: 500;
-    letter-spacing: .12em;
+    letter-spacing: .14em;
+    color: #EFE7CF;
   }
   .常設牌 dl {
     display: grid;
-    grid-template-columns: 62px minmax(0, 1fr);
-    gap: 7px 12px;
-    margin: 0;
-    font-size: 10.5px;
-    line-height: 1.8;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 0 24px;
+    margin: 22px 0 0;
+    font-size: 12.5px;
+    line-height: 2.05;
   }
-  .常設牌 dt { color: var(--金泥); letter-spacing: .16em; }
-  .常設牌 dd { margin: 0; color: var(--墨淡); }
-  .常設訓 {
-    margin: 14px 0 0;
-    color: var(--金暗);
-    font-size: 9.5px;
-    letter-spacing: .15em;
-  }
-  .常設牌 .並觀鈕 { margin-top: 14px; font-size: 11px; }
+  .常設牌 dt { padding: 9px 0; font-size: 10px; letter-spacing: .3em; color: var(--金暗); }
+  .常設牌 dd { margin: 0; padding: 9px 0; border-bottom: 1px solid rgba(201, 164, 92, .07); color: var(--夜灰); }
+  .常設牌 .並觀鈕 { margin-top: 18px; }
+  .常設訓 { margin: 18px 0 0; font-size: 9.5px; letter-spacing: .24em; color: var(--金暗); }
 
-  /* ── 並觀覆層 ── */
+  .暮 {
+    height: 30vh;
+    background: linear-gradient(180deg, var(--夜) 0%, #4A4A50 55%, var(--骨白) 100%);
+  }
+
+  /* ══════════ 研究室：同尊卷 ══════════ */
+  .研究室 { color: var(--炭); background: var(--骨白); }
+  .研究室 .室身 { padding-top: clamp(60px, 11vh, 140px); padding-bottom: clamp(70px, 13vh, 160px); }
+  .研首 {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) auto;
+    gap: clamp(24px, 4vw, 70px);
+    align-items: end;
+    margin-bottom: clamp(40px, 7vh, 80px);
+  }
+  .研首 .卷序 { margin: 0; font-size: 10px; letter-spacing: .44em; color: var(--朱); writing-mode: vertical-rl; }
+  .研首 h2 {
+    margin: 0;
+    font-size: clamp(30px, 4vw, 54px);
+    font-weight: 500;
+    letter-spacing: .16em;
+  }
+  .研首 .研引 { margin: 10px 0 0; font-size: 12.5px; letter-spacing: .1em; color: var(--墨灰); }
+  .三體縮圖 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--明線);
+    border: 1px solid var(--明線);
+  }
+  .三體縮圖 a {
+    display: flex;
+    flex-direction: column;
+    background: var(--骨白);
+    text-decoration: none;
+    padding: clamp(14px, 2vw, 30px);
+    gap: 14px;
+  }
+  .三體縮圖 .縮框 {
+    height: clamp(220px, 30vw, 420px);
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: var(--夜);
+  }
+  .三體縮圖 img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 32%;
+    opacity: .92;
+    transition: opacity .6s;
+  }
+  .三體縮圖 a:hover img { opacity: 1; }
+  .三體縮圖 span { font-size: 11px; letter-spacing: .22em; color: var(--墨灰); }
+  .三體縮圖 a:hover span { color: var(--朱); }
+  .釋迦卷首 {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 0 0 16px;
+  }
+  .釋迦卷首 h3 { margin: 0; font-size: 16px; font-weight: 500; letter-spacing: .26em; }
+  .釋迦卷首 small { font-size: 10px; letter-spacing: .2em; color: var(--墨灰); }
+  .候軸列 { margin-top: clamp(44px, 8vh, 90px); border-top: 1px solid var(--明線); }
+  .候軸 {
+    display: grid;
+    grid-template-columns: minmax(120px, 190px) minmax(70px, 110px) minmax(0, 1fr);
+    gap: clamp(16px, 3vw, 50px);
+    align-items: baseline;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--明線);
+  }
+  .候軸 h3 { margin: 0; font-size: 14.5px; font-weight: 500; letter-spacing: .2em; }
+  .候軸 .軸況 { font-size: 10px; letter-spacing: .24em; color: var(--朱); }
+  .候軸 p { margin: 0; font-size: 12px; line-height: 1.9; color: var(--墨灰); }
+
+  footer {
+    color: var(--炭);
+    background: var(--骨白);
+  }
+  footer .室身 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px 40px;
+    padding-top: 30px;
+    padding-bottom: 50px;
+    border-top: 1px solid var(--明線);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    color: var(--墨灰);
+  }
+
+  /* ══════════ 同尊比較室（conservation study room） ══════════ */
   dialog.並觀廳 {
     width: 100dvw;
     height: 100dvh;
@@ -901,50 +1052,42 @@
     margin: 0;
     padding: 0;
     border: 0;
-    color: var(--絹);
-    background:
-      radial-gradient(900px 600px at 50% 0%, #171d3d 0%, transparent 66%),
-      rgba(6, 9, 20, .985);
+    color: var(--淡絹);
+    background: #06080F;
   }
-  dialog.並觀廳::backdrop { background: rgba(4, 6, 13, .72); }
-  dialog.並觀廳[open] { animation: 覆顯 .28s ease both; }
-  .並觀殼 {
-    height: 100%;
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-  }
+  dialog.並觀廳::backdrop { background: rgba(4, 6, 12, .8); }
+  html.動 dialog.並觀廳[open] { animation: 覆顯 .5s ease both; }
+  @keyframes 覆顯 { from { opacity: 0; } to { opacity: 1; } }
+  .並觀殼 { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); }
   .並觀首 {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 24px;
-    padding: 22px 28px 18px;
-    border-bottom: 1px solid var(--線明);
-    background: rgba(8, 11, 25, .76);
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 14px 30px;
+    align-items: start;
+    padding: 20px clamp(16px, 3vw, 40px) 16px;
+    border-bottom: 1px solid var(--暗線);
   }
-  .並觀首 h2 {
-    margin: 0;
-    color: var(--金明);
-    font-size: 25px;
-    font-weight: 500;
-    letter-spacing: .18em;
-  }
-  .並觀首 p {
-    margin: 4px 0 0;
-    color: var(--墨淡);
-    font-size: 10.5px;
-    letter-spacing: .12em;
-  }
-  .閉 {
-    align-self: start;
-    min-width: 44px;
+  .並觀首 h2 { margin: 0; font-size: clamp(16px, 2vw, 22px); font-weight: 500; letter-spacing: .24em; color: #EFE7CF; }
+  .並觀首 p { margin: 5px 0 0; font-size: 10px; letter-spacing: .14em; color: var(--夜灰); }
+  .觀制 { display: flex; align-items: center; gap: 4px 18px; flex-wrap: wrap; }
+  .觀制 button {
     min-height: 44px;
-    border: 1px solid var(--線);
-    color: var(--墨淡);
-    background: transparent;
+    padding: 4px 2px;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: none;
+    color: var(--夜灰);
     cursor: pointer;
-    font-size: 18px;
+    font-size: 11px;
+    letter-spacing: .2em;
+    transition: color .3s, border-color .3s;
   }
-  .閉:hover { color: var(--金明); border-color: var(--金泥); }
+  .觀制 button:hover { color: var(--淡絹); }
+  .觀制 button[aria-pressed="true"] { color: var(--金); border-bottom-color: var(--金暗); }
+  .觀制 .制界 { width: 1px; height: 20px; background: var(--暗線); }
+  dialog.並觀廳 .閉 { border-color: var(--暗線); color: var(--夜灰); }
+  dialog.並觀廳 .閉:hover { color: #EFE7CF; border-color: var(--金暗); }
+
   .比較軌 {
     min-height: 0;
     display: grid;
@@ -952,48 +1095,19 @@
     grid-auto-columns: minmax(300px, 1fr);
     gap: 1px;
     overflow: auto;
-    background: var(--線);
+    background: var(--暗線);
     scroll-snap-type: x mandatory;
   }
   .比較卡 {
     min-width: 0;
     display: grid;
-    grid-template-rows: auto minmax(360px, 1fr) auto;
-    padding: 22px;
-    background: var(--紺深);
+    grid-template-rows: auto minmax(340px, 1fr) auto;
+    padding: 18px clamp(14px, 2vw, 30px) 20px;
+    background: #06080F;
     scroll-snap-align: start;
   }
-  .比較卡 h3 {
-    margin: 0 0 12px;
-    color: var(--金泥);
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: .18em;
-  }
-  .並圖 {
-    position: relative;
-    min-height: 0;
-    overflow: hidden;
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--線);
-    background: radial-gradient(circle at 50% 45%, #151b38, var(--紺深) 72%);
-  }
-  .並圖::after {
-    content: "座面 68";
-    position: absolute;
-    right: 0;
-    bottom: 28%;
-    left: 0;
-    padding-right: 8px;
-    border-top: 1px solid rgba(176, 64, 44, .42);
-    color: rgba(176, 64, 44, .7);
-    font-size: 8px;
-    line-height: 1.7;
-    letter-spacing: .12em;
-    text-align: right;
-    pointer-events: none;
-  }
+  .比較卡 h3 { margin: 0 0 12px; font-size: 12px; font-weight: 500; letter-spacing: .2em; color: var(--金); }
+  .並圖 { position: relative; min-height: 0; overflow: hidden; }
   .並圖 img {
     display: block;
     width: 100%;
@@ -1002,164 +1116,83 @@
     transform-origin: 50% 50%;
   }
   .比較卡.犍陀羅 .並圖 img { transform: translateY(1%) scale(1.55); }
-  .比較卡.漢地 .並圖 img {
-    transform: translateY(-2%) scale(1.65);
-  }
+  .比較卡.漢地 .並圖 img { transform: translateY(-2%) scale(1.65); }
   .比較卡.藏地 .並圖 img { transform: translateY(5%) scale(1.78); }
-  .並準 {
-    margin: 14px 0 0;
-    color: var(--墨淡);
-    font-size: 11px;
-    line-height: 1.85;
+  .並圖::after {
+    content: "座面 68";
+    position: absolute;
+    right: 0;
+    bottom: 28%;
+    left: 0;
+    padding: 2px 8px 0 0;
+    border-top: 1px solid rgba(196, 85, 58, .6);
+    color: rgba(196, 85, 58, .85);
+    font-size: 8px;
+    letter-spacing: .16em;
+    line-height: 1.6;
+    text-align: right;
+    pointer-events: none;
   }
-  .並準 b { display: block; color: var(--絹); font-weight: 500; }
-  .並錨 {
-    margin-top: 8px;
-    color: var(--金暗);
-    font-size: 9px;
-    letter-spacing: .1em;
+  dialog.並觀廳.無基準 .並圖::after { display: none; }
+  .並圖::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(216, 208, 186, .13) 0 1px, transparent 1px calc(100% / 24)),
+      linear-gradient(90deg, transparent calc(50% - 1px), rgba(216, 208, 186, .22) calc(50% - 1px) 50%, transparent 50%);
+    transition: opacity .5s;
   }
+  dialog.並觀廳[data-mode="格"] .並圖::before { opacity: 1; }
+  .並註 { margin: 14px 0 0; }
+  dialog.並觀廳:not([data-mode="註"]) .並註 { display: none; }
+  .並準 { margin: 0; font-size: 11.5px; line-height: 1.95; color: var(--夜灰); }
+  .並準 b { display: block; margin-bottom: 2px; color: var(--淡絹); font-weight: 500; font-size: 10px; letter-spacing: .26em; }
+  .並錨 { margin: 8px 0 0; font-size: 9px; letter-spacing: .12em; color: #B29A64; }
 
-  footer {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 10px 30px;
-    margin-top: 130px;
-    padding-top: 28px;
-    border-top: 1px solid var(--線);
-    color: var(--墨淡);
-    font-size: 10.5px;
-    letter-spacing: .1em;
-  }
-  footer a { color: var(--金泥); text-decoration: none; }
-
-  :focus-visible {
-    outline: 1px solid var(--金泥);
-    outline-offset: 3px;
-  }
-  @keyframes 覆顯 { from { opacity: 0; } to { opacity: 1; } }
-
+  /* ══════════ 響應 ══════════ */
   @media (max-width: 1100px) {
-    .卷 { padding-right: 28px; padding-left: 116px; }
-    .館航 { grid-template-columns: repeat(6, minmax(132px, 1fr)); overflow-x: auto; }
-    .室題 { grid-template-columns: 78px minmax(0, 1fr); }
-    .室據 { grid-column: 2; }
-    .展位 { grid-template-columns: minmax(280px, .9fr) minmax(330px, 1.1fr); }
-    .段面 { padding: 22px; }
-  }
-
-  @media (max-width: 960px) {
-    html { scroll-padding-top: 96px; }
-    section[id], article[id] { scroll-margin-top: 96px; }
-    .卷 { padding: 0 28px 90px; }
-    nav.諸頁 {
-      position: relative;
-      inset: auto;
-      width: 100%;
-      min-height: 64px;
-      flex-direction: row;
-      gap: 22px;
-      overflow-x: auto;
-      padding: 14px 0;
-      border-right: 0;
-      border-bottom: 1px solid var(--線);
-      background: transparent;
-    }
-    nav.諸頁 a { flex: none; writing-mode: horizontal-tb; letter-spacing: .18em; }
-    nav.諸頁 .印記 { margin: 0 auto 0 0; padding: 6px 8px; }
-    nav.諸頁 .今 { padding: 0 0 3px; border-left: 0; border-bottom: 1px solid var(--金暗); }
-    .跳 { left: 16px; }
-    .館首 { min-height: 780px; padding-top: 42px; }
-    .館航 { top: 0; margin: 0 -28px; padding-right: 28px; padding-left: 28px; }
-    .展位 { grid-template-columns: 1fr; }
-    .展圖 { border-right: 0; border-bottom: 1px solid var(--線); }
-    .展圖 img { max-height: 720px; }
-    .候展 { grid-template-columns: 1fr; }
-    .候主 { min-height: 220px; border-right: 0; border-bottom: 1px dashed rgba(216, 179, 106, .24); }
-    .比較軌 { grid-auto-columns: minmax(330px, 72vw); }
+    .前庭引 { grid-template-columns: minmax(0, 1fr); }
+    .題簽 { writing-mode: horizontal-tb; letter-spacing: .4em; }
+    .研究廊 .室身 { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+    .廊標 { writing-mode: horizontal-tb; }
+    .研首 { grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start; }
+    .研首 .卷序 { writing-mode: horizontal-tb; }
+    .次室 { text-align: left; }
   }
 
   @media (max-width: 650px) {
-    html { scroll-padding-top: 88px; }
-    .卷 { padding: 0 18px 76px; }
-    nav.諸頁 { gap: 18px; }
-    .館首 {
-      min-height: 0;
-      grid-template-columns: 1fr;
-      gap: 38px;
-      padding: 38px 0 48px;
-    }
-    .館首文 { order: 2; }
-    .眉題 { margin-bottom: 30px; }
-    .開館章 { margin-bottom: 28px; }
-    .館首 h1 { font-size: clamp(38px, 12vw, 56px); letter-spacing: .08em; }
-    .館首 h1 span:first-child { font-size: .38em; }
-    .館引 { margin-top: 26px; font-size: 13px; line-height: 2; }
-    .館訓 { align-items: flex-start; font-size: 11px; letter-spacing: .22em; }
-    .館數 { grid-template-columns: repeat(2, 1fr); }
-    .館數 div { min-height: 78px; }
-    .題簽 {
-      order: 1;
-      min-height: 0;
-      width: max-content;
-      max-height: none;
-      padding: 23px 16px 19px;
-      font-size: 42px;
-    }
-    .館航 { margin: 0 -18px; padding: 10px 18px; grid-template-columns: repeat(6, minmax(126px, 1fr)); }
-    .館航 a { min-height: 58px; padding-right: 9px; padding-left: 9px; }
-    .館航 a[aria-current="location"]::after { bottom: -11px; }
-    .同尊卷 { margin: 70px 0 108px; }
-    .卷段首 { grid-template-columns: 1fr; gap: 9px; align-items: start; }
-    .卷段首 .並觀鈕 { width: 100%; margin-top: 8px; }
-    .同尊軌 { grid-auto-columns: minmax(245px, 84vw); }
-    .同尊軸.主軸 { min-width: 84vw; }
-    .三體縮圖 img { height: 210px; }
-    .同尊軸 h3 { font-size: 13px; }
-    .室 { margin-bottom: 118px; padding-top: 12px; }
-    .室題 {
-      grid-template-columns: 1fr;
-      gap: 8px;
-      margin-bottom: 22px;
-      padding-top: 28px;
-    }
-    .室序 { padding: 0; }
-    .室題 h2 { font-size: 34px; letter-spacing: .1em; }
-    .室題 > p { font-size: 11px; }
-    .室據 { grid-column: auto; margin-top: 10px; }
-    .段籤 { grid-template-columns: repeat(var(--段數), minmax(145px, 1fr)); }
-    .段籤 button { min-height: 68px; }
-    .段面 { padding: 15px; }
-    .段標 { grid-template-columns: 1fr; gap: 2px; margin-bottom: 16px; }
-    .展圖 { padding: 10px; }
-    .展圖 figcaption { display: block; }
-    .展圖 figcaption span { display: block; }
-    .說明牌 { padding: 22px 17px 24px; }
-    .牌首 { display: block; }
-    .章列 { margin-top: 13px; }
-    .牌格 { grid-template-columns: 1fr; gap: 5px; }
-    .牌格 h5 { margin: 0; }
-    .牌尾 { align-items: stretch; }
-    .牌尾 .並觀鈕 { width: 100%; }
-    .候主 { min-height: 200px; padding: 24px 20px; }
-    .候牌 { padding: 24px 20px; }
-    .候牌 dl { grid-template-columns: 1fr; gap: 4px; }
-    .候牌 dd { margin-bottom: 10px; }
-    .常設首 { grid-template-columns: 1fr; gap: 4px; }
-    .常設首 h2 { font-size: 38px; }
-    .常設網 { grid-template-columns: 1fr; }
-    .常設卡.獨 { grid-column: auto; }
-    .常設組題 { align-items: flex-start; flex-wrap: wrap; }
-    .常設組題::after { display: none; }
-    .常設牌 header { display: block; }
-    .常設牌 .章列 { margin: 10px 0 0; }
-    .並觀首 { padding: 17px 16px 14px; }
-    .並觀首 h2 { font-size: 19px; }
-    .並觀首 p { max-width: 270px; }
-    .比較軌 { grid-auto-columns: 88vw; }
-    .比較卡 { padding: 14px; grid-template-rows: auto minmax(360px, 1fr) auto; }
-    footer { margin-top: 92px; }
+    body { font-size: 14px; }
+    .館名 { left: auto; right: clamp(18px, 8vw, 60px); }
+    .館名 .名正 { font-size: clamp(40px, 8svh, 60px); }
+    .開館章 { left: auto; right: calc(clamp(18px, 8vw, 60px) + 4px); bottom: 26svh; }
+    .館訓 { top: 30%; max-width: 9em; }
+    .五室索引 { bottom: 44px; }
+    .五室索引 a { grid-template-columns: 36px auto; gap: 12px; padding: 7px 0; }
+    .五室索引 a small { display: none; }
+    .入館 { display: none; }
+    .諸頁 { position: static; padding: 22px 18px 0 22px; flex-wrap: wrap; gap: 14px 20px; }
+    .眉題 { top: 66px; }
+    .前庭首 { min-height: 96svh; }
+    .門檻 { min-height: 78svh; }
+    .判語 { font-size: 12.5px; }
+    .展圖 { min-height: 88svh; padding-top: clamp(30px, 6svh, 60px); }
+    .展圖 img, .室-犍陀羅 .展圖 img, .室-尼瓦爾 .展圖 img { max-height: 74svh; max-width: 100%; }
+    .室-犍陀羅 .展圖, .室-尼瓦爾 .展圖 { min-height: 92svh; padding-top: clamp(40px, 9svh, 90px); }
+    .候展 { margin-left: calc(-1 * clamp(22px, 5vw, 84px) + 10px); margin-right: calc(-1 * clamp(22px, 5vw, 84px) + 10px); }
+    .候牌 dl { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .候牌 dt { padding-bottom: 0; }
+    .候牌 dd { padding-top: 2px; }
+    .三體縮圖 { grid-template-columns: minmax(0, 1fr); }
+    .三體縮圖 .縮框 { height: 240px; }
+    .候軸 { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .比較軌 { grid-auto-columns: 100%; }
+    .比較卡 { grid-template-rows: auto minmax(300px, 1fr) auto; }
+    .並觀首 { grid-template-columns: minmax(0, 1fr) auto; }
+    .觀制 { grid-column: 1 / -1; order: 3; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1170,100 +1203,82 @@
 </head>
 <body>
 <a class="跳" href="#主館">直入主館</a>
-<div class="卷">
-  <nav class="諸頁" aria-label="全站之航">
-    <a class="印記" href="index.html">粉本</a>
-    <a href="index.html">諸尊陳列</a>
-    <a href="shouyin.html">手印譜</a>
-    <a href="sanmaya.html">三昧耶譜</a>
-    <a href="博物館.html" class="今" aria-current="page">博物館</a>
-    <a href="競本.html">評卷廳</a>
-  </nav>
 
-  <header class="館首" id="館首">
-    <div class="館首文">
+<nav class="館路" aria-label="全館平面索引" data-tone="明">
+  <a class="印記" href="index.html">粉本</a>
+  <a class="步" href="#前庭" data-room-nav="前庭">前庭</a>
+  <a class="步" href="#犍陀羅" data-room-nav="犍陀羅">壹 犍陀羅</a>
+  <a class="步" href="#漢地" data-room-nav="漢地">貳 漢地</a>
+  <a class="步" href="#藏地" data-room-nav="藏地">參 藏地</a>
+  <a class="步" href="#東密" data-room-nav="東密">肆 東密</a>
+  <a class="步" href="#尼瓦爾" data-room-nav="尼瓦爾">伍 尼瓦爾</a>
+  <a class="步" href="#常設" data-room-nav="常設">常設</a>
+  <a class="步" href="#同尊卷" data-room-nav="同尊卷">研究室</a>
+</nav>
+
+<div class="袖航" data-tone="明">
+  <a class="袖印" href="index.html">粉本</a>
+  <button type="button" id="袖目鈕" aria-haspopup="dialog">
+    <span id="袖所在">前庭</span>
+  </button>
+</div>
+
+<main id="主館">
+
+  <!-- ════════ 第一幕：白晝前庭 ════════ -->
+  <section class="前庭" id="前庭" data-room-section="前庭" data-tone="明" data-screen-label="前庭" aria-label="前庭">
+    <header class="前庭首" id="館首">
+      <nav class="諸頁" aria-label="全站之航">
+        <a href="index.html">諸尊陳列</a>
+        <a href="shouyin.html">手印譜</a>
+        <a href="sanmaya.html">三昧耶譜</a>
+        <a href="博物館.html" aria-current="page">博物館</a>
+        <a href="競本.html">評卷廳</a>
+      </nav>
       <p class="眉題">FENBEN ONLINE MUSEUM · PERMANENT COLLECTION</p>
+      <h1 class="館名"><span class="名正">粉本線上博物館</span><span class="名副">程序造像之藏</span></h1>
       <span class="開館章">五室常設</span>
-      <h1><span>程序造像之藏</span>粉本線上博物館</h1>
-      <p class="館引">
-        同一百二十指格網，落於五地，貌各有宗。此館不以地域作標籤而止：
-        逐室循<b>朝代、線質、構圖與表法景物</b>而讀；每幀皆本庫程序白描，
-        館藏名品只作考據文字之錨，不取外圖。虛線者候考，朱界者候審；
-        寧缺毋誤，乃開館第一戒。
-      </p>
-      <div class="館訓">量度是律，風格是貌</div>
-      <div class="館數" aria-label="館藏概覽">
-        <div><b>五</b><small>歷代風格室</small></div>
-        <div><b>十九</b><small>朝代與畫派段</small></div>
-        <div><b>三</b><small>釋迦同尊異體</small></div>
-        <div><b>三</b><small>常設陳列廳</small></div>
+      <p class="館訓">量度是律，風格是貌<small>粉本 · 五地同觀</small></p>
+      <nav class="五室索引" aria-label="五室索引">
+        <a href="#犍陀羅"><i>室壹</i>犍陀羅<small>1–7 世紀</small></a>
+        <a href="#漢地"><i>室貳</i>漢地<small>唐至明</small></a>
+        <a href="#藏地"><i>室參</i>藏地<small>五派之辨</small></a>
+        <a href="#東密"><i>室肆</i>東密<small>請來至鎌倉</small></a>
+        <a href="#尼瓦爾"><i>室伍</i>尼瓦爾南傳<small>蒲甘至康提</small></a>
+      </nav>
+      <div class="基準線" aria-hidden="true"><span>座面六八 · 一二〇指格</span></div>
+      <a class="入館" href="#犍陀羅">入館</a>
+    </header>
+    <div class="室身 前庭引">
+      <div>
+        <p class="館引" data-reveal>
+          同一百二十指格網，落於五地，貌各有宗。此館不以地域作標籤而止：
+          逐室循<b>朝代、線質、構圖與表法景物</b>而讀；每幀皆本庫程序白描，
+          館藏名品只作考據文字之錨，不取外圖。虛線者候考，朱界者候審；
+          寧缺毋誤，乃開館第一戒。
+        </p>
+        <p class="館數" aria-label="館藏概覽" data-reveal>
+          <span><b>五</b>歷代風格室</span>
+          <span><b>十九</b>朝代與畫派段</span>
+          <span><b>三</b>釋迦同尊異體</span>
+          <span><b>三</b>常設陳列廳</span>
+        </p>
       </div>
+      <p class="題簽" aria-hidden="true">線上博物館 · 粉本 · 五地同觀</p>
     </div>
-    <div class="題簽" aria-hidden="true">線上博物館<small>粉本 · 五地同觀</small></div>
-  </header>
+  </section>
 
-  <nav class="館航" aria-label="五室與常設三廳">
-    <a href="#犍陀羅" data-room-nav="犍陀羅"><span class="航序">室壹</span><strong>犍陀羅</strong><small>1–7 世紀</small></a>
-    <a href="#漢地" data-room-nav="漢地"><span class="航序">室貳</span><strong>漢地</strong><small>唐至明</small></a>
-    <a href="#藏地" data-room-nav="藏地"><span class="航序">室參</span><strong>藏地</strong><small>五派之辨</small></a>
-    <a href="#東密" data-room-nav="東密"><span class="航序">室肆</span><strong>東密</strong><small>請來至鎌倉</small></a>
-    <a href="#尼瓦爾" data-room-nav="尼瓦爾"><span class="航序">室伍</span><strong>尼瓦爾南傳</strong><small>蒲甘至康提</small></a>
-    <a href="#常設" data-room-nav="常設"><span class="航序">常設</span><strong>三廳</strong><small>壇城・漢傳・星供</small></a>
-  </nav>
-
-  <main id="主館">
-    <section class="同尊卷" id="同尊卷" aria-labelledby="同尊題">
-      <header class="卷段首">
-        <span class="卷序">同尊卷</span>
-        <div>
-          <h2 id="同尊題">一尊，五地之貌</h2>
-          <p>同錨等高，非以尺度較高下，惟見衣紋、線質與構圖如何改貌。</p>
-        </div>
-        <button class="並觀鈕" type="button" data-compare="shaka">啟釋迦三體並觀</button>
-      </header>
-      <div class="同尊軌" aria-label="同尊異體諸卷">
-        <article class="同尊軸 主軸">
-          <header><h3>釋迦卷</h3><small>三體可觀 · shaka</small></header>
-          <div class="三體縮圖">
-            <a href="#展-犍陀羅-釋迦">
-              <img src="圖錄/風格館/犍陀羅-釋迦說法龕.png" alt="犍陀羅室釋迦說法龕縮圖" width="1800" height="2400" loading="lazy" decoding="async">
-              <span>犍陀羅 · 龕式</span>
-            </a>
-            <a href="#常設-橫三世">
-              <img src="圖錄/唐卡試卷/橫三世一幀.png" alt="漢地室橫三世中尊釋迦縮圖" width="2400" height="1560" loading="lazy" decoding="async">
-              <span>漢地 · 說法中尊</span>
-            </a>
-            <a href="#展-藏地-釋迦">
-              <img src="圖錄/風格館/藏地-精密二稿.png" alt="藏地室釋迦說法唐卡縮圖" width="2000" height="2600" loading="lazy" decoding="async">
-              <span>藏地 · 唐卡式</span>
-            </a>
-          </div>
-        </article>
-        <article class="同尊軸 候軸">
-          <header><h3>觀音・度母卷</h3><small>候波二</small></header>
-          <div class="候軸身">候展<span>水月觀音・十一面・綠度母<br>新尊新儀軌，未考不陳</span></div>
-        </article>
-        <article class="同尊軸 候軸">
-          <header><h3>藥師卷</h3><small>一體在館</small></header>
-          <div class="候軸身">待成對<span>元壁畫式已陳<br>勉唐淨土與明水陸候展</span></div>
-        </article>
-        <article class="同尊軸 候軸">
-          <header><h3>彌勒卷</h3><small>候波三</small></header>
-          <div class="候軸身">候展<span>哈達灰泥交腳式<br>待與胎藏彌勒同錨並陳</span></div>
-        </article>
+  <!-- ════════ 室壹：犍陀羅 ════════ -->
+  <section class="室 室暗 室-犍陀羅" id="犍陀羅" data-room-section="犍陀羅" data-tone="暗" data-screen-label="室壹 犍陀羅" aria-labelledby="犍陀羅題">
+    <header class="門檻">
+      <div class="室身 檻文">
+        <p class="室號"><b>室壹</b>1–7 世紀 · 白沙瓦盆地・斯瓦特・哈達</p>
+        <h2 id="犍陀羅題" data-reveal>犍陀羅室<small>垂直 · 石質 · 龕之深遠</small></h2>
+        <p class="判語" data-reveal>衣紋見身體之勢為總軸：通肩厚袍之 U 形深谷褶，須使厚衣之下仍可讀肩峰、肘轉與盤坐；素圈頭光、支提拱與科林斯柱龕，共成希臘化佛國之居。</p>
       </div>
-    </section>
-
-    <!-- 室壹：犍陀羅 -->
-    <section class="室" id="犍陀羅" data-room-section="犍陀羅" aria-labelledby="犍陀羅題">
-      <header class="室題">
-        <span class="室序">室壹</span>
-        <div>
-          <h2 id="犍陀羅題">犍陀羅室<small>白沙瓦盆地・斯瓦特・哈達</small></h2>
-          <p>衣紋見身體之勢為總軸：通肩厚袍之 U 形深谷褶，須使厚衣之下仍可讀肩峰、肘轉與盤坐；素圈頭光、支提拱與科林斯柱龕，共成希臘化佛國之居。</p>
-        </div>
-        <aside class="室據"><b>所據之卷</b>本室無專卷；依 <a href="docs/風格館總設計.md">風格館總設計 · 犍陀羅室</a>，未核細判明標〔待核〕。</aside>
-      </header>
+      <span class="裁名" aria-hidden="true">犍陀羅</span>
+    </header>
+    <div class="室身">
       <div class="分期" style="--段數:3" data-tabs>
         <div class="段籤" role="tablist" aria-label="犍陀羅室朝代選擇">
           <button type="button" role="tab" id="tab-g1" aria-controls="panel-g1" aria-selected="true" tabindex="0"><b>貴霜片岩盛期</b><small>1–3 世紀</small></button>
@@ -1273,19 +1288,22 @@
         <div class="段面" id="panel-g1" role="tabpanel" aria-labelledby="tab-g1">
           <header class="段標"><p class="段代">1–3 世紀</p><div><h3>貴霜片岩盛期</h3><p>青灰片岩造像之極；深褶隨體轉折，龕楣嚴整，主尊、脅侍、供養人以尺度定階。</p></div></header>
           <article class="展位" id="展-犍陀羅-釋迦" data-zun="shaka" data-room="犍陀羅室" data-compare-src="圖錄/風格館/犍陀羅-釋迦說法龕.png" data-compare-width="1800" data-compare-height="2400" data-compare-title="釋迦說法 · 貴霜片岩龕式" data-criteria="通肩厚衣作 U 形深谷褶；素圈頭光、支提拱與柱龕三環同軸；主尊、立侍、跪供養以尺度成階。" data-anchor="T1419 120 指 · 白毫 12／頦 20／臍 48／座面 68">
-            <figure class="展圖">
+            <figure class="展圖" data-reveal>
               <img src="圖錄/風格館/犍陀羅-釋迦說法龕.png" alt="犍陀羅貴霜片岩式釋迦說法龕，金泥程序白描" width="1800" height="2400" loading="lazy" decoding="async">
               <figcaption><span>本庫機出白描 · 零外部圖源</span><span>圖錄／風格館</span></figcaption>
             </figure>
             <div class="說明牌">
-              <header class="牌首">
+              <header class="牌首" data-reveal>
                 <h4>釋迦說法龕<small>shaka · 漢傳側 · 犍陀羅室 · 貴霜片岩式</small></h4>
                 <div class="章列"><span class="章">信級 已核</span><span class="章 實">品狀 上壇</span></div>
               </header>
-              <div class="牌格"><h5>風格判準</h5><ul><li>通肩厚袍作懸鏈 U 弧，褶谷疏密隨胸臂轉折。</li><li>素圈頭光、支提拱楣、菩提樹冠三環同軸。</li><li>主尊＞立脅侍＞跪供養，位階即尺度。</li></ul></div>
-              <div class="牌格"><h5>所據</h5><p><a href="docs/風格館總設計.md">總設計 · 犍陀羅室</a>；V&amp;A O63825（素光、覆帛座與深褶）；Met 38118（說法圖右侍執金剛）；Penn Museum 29-64-239（連珠分場）。</p></div>
-              <div class="牌格"><h5>表法景物</h5><ul class="景物籤"><li><b>雙鹿法輪</b> · 初轉</li><li><b>菩提樹冠</b> · 成道</li><li><b>獅座</b> · 說法無畏</li><li><b>執金剛</b> · 常隨護法</li><li><b>科林斯柱</b> · 分龕成境</li></ul></div>
-              <div class="牌格"><h5>格網關係</h5><p><strong>120 指佛格</strong>；並觀取白毫 12、頦 20、臍 48、座面 68 同高。龕柱與座基外擴，尊身錨點不移。</p></div>
+              <div class="牌讀" data-reveal><h5>觀看提示</h5><ul><li>通肩厚袍作懸鏈 U 弧，褶谷疏密隨胸臂轉折。</li><li>素圈頭光、支提拱楣、菩提樹冠三環同軸。</li><li>主尊＞立脅侍＞跪供養，位階即尺度。</li></ul></div>
+              <details class="深讀">
+                <summary>研讀 · 所據與量度</summary>
+                <div class="牌格"><h5>所據</h5><p><a href="docs/風格館總設計.md">總設計 · 犍陀羅室</a>；V&amp;A O63825（素光、覆帛座與深褶）；Met 38118（說法圖右侍執金剛）；Penn Museum 29-64-239（連珠分場）。</p></div>
+                <div class="牌格"><h5>表法景物</h5><ul class="景物籤"><li><b>雙鹿法輪</b> · 初轉</li><li><b>菩提樹冠</b> · 成道</li><li><b>獅座</b> · 說法無畏</li><li><b>執金剛</b> · 常隨護法</li><li><b>科林斯柱</b> · 分龕成境</li></ul></div>
+                <div class="牌格"><h5>格網關係</h5><p><strong>120 指佛格</strong>；並觀取白毫 12、頦 20、臍 48、座面 68 同高。龕柱與座基外擴，尊身錨點不移。</p></div>
+              </details>
               <div class="牌尾"><p>量度是律，風格是貌</p><button class="並觀鈕" type="button" data-compare="shaka">與漢、藏二體並觀</button></div>
             </div>
           </article>
@@ -1305,18 +1323,27 @@
           </article>
         </div>
       </div>
-    </section>
+    </div>
+    <aside class="研究廊" data-tone="明" aria-label="犍陀羅室研究廊">
+      <div class="室身">
+        <p class="廊標">研究廊</p>
+        <p class="室據"><b>所據之卷</b>本室無專卷；依 <a href="docs/風格館總設計.md">風格館總設計 · 犍陀羅室</a>，未核細判明標〔待核〕。</p>
+        <a class="次室" href="#漢地"><small>下一室 · 室貳</small><strong>漢地</strong></a>
+      </div>
+    </aside>
+  </section>
 
-    <!-- 室貳：漢地 -->
-    <section class="室" id="漢地" data-room-section="漢地" aria-labelledby="漢地題">
-      <header class="室題">
-        <span class="室序">室貳</span>
-        <div>
-          <h2 id="漢地題">漢地室<small>長安洛陽・敦煌・大理・晉南</small></h2>
-          <p>描法之辨為軸：蘭葉描以提按生風，鐵線描以勻細藏鋒立骨，元壁長線一筆貫底。刺孔撲粉與對摺鏡像不是旁技，乃「粉本即制度」之千年史證。</p>
-        </div>
-        <aside class="室據"><b>所據之卷</b><a href="docs/考據/畫風-漢地.md">畫風考據 · 漢地白描佛畫流變</a>；唐至清總判三訣。</aside>
-      </header>
+  <!-- ════════ 室貳：漢地 ════════ -->
+  <section class="室 室暗 室-漢地" id="漢地" data-room-section="漢地" data-tone="暗" data-screen-label="室貳 漢地" aria-labelledby="漢地題">
+    <header class="門檻">
+      <div class="室身 檻文">
+        <p class="室號"><b>室貳</b>唐至明 · 長安洛陽・敦煌・大理・晉南</p>
+        <h2 id="漢地題" data-reveal>漢地室<small>橫向 · 卷軸 · 長線之行列</small></h2>
+        <p class="判語" data-reveal>描法之辨為軸：蘭葉描以提按生風，鐵線描以勻細藏鋒立骨，元壁長線一筆貫底。刺孔撲粉與對摺鏡像不是旁技，乃「粉本即制度」之千年史證。</p>
+      </div>
+      <span class="裁名" aria-hidden="true">漢地</span>
+    </header>
+    <div class="室身">
       <div class="分期" style="--段數:4" data-tabs>
         <div class="段籤" role="tablist" aria-label="漢地室朝代選擇">
           <button type="button" role="tab" id="tab-h1" aria-controls="panel-h1" aria-selected="false" tabindex="-1"><b>唐・吳家樣</b><small>8 世紀</small></button>
@@ -1341,16 +1368,22 @@
         <div class="段面" id="panel-h3" role="tabpanel" aria-labelledby="tab-h3">
           <header class="段標"><p class="段代">1325 前後</p><div><h3>元・壁畫作坊</h3><p>鐵線與蓴菜條並用；主線少而長，輔線短而密，鬚髮毛根出肉，一鋪十五尊成堂。</p></div></header>
           <article class="展位" id="展-漢地-藥師" data-zun="yakushi">
-            <figure class="展圖">
+            <figure class="展圖" data-reveal>
               <img src="圖錄/風格館/漢地-精密二稿.png" alt="漢地元壁畫式藥師佛會淨土變，金泥程序白描" width="2100" height="2500" loading="lazy" decoding="async">
               <figcaption><span>本庫機出白描 · 零外部圖源</span><span>圖錄／風格館</span></figcaption>
             </figure>
             <div class="說明牌">
-              <header class="牌首"><h4>藥師佛會淨土變<small>yakushi · 漢傳側 · 漢地室 · 元壁畫作坊</small></h4><div class="章列"><span class="章">信級 已核</span><span class="章 實">品狀 上壇</span></div></header>
-              <div class="牌格"><h5>風格判準</h5><ul><li>虛空、佛會、蓮池平臺三段縱疊，中軸主大從小。</li><li>主線長而少、輔線短而密；面手鐵線，衣帶蓴菜條。</li><li>左右對摺鏡像，榜題成堂而尊格不亂。</li></ul></div>
-              <div class="牌格"><h5>所據</h5><p><a href="docs/考據/畫風-漢地.md">畫風-漢地 · 元</a>；Met 65.29.2 廣勝寺《藥師佛會圖》（朱好古作坊）。榜題制度另據明寶寧寺水陸成堂，旁證明標，毋混代。</p></div>
-              <div class="牌格"><h5>表法景物</h5><ul class="景物籤"><li><b>華蓋</b> · 覆護</li><li><b>七寶樹</b> · 國土莊嚴</li><li><b>欄楯</b> · 淨域之界</li><li><b>蓮池</b> · 八功德水</li><li><b>榜題牌</b> · 尊格之錨</li></ul></div>
-              <div class="牌格"><h5>格網關係</h5><p>中尊 <strong>120 指</strong>；十二神將用忿怒 96 指級，群像依尊格遞減。白毫 12、頦 20、臍 48、座面 68 不移。</p></div>
+              <header class="牌首" data-reveal>
+                <h4>藥師佛會淨土變<small>yakushi · 漢傳側 · 漢地室 · 元壁畫作坊</small></h4>
+                <div class="章列"><span class="章">信級 已核</span><span class="章 實">品狀 上壇</span></div>
+              </header>
+              <div class="牌讀" data-reveal><h5>觀看提示</h5><ul><li>虛空、佛會、蓮池平臺三段縱疊，中軸主大從小。</li><li>主線長而少、輔線短而密；面手鐵線，衣帶蓴菜條。</li><li>左右對摺鏡像，榜題成堂而尊格不亂。</li></ul></div>
+              <details class="深讀">
+                <summary>研讀 · 所據與量度</summary>
+                <div class="牌格"><h5>所據</h5><p><a href="docs/考據/畫風-漢地.md">畫風-漢地 · 元</a>；Met 65.29.2 廣勝寺《藥師佛會圖》（朱好古作坊）。榜題制度另據明寶寧寺水陸成堂，旁證明標，毋混代。</p></div>
+                <div class="牌格"><h5>表法景物</h5><ul class="景物籤"><li><b>華蓋</b> · 覆護</li><li><b>七寶樹</b> · 國土莊嚴</li><li><b>欄楯</b> · 淨域之界</li><li><b>蓮池</b> · 八功德水</li><li><b>榜題牌</b> · 尊格之錨</li></ul></div>
+                <div class="牌格"><h5>格網關係</h5><p>中尊 <strong>120 指</strong>；十二神將用忿怒 96 指級，群像依尊格遞減。白毫 12、頦 20、臍 48、座面 68 不移。</p></div>
+              </details>
               <div class="牌尾"><p>量度是律，風格是貌</p><a class="並觀鈕" href="#常設-藥師十五尊">索引常設同題</a></div>
             </div>
           </article>
@@ -1363,18 +1396,27 @@
           </article>
         </div>
       </div>
-    </section>
+    </div>
+    <aside class="研究廊" data-tone="明" aria-label="漢地室研究廊">
+      <div class="室身">
+        <p class="廊標">研究廊</p>
+        <p class="室據"><b>所據之卷</b><a href="docs/考據/畫風-漢地.md">畫風考據 · 漢地白描佛畫流變</a>；唐至清總判三訣。</p>
+        <a class="次室" href="#藏地"><small>下一室 · 室參</small><strong>藏地</strong></a>
+      </div>
+    </aside>
+  </section>
 
-    <!-- 室參：藏地 -->
-    <section class="室" id="藏地" data-room-section="藏地" aria-labelledby="藏地題">
-      <header class="室題">
-        <span class="室序">室參</span>
-        <div>
-          <h2 id="藏地題">藏地室<small>衛藏・後藏・康區</small></h2>
-          <p>非一種鐵線走遍全幅：肉線平勾、衣線兩端細中段粗、山石忿怒濁勾，分部位而治。八大線先行，中央梵線 tshangs thig 即 T1419「梵絣」。</p>
-        </div>
-        <aside class="室據"><b>所據之卷</b><a href="docs/考據/畫風-藏地.md">畫風考據 · 藏地唐卡畫派</a>；125／120 佛格異說並陳。</aside>
-      </header>
+  <!-- ════════ 室參：藏地 ════════ -->
+  <section class="室 室暗 室-藏地" id="藏地" data-room-section="藏地" data-tone="暗" data-screen-label="室參 藏地" aria-labelledby="藏地題">
+    <header class="門檻">
+      <div class="室身 檻文">
+        <p class="室號"><b>室參</b>五派之辨 · 衛藏・後藏・康區</p>
+        <h2 id="藏地題" data-reveal>藏地室<small>同心 · 包圍 · 層層入內</small></h2>
+        <p class="判語" data-reveal>非一種鐵線走遍全幅：肉線平勾、衣線兩端細中段粗、山石忿怒濁勾，分部位而治。八大線先行，中央梵線 tshangs thig 即 T1419「梵絣」。</p>
+      </div>
+      <span class="裁名" aria-hidden="true">藏地</span>
+    </header>
+    <div class="室身">
       <div class="分期" style="--段數:5" data-tabs>
         <div class="段籤" role="tablist" aria-label="藏地室畫派選擇">
           <button type="button" role="tab" id="tab-t1" aria-controls="panel-t1" aria-selected="false" tabindex="-1"><b>齊烏崗巴</b><small>13／15 世紀異說</small></button>
@@ -1393,16 +1435,22 @@
         <div class="段面" id="panel-t2" role="tabpanel" aria-labelledby="tab-t2">
           <header class="段標"><p class="段代">15 世紀中</p><div><h3>勉唐</h3><p>擅寂靜尊，線工整而法度嚴；漢式青綠山水補中景，面施白高光，「勉靜欽忿」由此判。</p></div></header>
           <article class="展位" id="展-藏地-釋迦" data-zun="shaka" data-room="藏地室" data-compare-src="圖錄/風格館/藏地-精密二稿.png" data-compare-width="2000" data-compare-height="2600" data-compare-title="釋迦說法 · 勉唐唐卡式" data-criteria="八大線先行，中央梵線與白毫同軸；上師／中尊／護法供養三界縱分；日月、寶蓋、雙鹿法輪、七供與蓮池滿幀而不侵尊身。" data-anchor="T1419 120 指 · 白毫 12／頦 20／臍 48／座面 68">
-            <figure class="展圖">
+            <figure class="展圖" data-reveal>
               <img src="圖錄/風格館/藏地-精密二稿.png" alt="藏地勉唐式釋迦說法唐卡，金泥程序白描" width="2000" height="2600" loading="lazy" decoding="async">
               <figcaption><span>本庫機出白描 · 零外部圖源</span><span>圖錄／風格館</span></figcaption>
             </figure>
             <div class="說明牌">
-              <header class="牌首"><h4>釋迦說法唐卡<small>shaka · 漢傳側 · 藏地室 · 勉唐構圖</small></h4><div class="章列"><span class="章">信級 已核</span><span class="章 實">品狀 上壇</span></div></header>
-              <div class="牌格"><h5>風格判準</h5><ul><li>八大線先行，梵線與中尊白毫同軸。</li><li>上師、中尊、護法供養三界縱分，中尊獨大。</li><li>肉線平勾、衣線提按、山石濁勾，三質分治。</li></ul></div>
-              <div class="牌格"><h5>所據</h5><p><a href="docs/考據/畫風-藏地.md">畫風-藏地 · 勉唐與量度</a>；Jackson &amp; Jackson 1984、Jackson 1996；第司桑結嘉措《具慧滋養》約 1687／Brill 2012。單件館藏號〔待核〕。</p></div>
-              <div class="牌格"><h5>表法景物</h5><ul class="景物籤"><li><b>雙鹿法輪</b> · 初轉</li><li><b>七供碗</b> · 資糧</li><li><b>日月</b> · 方便智慧</li><li><b>寶蓋</b> · 覆護</li><li><b>青綠山</b> · 雪域淨土</li><li><b>蓮池</b> · 清淨化生</li></ul></div>
-              <div class="牌格"><h5>格網關係</h5><p>本幀依 T1419 <strong>120 指勝樂系</strong>。藏佛 125／120 為真分歧，只並陳不互補；白毫 12、頦 20、臍 48、座面 68 同錨。</p></div>
+              <header class="牌首" data-reveal>
+                <h4>釋迦說法唐卡<small>shaka · 漢傳側 · 藏地室 · 勉唐構圖</small></h4>
+                <div class="章列"><span class="章">信級 已核</span><span class="章 實">品狀 上壇</span></div>
+              </header>
+              <div class="牌讀" data-reveal><h5>觀看提示</h5><ul><li>八大線先行，梵線與中尊白毫同軸。</li><li>上師、中尊、護法供養三界縱分，中尊獨大。</li><li>肉線平勾、衣線提按、山石濁勾，三質分治。</li></ul></div>
+              <details class="深讀">
+                <summary>研讀 · 所據與量度</summary>
+                <div class="牌格"><h5>所據</h5><p><a href="docs/考據/畫風-藏地.md">畫風-藏地 · 勉唐與量度</a>；Jackson &amp; Jackson 1984、Jackson 1996；第司桑結嘉措《具慧滋養》約 1687／Brill 2012。單件館藏號〔待核〕。</p></div>
+                <div class="牌格"><h5>表法景物</h5><ul class="景物籤"><li><b>雙鹿法輪</b> · 初轉</li><li><b>七供碗</b> · 資糧</li><li><b>日月</b> · 方便智慧</li><li><b>寶蓋</b> · 覆護</li><li><b>青綠山</b> · 雪域淨土</li><li><b>蓮池</b> · 清淨化生</li></ul></div>
+                <div class="牌格"><h5>格網關係</h5><p>本幀依 T1419 <strong>120 指勝樂系</strong>。藏佛 125／120 為真分歧，只並陳不互補；白毫 12、頦 20、臍 48、座面 68 同錨。</p></div>
+              </details>
               <div class="牌尾"><p>量度是律，風格是貌</p><button class="並觀鈕" type="button" data-compare="shaka">與犍、漢二體並觀</button></div>
             </div>
           </article>
@@ -1429,18 +1477,27 @@
           </article>
         </div>
       </div>
-    </section>
+    </div>
+    <aside class="研究廊" data-tone="明" aria-label="藏地室研究廊">
+      <div class="室身">
+        <p class="廊標">研究廊</p>
+        <p class="室據"><b>所據之卷</b><a href="docs/考據/畫風-藏地.md">畫風考據 · 藏地唐卡畫派</a>；125／120 佛格異說並陳。</p>
+        <a class="次室" href="#東密"><small>下一室 · 室肆</small><strong>東密</strong></a>
+      </div>
+    </aside>
+  </section>
 
-    <!-- 室肆：東密 -->
-    <section class="室" id="東密" data-room-section="東密" aria-labelledby="東密題">
-      <header class="室題">
-        <span class="室序">室肆</span>
-        <div>
-          <h2 id="東密題">東密室<small>東寺・醍醐寺・仁和寺・高野山</small></h2>
-          <p>白描図像是自立門類，非設色前之殘稿。尊像、梵號種子真言、印相與三昧耶形並列成傳法手冊；本庫程序白描，正是骨描き層之獨立成品化。</p>
-        </div>
-        <aside class="室據"><b>所據之卷</b><a href="docs/考據/畫風-日本.md">畫風考據 · 日本白描図像</a>；大正藏図像部 SAT IIIF 為公開主庫。</aside>
-      </header>
+  <!-- ════════ 室肆：東密（紙色研究室） ════════ -->
+  <section class="室 室明 室-東密" id="東密" data-room-section="東密" data-tone="明" data-screen-label="室肆 東密" aria-labelledby="東密題">
+    <header class="門檻">
+      <div class="室身 檻文">
+        <p class="室號"><b>室肆</b>請來至鎌倉 · 東寺・醍醐寺・仁和寺・高野山</p>
+        <h2 id="東密題" data-reveal>東密室<small>紙頁 · 記錄 · 極度克制</small></h2>
+        <p class="判語" data-reveal>白描図像是自立門類，非設色前之殘稿。尊像、梵號種子真言、印相與三昧耶形並列成傳法手冊；本庫程序白描，正是骨描き層之獨立成品化。</p>
+      </div>
+      <span class="裁名" aria-hidden="true">東密</span>
+    </header>
+    <div class="室身">
       <div class="分期" style="--段數:3" data-tabs>
         <div class="段籤" role="tablist" aria-label="東密室朝代選擇">
           <button type="button" role="tab" id="tab-j1" aria-controls="panel-j1" aria-selected="false" tabindex="-1"><b>唐請來原本期</b><small>804–855</small></button>
@@ -1457,16 +1514,22 @@
         <div class="段面" id="panel-j2" role="tabpanel" aria-labelledby="tab-j2">
           <header class="段標"><p class="段代">11 世紀末–1180</p><div><h3>平安院政白描図像集成期</h3><p>無肥瘦鐵線與截金文樣成正；半眼伏目，上瞼重於下瞼；素地之上，線本身即完成品。</p></div></header>
           <article class="展位" id="展-東密-大日" data-zun="center">
-            <figure class="展圖">
+            <figure class="展圖" data-reveal>
               <img src="圖錄/風格館/東密-大日一頁.png" alt="東密平安院政式大日如來白描図像頁" width="1720" height="2300" loading="lazy" decoding="async">
               <figcaption><span>本庫機出白描 · 零外部圖源</span><span>圖錄／風格館</span></figcaption>
             </figure>
             <div class="說明牌">
-              <header class="牌首"><h4>金剛界大日・図像葉<small>center · 金剛界側 · 東密室 · 院政鐵線</small></h4><div class="章列"><span class="章">信級 已核</span><span class="章 實">品狀 上壇</span></div></header>
-              <div class="牌格"><h5>風格判準</h5><ul><li>全幅以無肥瘦鐵線立骨，上瞼獨重而半眼垂目。</li><li>尊像、題記、印相、三昧耶形三段成葉。</li><li>素地無山水；界線以三級線細分空間，不假濃淡。</li></ul></div>
-              <div class="牌格"><h5>所據</h5><p><a href="docs/考據/畫風-日本.md">畫風-日本 · 白描図像</a>；神護寺高雄曼荼羅 824–833（紫綾金銀泥線描）；《図像抄》1139、《別尊雑記》1156–80；西式館藏號〔待核〕。</p></div>
-              <div class="牌格"><h5>表法景物</h5><ul class="景物籤"><li><b>智拳印</b> · 法智不二</li><li><b>月輪空位</b> · 種子候書</li><li><b>五鈷杵</b> · 五智堅固</li><li><b>二重光背</b> · 智光遍照</li><li><b>題記框</b> · 語密之記</li></ul></div>
-              <div class="牌格"><h5>格網關係</h5><p>尊像足 <strong>120 指</strong>，白毫 12、頦 20、心窩 36、臍 48、座面 68；印相與三昧耶形縮約半格，賓不奪主。</p></div>
+              <header class="牌首" data-reveal>
+                <h4>金剛界大日・図像葉<small>center · 金剛界側 · 東密室 · 院政鐵線</small></h4>
+                <div class="章列"><span class="章">信級 已核</span><span class="章 實">品狀 上壇</span></div>
+              </header>
+              <div class="牌讀" data-reveal><h5>觀看提示</h5><ul><li>全幅以無肥瘦鐵線立骨，上瞼獨重而半眼垂目。</li><li>尊像、題記、印相、三昧耶形三段成葉。</li><li>素地無山水；界線以三級線細分空間，不假濃淡。</li></ul></div>
+              <details class="深讀">
+                <summary>研讀 · 所據與量度</summary>
+                <div class="牌格"><h5>所據</h5><p><a href="docs/考據/畫風-日本.md">畫風-日本 · 白描図像</a>；神護寺高雄曼荼羅 824–833（紫綾金銀泥線描）；《図像抄》1139、《別尊雑記》1156–80；西式館藏號〔待核〕。</p></div>
+                <div class="牌格"><h5>表法景物</h5><ul class="景物籤"><li><b>智拳印</b> · 法智不二</li><li><b>月輪空位</b> · 種子候書</li><li><b>五鈷杵</b> · 五智堅固</li><li><b>二重光背</b> · 智光遍照</li><li><b>題記框</b> · 語密之記</li></ul></div>
+                <div class="牌格"><h5>格網關係</h5><p>尊像足 <strong>120 指</strong>，白毫 12、頦 20、心窩 36、臍 48、座面 68；印相與三昧耶形縮約半格，賓不奪主。</p></div>
+              </details>
               <div class="牌尾"><p>量度是律，風格是貌</p><span class="章">同尊卷 待成對</span></div>
             </div>
           </article>
@@ -1479,18 +1542,27 @@
           </article>
         </div>
       </div>
-    </section>
+    </div>
+    <aside class="研究廊" data-tone="明" aria-label="東密室研究廊">
+      <div class="室身">
+        <p class="廊標">研究廊</p>
+        <p class="室據"><b>所據之卷</b><a href="docs/考據/畫風-日本.md">畫風考據 · 日本白描図像</a>；大正藏図像部 SAT IIIF 為公開主庫。</p>
+        <a class="次室" href="#尼瓦爾"><small>下一室 · 室伍</small><strong>尼瓦爾南傳</strong></a>
+      </div>
+    </aside>
+  </section>
 
-    <!-- 室伍：尼瓦爾南傳 -->
-    <section class="室" id="尼瓦爾" data-room-section="尼瓦爾" aria-labelledby="尼瓦爾題">
-      <header class="室題">
-        <span class="室序">室伍</span>
-        <div>
-          <h2 id="尼瓦爾題">尼瓦爾南傳室<small>加德滿都・蒲甘・斯里蘭卡康提</small></h2>
-          <p>尼瓦爾以均勻細鐵線、朱紅深藍、密卷草與 torana 龕楣成貌；康提以波狀雙線衣紋、火焰頂光與樹花分景成貌。錫蘭 124 指與 T1419 120 指共源異流，嚴禁互混。</p>
-        </div>
-        <aside class="室據"><b>所據之卷</b><a href="docs/考據/畫風-南傳尼瓦爾.md">畫風考據 · 南傳與尼瓦爾</a>；數值只並陳，不互補。</aside>
-      </header>
+  <!-- ════════ 室伍：尼瓦爾南傳 ════════ -->
+  <section class="室 室暗 室-尼瓦爾" id="尼瓦爾" data-room-section="尼瓦爾" data-tone="暗" data-screen-label="室伍 尼瓦爾南傳" aria-labelledby="尼瓦爾題">
+    <header class="門檻">
+      <div class="室身 檻文">
+        <p class="室號"><b>室伍</b>蒲甘至康提 · 加德滿都・蒲甘・斯里蘭卡康提</p>
+        <h2 id="尼瓦爾題" data-reveal>尼瓦爾南傳室<small>密度 · 門楣 · 秩序中的豐饒</small></h2>
+        <p class="判語" data-reveal>尼瓦爾以均勻細鐵線、朱紅深藍、密卷草與 torana 龕楣成貌；康提以波狀雙線衣紋、火焰頂光與樹花分景成貌。錫蘭 124 指與 T1419 120 指共源異流，嚴禁互混。</p>
+      </div>
+      <span class="裁名" aria-hidden="true">尼瓦爾</span>
+    </header>
+    <div class="室身">
       <div class="分期" style="--段數:4" data-tabs>
         <div class="段籤" role="tablist" aria-label="尼瓦爾南傳室朝代選擇">
           <button type="button" role="tab" id="tab-n1" aria-controls="panel-n1" aria-selected="false" tabindex="-1"><b>蒲甘壁畫期</b><small>11–13 世紀</small></button>
@@ -1508,16 +1580,22 @@
         <div class="段面" id="panel-n2" role="tabpanel" aria-labelledby="tab-n2">
           <header class="段標"><p class="段代">1260s–1365</p><div><h3>尼瓦爾轉承期</h3><p>均勻細鐵線、柔圓軀體、密卷草填地與 torana 龕楣；尼瓦爾為藏地 Beri 唐卡源流之展證。</p></div></header>
           <article class="展位" id="展-尼瓦爾-金剛薩埵" data-zun="fugen">
-            <figure class="展圖">
+            <figure class="展圖" data-reveal>
               <img src="圖錄/風格館/尼瓦爾-精密二稿.png" alt="尼瓦爾轉承期金剛薩埵 paubha 式程序白描" width="1800" height="2400" loading="lazy" decoding="async">
               <figcaption><span>本庫機出白描 · 零外部圖源</span><span>圖錄／風格館</span></figcaption>
             </figure>
             <div class="說明牌">
-              <header class="牌首"><h4>金剛薩埵 paubha<small>fugen · 金剛界側 · 尼瓦爾室 · 轉承期</small></h4><div class="章列"><span class="章">信級 已核</span><span class="章 實">品狀 上壇</span></div></header>
-              <div class="牌格"><h5>風格判準</h5><ul><li>尊身與飾紋皆均勻細鐵線，以疏密而非粗細分層。</li><li>上欄、中堂、下欄三段分格，中尊獨大居 torana 龕。</li><li>朱紅深藍色域轉作雙線界欄，龕外密卷草不留空。</li></ul></div>
-              <div class="牌格"><h5>所據</h5><p><a href="docs/考據/畫風-南傳尼瓦爾.md">畫風-南傳尼瓦爾 · paubha</a>。風格範本為 Cleveland 1970.156《綠度母》c.1260s（CC0），非本幀尊名；1365《Vasudhārā》為紀年旁證。</p></div>
-              <div class="牌格"><h5>表法景物</h5><ul class="景物籤"><li><b>杵鈴</b> · 方便般若</li><li><b>torana</b> · 宮殿門楣</li><li><b>獸面</b> · 降伏諸魔</li><li><b>五佛上欄</b> · 五智鑒臨</li><li><b>獅象座</b> · 無畏願行</li><li><b>火壇寶瓶</b> · 供養滿德</li></ul></div>
-              <div class="牌格"><h5>格網關係</h5><p>中尊依 T1419 <strong>120 指</strong>，龕拱與座基向外擴。錫蘭 Bimbamāna 上品 124 指另立制條，嚴禁混入。</p></div>
+              <header class="牌首" data-reveal>
+                <h4>金剛薩埵 paubha<small>fugen · 金剛界側 · 尼瓦爾室 · 轉承期</small></h4>
+                <div class="章列"><span class="章">信級 已核</span><span class="章 實">品狀 上壇</span></div>
+              </header>
+              <div class="牌讀" data-reveal><h5>觀看提示</h5><ul><li>尊身與飾紋皆均勻細鐵線，以疏密而非粗細分層。</li><li>上欄、中堂、下欄三段分格，中尊獨大居 torana 龕。</li><li>朱紅深藍色域轉作雙線界欄，龕外密卷草不留空。</li></ul></div>
+              <details class="深讀">
+                <summary>研讀 · 所據與量度</summary>
+                <div class="牌格"><h5>所據</h5><p><a href="docs/考據/畫風-南傳尼瓦爾.md">畫風-南傳尼瓦爾 · paubha</a>。風格範本為 Cleveland 1970.156《綠度母》c.1260s（CC0），非本幀尊名；1365《Vasudhārā》為紀年旁證。</p></div>
+                <div class="牌格"><h5>表法景物</h5><ul class="景物籤"><li><b>杵鈴</b> · 方便般若</li><li><b>torana</b> · 宮殿門楣</li><li><b>獸面</b> · 降伏諸魔</li><li><b>五佛上欄</b> · 五智鑒臨</li><li><b>獅象座</b> · 無畏願行</li><li><b>火壇寶瓶</b> · 供養滿德</li></ul></div>
+                <div class="牌格"><h5>格網關係</h5><p>中尊依 T1419 <strong>120 指</strong>，龕拱與座基向外擴。錫蘭 Bimbamāna 上品 124 指另立制條，嚴禁混入。</p></div>
+              </details>
               <div class="牌尾"><p>量度是律，風格是貌</p><span class="章">同尊卷 待成對</span></div>
             </div>
           </article>
@@ -1537,64 +1615,190 @@
           </article>
         </div>
       </div>
-    </section>
+    </div>
+    <aside class="研究廊" data-tone="明" aria-label="尼瓦爾南傳室研究廊">
+      <div class="室身">
+        <p class="廊標">研究廊</p>
+        <p class="室據"><b>所據之卷</b><a href="docs/考據/畫風-南傳尼瓦爾.md">畫風考據 · 南傳與尼瓦爾</a>；數值只並陳，不互補。</p>
+        <a class="次室" href="#常設"><small>續行 · 常設</small><strong>三廳常設陳列</strong></a>
+      </div>
+    </aside>
+  </section>
 
-    <!-- 常設三廳 -->
-    <section class="常設" id="常設" data-room-section="常設" aria-labelledby="常設題">
-      <header class="常設首"><span class="室序">常設</span><div><h2 id="常設題">三廳常設陳列</h2><p>兩界壇城・漢傳諸帖・星供籌備——舊館五幀全數留陳，改以展牌分讀。</p></div></header>
+  <!-- ════════ 常設三廳 ════════ -->
+  <section class="常設" id="常設" data-room-section="常設" data-tone="暗" data-screen-label="常設三廳" aria-labelledby="常設題">
+    <header class="門檻">
+      <div class="室身 檻文">
+        <p class="室號"><b>常設</b>壇城・漢傳・星供</p>
+        <h2 id="常設題" data-reveal>三廳常設陳列<small>舊館五幀全數留陳，改以展牌分讀</small></h2>
+      </div>
+      <span class="裁名" aria-hidden="true">常設</span>
+    </header>
+    <div class="室身">
 
-      <section class="常設組" id="常設-兩界">
-        <h3 class="常設組題">兩界壇城廳 <small>金剛界・胎藏，皆庫內已核之筆活渲合幀</small></h3>
-        <div class="常設網">
-          <article class="常設卡">
-            <figure><img src="圖錄/壇城/成身會三十七尊一幀.png" alt="金剛界成身會三十七尊一幀" width="2400" height="2480" loading="lazy" decoding="async"></figure>
-            <div class="常設牌"><header><h4>金剛界成身會三十七尊</h4><div class="章列"><span class="章 實">上壇</span></div></header><dl><dt>判讀</dt><dd>五解脫輪；下東、左南、上西、右北，四親近向壇心，內外四供居隅，四攝守門。</dd><dt>所據</dt><dd>現圖曼荼羅成身會方位；本庫誦戒 37。</dd><dt>景物</dt><dd>五輪＝五智；四門＝四攝；蓮華界道＝壇場清淨。</dd></dl><p class="常設訓">量度是律，風格是貌</p></div>
-          </article>
-          <article class="常設卡">
-            <figure><img src="圖錄/壇城/中台八葉院九尊一幀.png" alt="胎藏中台八葉院九尊一幀" width="2000" height="2080" loading="lazy" decoding="async"></figure>
-            <div class="常設牌"><header><h4>胎藏中台八葉院九尊</h4><div class="章列"><span class="章 實">上壇</span></div></header><dl><dt>判讀</dt><dd>上東之向；四方四佛、四隅四菩薩，中臺大日法界定印。</dd><dt>所據</dt><dd>胎藏中台八葉院儀軌；本庫誦戒 9。</dd><dt>景物</dt><dd>八葉蓮華＝心蓮開敷；中臺＝法界體性；四隅＝菩薩行門。</dd></dl><p class="常設訓">量度是律，風格是貌</p></div>
-          </article>
-        </div>
+      <section class="常設組" id="常設-兩界" aria-label="兩界壇城廳">
+        <h3 class="常設組題">兩界壇城廳<small>金剛界・胎藏，皆庫內已核之筆活渲合幀</small></h3>
+        <article class="常設卡">
+          <figure data-reveal class="展圖 常圖">
+            <img src="圖錄/壇城/成身會三十七尊一幀.png" alt="金剛界成身會三十七尊一幀" width="2400" height="2480" loading="lazy" decoding="async">
+          </figure>
+          <div class="常設牌">
+            <header><h4>金剛界成身會三十七尊</h4><div class="章列"><span class="章 實">上壇</span></div></header>
+            <dl><dt>判讀</dt><dd>五解脫輪；下東、左南、上西、右北，四親近向壇心，內外四供居隅，四攝守門。</dd><dt>所據</dt><dd>現圖曼荼羅成身會方位；本庫誦戒 37。</dd><dt>景物</dt><dd>五輪＝五智；四門＝四攝；蓮華界道＝壇場清淨。</dd></dl>
+            <p class="常設訓">量度是律，風格是貌</p>
+          </div>
+        </article>
+        <article class="常設卡">
+          <figure data-reveal class="展圖 常圖">
+            <img src="圖錄/壇城/中台八葉院九尊一幀.png" alt="胎藏中台八葉院九尊一幀" width="2000" height="2080" loading="lazy" decoding="async">
+          </figure>
+          <div class="常設牌">
+            <header><h4>胎藏中台八葉院九尊</h4><div class="章列"><span class="章 實">上壇</span></div></header>
+            <dl><dt>判讀</dt><dd>上東之向；四方四佛、四隅四菩薩，中臺大日法界定印。</dd><dt>所據</dt><dd>胎藏中台八葉院儀軌；本庫誦戒 9。</dd><dt>景物</dt><dd>八葉蓮華＝心蓮開敷；中臺＝法界體性；四隅＝菩薩行門。</dd></dl>
+            <p class="常設訓">量度是律，風格是貌</p>
+          </div>
+        </article>
       </section>
 
-      <section class="常設組" id="常設-漢傳">
-        <h3 class="常設組題">漢傳廳 <small>橫三世・藥師曼荼羅基本式</small></h3>
-        <div class="常設網">
-          <article class="常設卡" id="常設-橫三世" data-zun="shaka" data-room="漢地室" data-compare-src="圖錄/唐卡試卷/橫三世一幀.png" data-compare-width="2400" data-compare-height="1560" data-compare-title="釋迦說法 · 橫三世中尊索引" data-criteria="中尊釋迦以說法印居白毫中軸；三佛同守 120 指格網，左右依方位鏡像；長線定骨，雲氣與舉身光不侵尊身。" data-anchor="T1419 120 指 · 白毫 12／頦 20／臍 48／座面 68">
-            <figure><img src="圖錄/唐卡試卷/橫三世一幀.png" alt="漢傳橫三世佛一幀，中尊為釋迦說法" width="2400" height="1560" loading="lazy" decoding="async"></figure>
-            <div class="常設牌"><header><h4>橫三世佛一幀</h4><div class="章列"><span class="章">候審</span><span class="章 實">唐卡首卷</span></div></header><dl><dt>判讀</dt><dd>中釋迦、左西彌陀、右東藥師（面南觀者之位）；三佛同錨，印與持物分尊。</dd><dt>所據</dt><dd>本庫漢傳三佛儀軌；本幀中尊作「漢地說法」並觀索引，並非將漢地藥師首展改名。</dd><dt>景物</dt><dd>舉身光＝智光；如意雲＝聖眾示現；八大線＝構圖之律。</dd></dl><button class="並觀鈕" type="button" data-compare="shaka">取中尊與犍、藏並觀</button><p class="常設訓">量度是律，風格是貌</p></div>
-          </article>
-          <article class="常設卡" id="常設-藥師十五尊" data-zun="yakushi">
-            <figure><img src="圖錄/唐卡試卷/藥師十五尊一幀.png" alt="藥師十五尊一幀" width="2000" height="2300" loading="lazy" decoding="async"></figure>
-            <div class="常設牌"><header><h4>藥師十五尊一幀</h4><div class="章列"><span class="章">候審</span></div></header><dl><dt>判讀</dt><dd>三尊：日光居觀者右、月光居觀者左；十二神將左右各六，八搩忿怒。</dd><dt>所據</dt><dd>鎌倉本基本式；持物依作例三源並陳。</dd><dt>景物</dt><dd>藥壺＝療治；日月二光＝晝夜照護；十二神將＝護持十二時。</dd></dl><p class="常設訓">120／96 指分級 · 量度是律，風格是貌</p></div>
-          </article>
-        </div>
+      <section class="常設組" id="常設-漢傳" aria-label="漢傳廳">
+        <h3 class="常設組題">漢傳廳<small>橫三世・藥師曼荼羅基本式</small></h3>
+        <article class="常設卡" id="常設-橫三世" data-zun="shaka" data-room="漢地室" data-compare-src="圖錄/唐卡試卷/橫三世一幀.png" data-compare-width="2400" data-compare-height="1560" data-compare-title="釋迦說法 · 橫三世中尊索引" data-criteria="中尊釋迦以說法印居白毫中軸；三佛同守 120 指格網，左右依方位鏡像；長線定骨，雲氣與舉身光不侵尊身。" data-anchor="T1419 120 指 · 白毫 12／頦 20／臍 48／座面 68">
+          <figure data-reveal class="展圖 常圖">
+            <img src="圖錄/唐卡試卷/橫三世一幀.png" alt="漢傳橫三世佛一幀，中尊為釋迦說法" width="2400" height="1560" loading="lazy" decoding="async">
+          </figure>
+          <div class="常設牌">
+            <header><h4>橫三世佛一幀</h4><div class="章列"><span class="章">候審</span><span class="章 實">唐卡首卷</span></div></header>
+            <dl><dt>判讀</dt><dd>中釋迦、左西彌陀、右東藥師（面南觀者之位）；三佛同錨，印與持物分尊。</dd><dt>所據</dt><dd>本庫漢傳三佛儀軌；本幀中尊作「漢地說法」並觀索引，並非將漢地藥師首展改名。</dd><dt>景物</dt><dd>舉身光＝智光；如意雲＝聖眾示現；八大線＝構圖之律。</dd></dl>
+            <button class="並觀鈕" type="button" data-compare="shaka">取中尊與犍、藏並觀</button>
+            <p class="常設訓">量度是律，風格是貌</p>
+          </div>
+        </article>
+        <article class="常設卡" id="常設-藥師十五尊" data-zun="yakushi">
+          <figure data-reveal class="展圖 常圖">
+            <img src="圖錄/唐卡試卷/藥師十五尊一幀.png" alt="藥師十五尊一幀" width="2000" height="2300" loading="lazy" decoding="async">
+          </figure>
+          <div class="常設牌">
+            <header><h4>藥師十五尊一幀</h4><div class="章列"><span class="章">候審</span></div></header>
+            <dl><dt>判讀</dt><dd>三尊：日光居觀者右、月光居觀者左；十二神將左右各六，八搩忿怒。</dd><dt>所據</dt><dd>鎌倉本基本式；持物依作例三源並陳。</dd><dt>景物</dt><dd>藥壺＝療治；日月二光＝晝夜照護；十二神將＝護持十二時。</dd></dl>
+            <p class="常設訓">120／96 指分級 · 量度是律，風格是貌</p>
+          </div>
+        </article>
       </section>
 
-      <section class="常設組" id="常設-星供">
-        <h3 class="常設組題">星供廳 <small>中尊金輪＋北斗七真身上壇；九曜以下候筆</small></h3>
-        <div class="常設網">
-          <article class="常設卡 獨">
-            <figure><img src="圖錄/星供/円曼荼羅構圖一幀.png" alt="星供曼荼羅円制構圖一幀" width="2300" height="2400" loading="lazy" decoding="async"></figure>
-            <div class="常設牌"><header><h4>星供曼荼羅円制構圖</h4><div class="章列"><span class="章">進行</span><span class="章 實">八真身上壇</span></div></header><dl><dt>判讀</dt><dd>一院釋迦金輪；二院上北斗七、下九曜候筆；三院十二宮；外院二十八宿。</dd><dt>所據</dt><dd>星供円制儀軌與本庫誦戒 57。</dd><dt>景物</dt><dd>同心院界＝天度秩序；北斗＝延命消災；十二宮與二十八宿＝周天方位。</dd></dl><p class="常設訓">量度是律，風格是貌</p></div>
-          </article>
-        </div>
+      <section class="常設組" id="常設-星供" aria-label="星供廳">
+        <h3 class="常設組題">星供廳<small>中尊金輪＋北斗七真身上壇；九曜以下候筆</small></h3>
+        <article class="常設卡">
+          <figure data-reveal class="展圖 常圖">
+            <img src="圖錄/星供/円曼荼羅構圖一幀.png" alt="星供曼荼羅円制構圖一幀" width="2300" height="2400" loading="lazy" decoding="async">
+          </figure>
+          <div class="常設牌">
+            <header><h4>星供曼荼羅円制構圖</h4><div class="章列"><span class="章">進行</span><span class="章 實">八真身上壇</span></div></header>
+            <dl><dt>判讀</dt><dd>一院釋迦金輪；二院上北斗七、下九曜候筆；三院十二宮；外院二十八宿。</dd><dt>所據</dt><dd>星供円制儀軌與本庫誦戒 57。</dd><dt>景物</dt><dd>同心院界＝天度秩序；北斗＝延命消災；十二宮與二十八宿＝周天方位。</dd></dl>
+            <p class="常設訓">量度是律，風格是貌</p>
+          </div>
+        </article>
       </section>
-    </section>
-  </main>
 
-  <footer>
-    <span>粉本 fenben · CC BY-NC-SA 4.0 · <a href="index.html">逐尊陳列</a> · <a href="競本.html">諸家競本評卷廳</a></span>
+    </div>
+    <div class="暮" aria-hidden="true"></div>
+  </section>
+
+  <!-- ════════ 研究室：同尊卷 ════════ -->
+  <section class="研究室" id="同尊卷" data-room-section="同尊卷" data-tone="明" data-screen-label="研究室 同尊卷" aria-labelledby="同尊題">
+    <div class="室身">
+      <header class="研首">
+        <p class="卷序">研究室 · 同尊卷</p>
+        <div>
+          <h2 id="同尊題">一尊，五地之貌</h2>
+          <p class="研引">同錨等高，非以尺度較高下，惟見衣紋、線質與構圖如何改貌。</p>
+        </div>
+        <button class="並觀鈕" type="button" data-compare="shaka">啟釋迦三體並觀</button>
+      </header>
+      <div class="釋迦卷首">
+        <h3>釋迦卷</h3>
+        <small>三體可觀 · shaka</small>
+      </div>
+      <div class="三體縮圖" aria-label="釋迦三體索引">
+        <a href="#展-犍陀羅-釋迦">
+          <span class="縮框"><img src="圖錄/風格館/犍陀羅-釋迦說法龕.png" alt="犍陀羅室釋迦說法龕縮圖" width="1800" height="2400" loading="lazy" decoding="async"></span>
+          <span>犍陀羅 · 龕式</span>
+        </a>
+        <a href="#常設-橫三世">
+          <span class="縮框"><img src="圖錄/唐卡試卷/橫三世一幀.png" alt="漢地室橫三世中尊釋迦縮圖" width="2400" height="1560" loading="lazy" decoding="async"></span>
+          <span>漢地 · 說法中尊</span>
+        </a>
+        <a href="#展-藏地-釋迦">
+          <span class="縮框"><img src="圖錄/風格館/藏地-精密二稿.png" alt="藏地室釋迦說法唐卡縮圖" width="2000" height="2600" loading="lazy" decoding="async"></span>
+          <span>藏地 · 唐卡式</span>
+        </a>
+      </div>
+      <div class="候軸列" aria-label="同尊異體候展諸卷">
+        <article class="候軸">
+          <h3>觀音・度母卷</h3>
+          <span class="軸況">候展 · 候波二</span>
+          <p>水月觀音・十一面・綠度母——新尊新儀軌，未考不陳。</p>
+        </article>
+        <article class="候軸">
+          <h3>藥師卷</h3>
+          <span class="軸況">待成對 · 一體在館</span>
+          <p>元壁畫式已陳；勉唐淨土與明水陸候展。</p>
+        </article>
+        <article class="候軸">
+          <h3>彌勒卷</h3>
+          <span class="軸況">候展 · 候波三</span>
+          <p>哈達灰泥交腳式，待與胎藏彌勒同錨並陳。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer data-tone="明">
+  <div class="室身">
+    <span>粉本 fenben · CC BY-NC-SA 4.0 · <a href="index.html">逐尊陳列</a> · <a href="shouyin.html">手印譜</a> · <a href="sanmaya.html">三昧耶譜</a> · <a href="競本.html">評卷廳</a></span>
     <span>館藏圖皆本庫機出 · 名品只作文字考據 · 參攷圖不入庫</span>
-  </footer>
-</div>
+  </div>
+</footer>
 
-<dialog class="並觀廳" id="並觀廳" aria-labelledby="並觀題">
+<dialog class="全目" id="全目" aria-label="全館目錄">
+  <div class="全目殼">
+    <header class="全目首">
+      <p>全館目錄</p>
+      <button class="閉" type="button" id="閉全目" aria-label="閉目錄">✕</button>
+    </header>
+    <nav aria-label="展室目錄">
+      <a href="#前庭">前庭</a>
+      <a href="#犍陀羅">犍陀羅<small>室壹 · 1–7 世紀</small></a>
+      <a href="#漢地">漢地<small>室貳 · 唐至明</small></a>
+      <a href="#藏地">藏地<small>室參 · 五派之辨</small></a>
+      <a href="#東密">東密<small>室肆 · 請來至鎌倉</small></a>
+      <a href="#尼瓦爾">尼瓦爾南傳<small>室伍 · 蒲甘至康提</small></a>
+      <a href="#常設">常設三廳<small>壇城・漢傳・星供</small></a>
+      <a href="#同尊卷">研究室<small>同尊卷 · 並觀</small></a>
+    </nav>
+    <div class="目他">
+      <p>全站之航</p>
+      <a href="index.html">諸尊陳列</a>
+      <a href="shouyin.html">手印譜</a>
+      <a href="sanmaya.html">三昧耶譜</a>
+      <a href="競本.html">評卷廳</a>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="並觀廳" id="並觀廳" aria-labelledby="並觀題" data-mode="純">
   <div class="並觀殼">
     <header class="並觀首">
       <div>
         <h2 id="並觀題">釋迦三體 · 同錨並觀</h2>
         <p>白毫 12・頦 20・臍 48・座面 68 同高；漢地一格取《橫三世》中央釋迦為索引。</p>
+      </div>
+      <div class="觀制" role="group" aria-label="觀看方式">
+        <button type="button" data-mode-set="純" aria-pressed="true">純觀看</button>
+        <button type="button" data-mode-set="格" aria-pressed="false">格網</button>
+        <button type="button" data-mode-set="註" aria-pressed="false">策展註解</button>
+        <span class="制界" aria-hidden="true"></span>
+        <button type="button" id="基準鈕" aria-pressed="true">基準線</button>
       </div>
       <button class="閉" type="button" id="閉並觀" aria-label="閉並觀廳">✕</button>
     </header>
@@ -1606,11 +1810,16 @@
   (function () {
     "use strict";
 
+    var 減動 = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!減動.matches) document.documentElement.classList.add("動");
+
+    /* ── 分期 tabs（契約如舊） ── */
     document.querySelectorAll("[data-tabs]").forEach(function (組) {
       var tabs = Array.prototype.slice.call(組.querySelectorAll('[role="tab"]'));
       var panels = tabs.map(function (tab) {
         return document.getElementById(tab.getAttribute("aria-controls"));
       });
+      var 列 = 組.querySelector('[role="tablist"]');
 
       function 選段(tab, moveFocus) {
         tabs.forEach(function (item, i) {
@@ -1620,11 +1829,12 @@
           panels[i].hidden = !active;
         });
         if (moveFocus) tab.focus();
-        tab.scrollIntoView({
-          block: "nearest",
-          inline: "nearest",
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
-        });
+        if (列.scrollWidth > 列.clientWidth) {
+          列.scrollTo({
+            left: Math.max(0, tab.offsetLeft - (列.clientWidth - tab.offsetWidth) / 2),
+            behavior: 減動.matches ? "auto" : "smooth"
+          });
+        }
       }
 
       tabs.forEach(function (tab, index) {
@@ -1640,8 +1850,15 @@
           選段(next, true);
         });
       });
+      // 初載：已選之段捲入段籤匣視野（只捲匣不捲頁——手機預選段勿隱於幅外）
+      var 已選 = tabs.filter(function (t) { return t.getAttribute("aria-selected") === "true"; })[0];
+      if (已選) { var 匣 = 已選.parentElement;
+        while (匣 && 匣.getAttribute && 匣.getAttribute("role") !== "tablist") 匣 = 匣.parentElement;
+        if (匣 && 匣.scrollWidth > 匣.clientWidth)
+          匣.scrollLeft = Math.max(0, 已選.offsetLeft - (匣.clientWidth - 已選.offsetWidth) / 2); }
     });
 
+    /* ── 同尊比較室 ── */
     var dialog = document.getElementById("並觀廳");
     var rail = document.getElementById("比較軌");
     var closeButton = document.getElementById("閉並觀");
@@ -1681,7 +1898,7 @@
         criterion.appendChild(label);
         criterion.appendChild(document.createTextNode(source.dataset.criteria));
         var anchor = 文("p", "並錨", source.dataset.anchor);
-        var note = 文("div", "");
+        var note = 文("div", "並註");
         note.appendChild(criterion);
         note.appendChild(anchor);
         card.appendChild(title);
@@ -1706,35 +1923,98 @@
       if (returnFocus) returnFocus.focus();
     });
 
+    /* 觀看方式：純觀看／格網／策展註解＋基準線 */
+    var modeButtons = Array.prototype.slice.call(dialog.querySelectorAll("[data-mode-set]"));
+    modeButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        dialog.dataset.mode = button.dataset.modeSet;
+        modeButtons.forEach(function (item) {
+          item.setAttribute("aria-pressed", item === button ? "true" : "false");
+        });
+      });
+    });
+    var baselineButton = document.getElementById("基準鈕");
+    baselineButton.addEventListener("click", function () {
+      var off = dialog.classList.toggle("無基準");
+      baselineButton.setAttribute("aria-pressed", off ? "false" : "true");
+    });
+
+    /* ── 館路：所在與已過 ── */
+    var 館路 = document.querySelector("nav.館路");
+    var 袖航 = document.querySelector(".袖航");
+    var 袖所在 = document.getElementById("袖所在");
+    var navLinks = Array.prototype.slice.call(館路.querySelectorAll("[data-room-nav]"));
+    var 名表 = { "前庭": "前庭", "犍陀羅": "室壹 · 犍陀羅", "漢地": "室貳 · 漢地", "藏地": "室參 · 藏地", "東密": "室肆 · 東密", "尼瓦爾": "室伍 · 尼瓦爾", "常設": "常設三廳", "同尊卷": "研究室" };
+
     if ("IntersectionObserver" in window) {
-      var navLinks = Array.prototype.slice.call(document.querySelectorAll("[data-room-nav]"));
       var sections = Array.prototype.slice.call(document.querySelectorAll("[data-room-section]"));
-      var roomNav = document.querySelector(".館航");
       var visible = new Map();
-      var lastRoom = "";
       var observer = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) { visible.set(entry.target, entry.intersectionRatio); });
         var current = sections.reduce(function (best, section) {
           return (visible.get(section) || 0) > (visible.get(best) || 0) ? section : best;
         }, sections[0]);
         if (!current || !(visible.get(current) > 0)) return;
-        var currentRoom = current.dataset.roomSection;
-        var currentLink = null;
+        var room = current.dataset.roomSection;
+        var index = sections.indexOf(current);
         navLinks.forEach(function (link) {
-          if (link.dataset.roomNav === currentRoom) {
-            link.setAttribute("aria-current", "location");
-            currentLink = link;
-          } else link.removeAttribute("aria-current");
+          var li = sections.findIndex(function (s) { return s.dataset.roomSection === link.dataset.roomNav; });
+          link.classList.toggle("已過", li > -1 && li < index);
+          if (link.dataset.roomNav === room) link.setAttribute("aria-current", "location");
+          else link.removeAttribute("aria-current");
         });
-        if (currentRoom !== lastRoom && currentLink && roomNav.scrollWidth > roomNav.clientWidth) {
-          roomNav.scrollTo({
-            left: Math.max(0, currentLink.offsetLeft - (roomNav.clientWidth - currentLink.offsetWidth) / 2),
-            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
-          });
-        }
-        lastRoom = currentRoom;
-      }, { rootMargin: "-20% 0px -62% 0px", threshold: [0, .05, .2, .5] });
+        if (袖所在) 袖所在.textContent = 名表[room] || room;
+      }, { rootMargin: "-30% 0px -50% 0px", threshold: [0, .05, .2, .5] });
       sections.forEach(function (section) { observer.observe(section); });
+
+      /* 明暗：導航隨域換色 */
+      var toneEls = Array.prototype.slice.call(document.querySelectorAll("[data-tone]")).filter(function (el) {
+        return !el.closest("dialog") && el !== 館路 && el !== 袖航;
+      });
+      var toneVisible = new Map();
+      var toneObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) { toneVisible.set(entry.target, entry.intersectionRatio); });
+        var top = null, best = 0;
+        toneEls.forEach(function (el) {
+          var r = toneVisible.get(el) || 0;
+          if (r > best) { best = r; top = el; }
+        });
+        if (top) {
+          館路.dataset.tone = top.dataset.tone;
+          if (袖航) 袖航.dataset.tone = top.dataset.tone;
+        }
+      }, { rootMargin: "-45% 0px -45% 0px", threshold: [0, .01, .1, .3, .6, 1] });
+      toneEls.forEach(function (el) { toneObserver.observe(el); });
+
+      /* 緩顯 */
+      if (document.documentElement.classList.contains("動")) {
+        var revealObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("入");
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
+        document.querySelectorAll("[data-reveal]").forEach(function (el) { revealObserver.observe(el); });
+      }
+    } else {
+      document.querySelectorAll("[data-reveal]").forEach(function (el) { el.classList.add("入"); });
+    }
+
+    /* ── 手機全目 ── */
+    var 全目 = document.getElementById("全目");
+    var 袖目鈕 = document.getElementById("袖目鈕");
+    var 閉全目 = document.getElementById("閉全目");
+    if (袖目鈕 && 全目) {
+      袖目鈕.addEventListener("click", function () { 全目.showModal(); });
+      閉全目.addEventListener("click", function () { 全目.close(); });
+      全目.addEventListener("click", function (event) {
+        if (event.target === 全目) 全目.close();
+      });
+      全目.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () { 全目.close(); });
+      });
     }
   }());
 </script>
