@@ -2,7 +2,7 @@
 # 存檔廊 · tools/存檔廊.py —— 歷代稿存檔（主人 2026-07-13 令：凡完整之嘗試皆記，不抹去）
 # 自 git 史掘各席候展稿（含已退役）歷代版本，去重（blob），出縮圖入 圖錄/存檔/，
 # 生成 存檔.html。ID＝<席>-<commit短碼>：主人指某幅，以其 ID `git show` 即得全圖。
-import subprocess, glob, io, html
+import subprocess, glob, io, html, os
 from PIL import Image
 
 def run(*a, 容路徑缺=False):
@@ -29,14 +29,18 @@ for f in files:
             h, H, date = line[1:].split(); 當 = [h, H, date]; continue
         if not line or 當 is None: continue
         parts = line.split('\t')
-        if parts[0].startswith('R') and len(parts) == 3:   # rename：彼卷路＝舊名
+        if parts[0].startswith(('R', 'C')) and len(parts) == 3:  # rename/copy：本卷新路
             卷路.append((*當, parts[2].strip('\"'))); 當 = None
         elif parts[0] in ('A', 'M') and len(parts) == 2:
             卷路.append((*當, parts[1].strip('\"'))); 當 = None
     for h, H, date, 路 in 卷路:
         blob = run('git', 'rev-parse', f'{H}:{路}', 容路徑缺=True).decode().strip()
-        if not blob or blob in seen_blobs: continue
-        seen_blobs.add(blob)
+        if not blob: continue
+        out = f'圖錄/存檔/{席}-{h}.jpg'
+        if (席, blob) in seen_blobs:
+            if os.path.exists(out): os.remove(out)
+            continue
+        seen_blobs.add((席, blob))
         data = run('git', 'show', blob)
         if len(data) < 1000: continue
         try:
@@ -44,7 +48,6 @@ for f in files:
         except Exception:
             continue
         im.thumbnail((720, 1000))
-        out = f'圖錄/存檔/{席}-{h}.jpg'
         im.save(out, quality=82)
         鍵 = 席.replace('（退役線）', '')
         條目.setdefault(鍵, []).append((f'{席}-{h}', date, out, h))
@@ -60,6 +63,7 @@ for 席 in sorted(條目):
             f'<figcaption><b>ID: {html.escape(_id)}</b><small>{date} · 全圖可以 ID 溯取</small></figcaption></figure>')
     卡s.append('</div>')
 
+卡文 = '\n'.join(卡s)
 頁 = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>歷代稿存檔廊 · 粉本</title>
@@ -80,8 +84,9 @@ a.歸{{color:#c8ab6a;text-decoration:none}}
 <h1>歷代稿存檔廊</h1>
 <p class="序">主人之令（2026-07-13）：凡完整之嘗試皆值一記，不必抹去。此廊自倉史掘出諸席歷代全稿——
 每一稿皆一次完整之嘗試，各具其時之風。各幀有 <b>ID</b>（席名＋卷碼）：指某幅告知其 ID，
-即可自倉史溯取全圖為參，或據以再精。縮圖藏 圖錄/存檔/，全圖永存於卷。</p>
-{''.join(卡s)}
+即可自倉史溯取全圖為參，或據以再精。縮圖藏 圖錄/存檔/，全圖永存於卷。
+退役之世系亦以「退役線」與原線同圖並陳，俾其可見。</p>
+{卡文}
 </body></html>"""
 open('存檔.html', 'w').write(頁)
 print('頁成 存檔.html；凡', sum(len(v) for v in 條目.values()), '稿')
