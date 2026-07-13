@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>觀・壇・星供</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1124; overscroll-behavior: none; }
+  canvas { display: block; width: 100vw; height: 100vh; height: 100dvh; cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; }
+  canvas.拖 { cursor: grabbing; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<script type="module">
+// 星供曼荼羅円制構圖 · 純觀之頁——依 tools/星供壇城.cjs 瀏覽器活渲。
+import { 掛觀 } from './tools/lib/觀具.js';
+import { 依號 } from './dist/yigui.js';
+import { 白描 } from './dist/baimiao.js';
+
+const W = 2300, H = 2400, cx = W / 2, cy = W / 2;
+const 金 = '#d8b36a', 灰 = '#6b7186', 硃 = '#b0402c';
+const 譜 = {
+  中尊: ['一字金輪'],
+  北斗: ['貪狼', '巨門', '祿存', '文曲', '廉貞', '武曲', '破軍'],
+  九曜: ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜', '羅睺', '計都'],
+  十二宮: ['白羊宮', '金牛宮', '雙子宮', '巨蟹宮', '獅子宮', '處女宮', '天秤宮', '天蠍宮', '人馬宮', '磨羯宮', '寶瓶宮', '雙魚宮'],
+  廿八宿: ['角', '亢', '氐', '房', '心', '尾', '箕', '斗', '牛', '女', '虛', '危', '室', '壁',
+           '奎', '婁', '胃', '昴', '畢', '觜', '參', '井', '鬼', '柳', '星', '張', '翼', '軫'],
+};
+
+const cv = document.getElementById('cv');
+掛觀(cv, (x, 變換) => {
+  x.setTransform(1, 0, 0, 1, 0, 0);
+  x.clearRect(0, 0, cv.width, cv.height);
+  x.setTransform(...變換);
+
+  const 圓 = (px, py, r) => { x.beginPath(); x.arc(px, py, r, 0, Math.PI * 2); x.stroke(); };
+  const 連珠環 = (px, py, r, n, 珠徑) => {
+    for (let i = 0; i < n; i++) {
+      const a = Math.PI * 2 * i / n;
+      圓(px + r * Math.cos(a), py + r * Math.sin(a), 珠徑);
+    }
+  };
+  const 月輪 = (px, py, r, alpha = 1) => {
+    x.save(); x.strokeStyle = 金; x.globalAlpha = alpha;
+    x.lineWidth = 2.5; 圓(px, py, r);
+    x.lineWidth = 1; x.globalAlpha = alpha * 0.58; 圓(px, py, r - 9);
+    x.lineWidth = 0.8; x.globalAlpha = alpha * 0.5;
+    連珠環(px, py, r - 4.5, Math.max(20, Math.round(r * 0.42)), r > 150 ? 2.2 : 1.55);
+    x.restore();
+  };
+  const 星紋 = (px, py, r) => {
+    x.save(); x.translate(px, py); x.strokeStyle = 金; x.globalAlpha = 0.46; x.lineWidth = 1.5;
+    for (let i = 0; i < 8; i++) {
+      const a = Math.PI * i / 4, r0 = i % 2 ? r * 0.32 : r * 0.2;
+      x.beginPath(); x.moveTo(r0 * Math.cos(a), r0 * Math.sin(a));
+      x.lineTo(r * Math.cos(a), r * Math.sin(a)); x.stroke();
+    }
+    x.beginPath(); x.moveTo(0, -r * 0.42); x.lineTo(r * 0.42, 0);
+    x.lineTo(0, r * 0.42); x.lineTo(-r * 0.42, 0); x.closePath(); x.stroke();
+    圓(0, 0, r * 0.14); x.restore();
+  };
+  const 雲氣 = (px, py, s, a) => {
+    x.save(); x.translate(px, py); x.rotate(a); x.strokeStyle = 金;
+    x.globalAlpha = 0.2; x.lineWidth = 1.35; x.lineCap = 'round';
+    x.beginPath(); x.moveTo(-s, 3);
+    x.bezierCurveTo(-s * 0.7, -s * 0.2, -s * 0.45, -s * 0.42, -s * 0.2, -s * 0.12);
+    x.bezierCurveTo(0, -s * 0.7, s * 0.42, -s * 0.55, s * 0.34, -s * 0.1);
+    x.bezierCurveTo(s * 0.55, -s * 0.3, s * 0.8, -s * 0.18, s, 3); x.stroke();
+    x.beginPath(); x.moveTo(-s * 0.72, s * 0.17);
+    x.bezierCurveTo(-s * 0.26, s * 0.42, s * 0.3, s * 0.38, s * 0.72, s * 0.12); x.stroke();
+    x.restore();
+  };
+
+  x.strokeStyle = 硃; x.globalAlpha = 0.18; x.lineWidth = 2;
+  for (const r of [420, 690, 910]) 圓(cx, cy, r);
+  x.strokeStyle = 金; x.globalAlpha = 0.42; x.lineWidth = 1.5;
+  for (const r of [1090, 1110, 1130]) 圓(cx, cy, r);
+  x.globalAlpha = 0.34; x.lineWidth = 0.8; 連珠環(cx, cy, 1100, 168, 2.1);
+  for (let i = 0; i < 56; i++) {
+    const a = Math.PI * 2 * i / 56, px = cx + 1120 * Math.cos(a), py = cy + 1120 * Math.sin(a);
+    x.save(); x.translate(px, py); x.rotate(a); x.globalAlpha = 0.36; x.lineWidth = 1;
+    if (i % 2) {
+      x.beginPath(); x.moveTo(-5, 0); x.lineTo(0, -7); x.lineTo(5, 0); x.lineTo(0, 7); x.closePath(); x.stroke();
+    } else {
+      圓(0, 0, 5.5); 圓(0, 0, 1.5);
+      for (let q = 0; q < 4; q++) {
+        const b = Math.PI * q / 2; x.beginPath(); x.moveTo(2 * Math.cos(b), 2 * Math.sin(b));
+        x.lineTo(5 * Math.cos(b), 5 * Math.sin(b)); x.stroke();
+      }
+    }
+    x.restore();
+  }
+  for (const a of [Math.PI / 4, Math.PI * 3 / 4, Math.PI * 5 / 4, Math.PI * 7 / 4])
+    星紋(cx + 1350 * Math.cos(a), cy + 1350 * Math.sin(a), 34);
+  for (const a of [0.18, 1.38, 2.7, 3.82, 5.12])
+    雲氣(cx + 370 * Math.cos(a), cy + 370 * Math.sin(a), 30, a + Math.PI / 2);
+  for (const a of [0.08, 1.02, 2.08, 3.2, 4.18, 5.26])
+    雲氣(cx + 715 * Math.cos(a), cy + 715 * Math.sin(a), 27, a + Math.PI / 2);
+  for (const a of [0.13, 1.05, 2.01, 2.96, 3.91, 4.86, 5.8])
+    雲氣(cx + 935 * Math.cos(a), cy + 935 * Math.sin(a), 19, a + Math.PI / 2);
+  x.globalAlpha = 1;
+
+  const 相 = (px, py, r, 名, 記) => {
+    月輪(px, py, r);
+    x.fillStyle = 灰; x.textAlign = 'center';
+    x.font = `${Math.round(r * 0.32)}px "Songti TC", serif`;
+    x.fillText(名, px, py + r * 0.1);
+    if (記) { x.font = `${Math.round(r * 0.17)}px "Songti TC", serif`; x.globalAlpha = 0.6; x.fillText(記, px, py + r * 0.38); x.globalAlpha = 1; }
+  };
+  {
+    月輪(cx, cy, 300);
+    const c2 = document.createElement('canvas'); c2.width = W; c2.height = H;
+    const x2 = c2.getContext('2d');
+    x2.translate(cx, cy - 20); x2.strokeStyle = 金; x2.fillStyle = 金;
+    白描(x2, 405, 依號['kinrin'].h, 'kinrin|h');
+    x.drawImage(c2, 0, 0);
+  }
+  {
+    const 七鍵 = ['hokuto-tanro', 'hokuto-komon', 'hokuto-rokuson', 'hokuto-monkyoku',
+                  'hokuto-renjo', 'hokuto-mukyoku', 'hokuto-hagun'];
+    譜.北斗.forEach((名, i) => {
+      const a = Math.PI + (Math.PI / 8) * (i + 1);
+      const px = cx + 560 * Math.cos(a), py = cy + 560 * Math.sin(a);
+      月輪(px, py, 105);
+      const c3 = document.createElement('canvas'); c3.width = W; c3.height = H;
+      const x3 = c3.getContext('2d');
+      x3.translate(px, py - 14); x3.strokeStyle = 金; x3.fillStyle = 金;
+      白描(x3, 156, 依號[七鍵[i]].h, `${七鍵[i]}|h`);
+      x.drawImage(c3, 0, 0);
+      x.fillStyle = 灰; x.textAlign = 'center'; x.globalAlpha = 0.7;
+      x.font = '23px "Songti TC", serif'; x.fillText(名, px, py + 132); x.globalAlpha = 1;
+    });
+  }
+  譜.九曜.forEach((名, i) => {
+    const a = (Math.PI / 10) * (i + 1);
+    相(cx + 560 * Math.cos(a), cy + 560 * Math.sin(a), 84, 名, '候筆');
+  });
+  譜.十二宮.forEach((名, i) => {
+    const a = -Math.PI / 2 + (Math.PI / 6) * i;
+    相(cx + 800 * Math.cos(a), cy + 800 * Math.sin(a), 112, 名, '候筆');
+  });
+  譜.廿八宿.forEach((名, i) => {
+    const a = -Math.PI / 2 + (Math.PI * 2 / 28) * i;
+    相(cx + 1010 * Math.cos(a), cy + 1010 * Math.sin(a), 74, 名 + '宿');
+  });
+
+  x.fillStyle = 灰; x.textAlign = 'center'; x.font = '34px "Songti TC", serif';
+  x.fillText('星供曼荼羅（北斗曼荼羅）円制構圖 · 一院中尊／二院上北斗下九曜／三院十二宮／外院廿八宿', cx, W + 40);
+  x.font = '26px "Songti TC", serif'; x.globalAlpha = 0.7;
+  x.fillText('誦戒 1+7+9+12+28＝57 · 中尊金輪＋北斗七真身上壇；九曜以下像容單源者仍空相候筆· 北斗杓形候法隆寺本目驗', cx, W + 84);
+  x.globalAlpha = 1;
+
+  x.save();
+  x.setTransform(1, 0, 0, 1, 0, 0);
+  x.globalCompositeOperation = 'destination-over';
+  x.fillStyle = '#0d1124';
+  x.fillRect(0, 0, cv.width, cv.height);
+  x.restore();
+}, { 寬: W, 高: H });
+</script>
+</body>
+</html>
