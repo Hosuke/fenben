@@ -257,34 +257,54 @@ function 座背織帶(ctx) {
     const mid = y + h / 2;
     const 筆 = [金, 朱, 灰][i % 3];
     筆.線([[x0, y], [x1, y]], 1.05 + (i % 3) * .15, false, .48 + (i % 4) * .055);
+    筆.線([[x0, y + 4], [x1, y + 4]], .68, false, .9);
+    筆.線([[x0, y + h - 4], [x1, y + h - 4]], .68, false, .9);
+    for (let row = 1; row <= 10; row++) {
+      const yy = y + row * h / 11;
+      筆.線([[x0, yy], [x1, yy]], .72, false, .86 + (row % 2) * .04);
+    }
 
     if (i % 4 === 0) {
-      const step = 43 + i * 1.4;
+      // 蓮瓣帶：三帶各易瓣寬、瓣腹與內弧，紋距較舊稿收密一檔。
+      const step = 24 + (i / 4) * 2;
       for (let x = x0 - step / 2 + (i * 13) % step; x < x1 + step; x += step) {
-        const tip = mid - h * (.3 + (i % 3) * .025);
-        筆.貝([x - step * .46, mid + h * .25], [x - step * .34, mid - h * .1], [x - step * .13, tip], [x, tip], .68, .44);
-        筆.貝([x, tip], [x + step * .13, tip], [x + step * .34, mid - h * .1], [x + step * .46, mid + h * .25], .68, .44);
+        const tip = mid - h * (.31 + (i % 3) * .02);
+        const foot = mid + h * (.27 - (i % 2) * .025);
+        筆.貝([x - step * .47, foot], [x - step * .35, mid - h * .1], [x - step * .13, tip], [x, tip], 1.12, .96);
+        筆.貝([x, tip], [x + step * .13, tip], [x + step * .35, mid - h * .1], [x + step * .47, foot], 1.12, .96);
+        筆.貝([x - step * .3, foot - 1], [x - step * .2, mid + 1], [x - step * .07, tip + 7], [x, tip + 8], .82, .88);
+        筆.貝([x, tip + 8], [x + step * .07, tip + 7], [x + step * .2, mid + 1], [x + step * .3, foot - 1], .82, .88);
       }
     } else if (i % 4 === 1) {
-      const step = 23 + (i % 5) * 2;
+      // 連珠帶：珠徑、雙緯與珠芯相異。
+      const step = 12 + (i % 3);
       for (let x = x0 + step / 2 + (i * 7) % step; x < x1; x += step) {
-        筆.圓(x, mid, 4 + (i % 3) * .55, .7, .45);
-        筆.點(x, mid, 1.05 + (i % 2) * .2, .5);
+        筆.圓(x, mid, 3.25 + (i % 3) * .45, 1.02, .95);
+        筆.點(x, mid, 1.05 + (i % 2) * .25, .98);
       }
-      筆.線([[x0, mid - 9], [x1, mid - 9]], .48, false, .25);
-      筆.線([[x0, mid + 9], [x1, mid + 9]], .48, false, .25);
+      筆.線([[x0, mid - 8 - i % 2], [x1, mid - 8 - i % 2]], .52, false, .87);
+      筆.線([[x0, mid + 8 + i % 2], [x1, mid + 8 + i % 2]], .52, false, .87);
     } else if (i % 4 === 2) {
-      const step = 13 + (i % 5) * 2;
-      const lean = 17 + (i % 4) * 3;
-      for (let x = x0 - h + (i * 9) % step; x < x1 + h; x += step) {
-        筆.線([[x, y + h - 5], [x + lean, y + 5]], .5, false, .27 + (i % 3) * .035);
+      // 細點帶：二、三、四列遞增，奇偶列錯半距。
+      const cols = 3 + ((i - 2) / 4);
+      const step = 9 + (i % 3);
+      for (let row = 0; row < cols; row++) {
+        const yy = y + (row + 1) * h / (cols + 1);
+        const shift = (row % 2) * step / 2 + (i * 5) % step;
+        for (let x = x0 + shift; x < x1; x += step) {
+          筆.點(x, yy, 1.05 + (row % 2) * .2, .92 + (row % 3) * .03);
+        }
       }
-      筆.線([[x0, mid], [x1, mid]], .42, false, .2);
     } else {
-      // 素帶只留不等距雙緣與一道偏心緯線，與相鄰繁帶相換氣。
-      筆.線([[x0, y + 8 + i % 3], [x1, y + 8 + i % 3]], .58, false, .31);
-      筆.線([[x0, y + h - 7 - i % 2], [x1, y + h - 7 - i % 2]], .46, false, .23);
-      筆.線([[x0, mid + (i % 5 - 2)], [x1, mid + (i % 5 - 2)]], .38, false, .16);
+      // 斜格帶：三帶分用不同格距與斜向，雙向經緯合成菱格。
+      const step = 10 + ((i - 3) / 4);
+      const lean = h - 10;
+      const phase = (i * 7) % step;
+      for (let x = x0 - lean + phase; x < x1 + lean; x += step) {
+        筆.線([[x, y + h - 5], [x + lean, y + 5]], .84, false, .94);
+        筆.線([[x, y + 5], [x + lean, y + h - 5]], .78, false, .9);
+      }
+      筆.線([[x0, mid], [x1, mid]], .42, false, .88);
     }
     y += h;
   }
