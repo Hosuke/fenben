@@ -52,7 +52,7 @@ const { 合幀 } = require('../../tools/lib/幀具.cjs');
 
 (async () => {
   await 合幀({
-    出: '圖錄/風格館/漢地-宋白描-候展稿.png',
+    出: '圖錄/風格館/漢地-宋白描-候展稿-已退役.png',
     幀: page => page.evaluate(async () => {
       const { 錨點, 坐像, 誦戒 } = await import('/dist/liangdu.js');
       const { 造線筆, 蓮瓣橫 } = await import('/匠筆-codex/風格館/lib/白描幀具.js');
