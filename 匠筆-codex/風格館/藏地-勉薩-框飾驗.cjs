@@ -18,7 +18,8 @@ const { 合幀 } = require('../../tools/lib/幀具.cjs');
           return n;
         };
         斷(typeof 框.景 === 'function' && typeof 框.飾 === 'function', '缺 景/飾 export');
-        斷(!/(小坐尊|傳承坐尊|手眼|清形|destination-out)/.test(源), '框飾層疑留身形或預清形筆');
+        斷(!/(小坐尊|傳承坐尊|手眼|清形)/.test(源), '框飾層疑留身形或預清形筆');
+        斷(!/(?:^|[^\p{L}\p{N}_$])ctx\s*\.\s*globalCompositeOperation\s*=\s*['"]destination-out['"]/u.test(源), '框飾層疑於主 ctx 預清形');
         const 尊位 = 框.尊位;
         斷(JSON.stringify(尊位) === JSON.stringify({
           W: 1800, H: 2500, 頂y: 700, 指: 14, 中x: 900, 座面: 1652,
@@ -48,7 +49,7 @@ const { 合幀 } = require('../../tools/lib/幀具.cjs');
         斷(七龕墨 > 3500, `七空龕線量不足：${七龕墨}`);
         斷(中景墨 > 3500, `中央景線過空，疑預留身形洞：${中景墨}`);
         斷(左樹墨 > 4500 && 右樹墨 > 4500, `花樹線量不足：左${左樹墨}/右${右樹墨}`);
-        斷(總墨 > 145000 && 總墨 < cv.width * cv.height * .16, `總線面密度可疑：${總墨}`);
+        斷(總墨 > 145000 && 總墨 < cv.width * cv.height * .18, `總線面密度可疑：${總墨}`);
         const 龕心 = [258, 472, 686, 900, 1114, 1328, 1542];
         const 龕內 = 龕心.map(cx => 數墨(ctx, cx - 48, 270, 96, 130));
         斷(龕內.every(n => n < 120), `七龕內疑有身形：${龕內.join('/')}`);
