@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>觀・藏地・勉薩</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1124; overscroll-behavior: none; }
+  canvas { display: block; width: 100vw; height: 100vh; height: 100dvh; cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; }
+  canvas.拖 { cursor: grabbing; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<script type="module">
+// 藏地・勉薩 · 純觀之頁——分層模組瀏覽器活渲，非 PNG 放大。
+import { 掛觀 } from './tools/lib/觀具.js';
+import { 景, 飾 } from './匠筆-codex/風格館/藏地-勉薩-框飾層.js';
+import { 尊位, 尊, 修 } from './匠筆-主坊/風格館/藏地-勉薩-尊身層.js';
+
+const cv = document.getElementById('cv');
+const 助 = { W: 尊位.W, H: 尊位.H, 尊位 };
+
+掛觀(cv, async (ctx, 變換) => {
+  // 繪序即蔽序，同 合席.cjs：景→尊→飾→修；透明布作畫，末合深底。
+  ctx.setTransform(...變換);
+  await 景(ctx, 助);
+  await 尊(ctx, 助);
+  await 飾(ctx, 助);
+  await 修(ctx, 助);
+
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.fillStyle = '#0d1124';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.restore();
+}, { 寬: 尊位.W, 高: 尊位.H });
+</script>
+</body>
+</html>
