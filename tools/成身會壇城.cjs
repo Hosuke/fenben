@@ -71,17 +71,119 @@ const 壇譜 = {
   const dataUrl = await page.evaluate(async (壇譜) => {
     const { 依號 } = await import('/dist/yigui.js');
     const { 白描 } = await import('/dist/baimiao.js');
-    const W = 2400, H = 2480, c = 1200;
+    const W = 2400, H = 2480, c = 1200, cy = 1170;
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const x = cv.getContext('2d');
     x.fillStyle = '#0d1124'; x.fillRect(0, 0, W, H);
     const 金 = '#d8b36a', 灰 = '#6b7186', 硃 = '#b0402c';
-    // 外院方郭（雙線）＋大圓輪（雙環）——淡硃打格之制
-    x.strokeStyle = 硃; x.globalAlpha = 0.2; x.lineWidth = 2.5;
-    x.strokeRect(100, 100, 2200, 2200); x.strokeRect(128, 128, 2144, 2144);
-    x.beginPath(); x.arc(c, c, 1000, 0, 7); x.stroke();
-    x.beginPath(); x.arc(c, c, 972, 0, 7); x.stroke();
-    x.globalAlpha = 1;
+    const 圓 = (cx, cy, r) => { x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.stroke(); };
+    const 連珠環 = (cx, cy, r, n, 珠徑) => {
+      for (let i = 0; i < n; i++) {
+        const a = Math.PI * 2 * i / n;
+        圓(cx + r * Math.cos(a), cy + r * Math.sin(a), 珠徑);
+      }
+    };
+    const 月輪 = (cx, cy, r, alpha = 0.42) => {
+      x.save(); x.strokeStyle = 金; x.globalAlpha = alpha;
+      x.lineWidth = 1.8; 圓(cx, cy, r);
+      x.globalAlpha = alpha * 0.72; x.lineWidth = 0.9; 圓(cx, cy, r - 7);
+      x.restore();
+    };
+    const 方連珠 = (a, b, 定, 橫) => {
+      const step = 32;
+      for (let q = a; q <= b; q += step) 圓(橫 ? q : 定, 橫 ? 定 : q, 4.2);
+    };
+    const 金剛杵 = (cx, cy, 角, L = 112) => {
+      x.save(); x.translate(cx, cy); x.rotate(角);
+      x.lineWidth = 1.6; 圓(0, 0, 8); 圓(0, 0, 3);
+      for (const s of [-1, 1]) {
+        x.beginPath(); x.moveTo(s * 8, 0); x.lineTo(s * 29, 0); x.stroke();
+        x.beginPath();
+        x.moveTo(s * 24, -9); x.quadraticCurveTo(s * 34, -7, s * 39, 0);
+        x.quadraticCurveTo(s * 34, 7, s * 24, 9); x.stroke();
+        x.beginPath(); x.moveTo(s * 38, 0); x.lineTo(s * L / 2, 0); x.stroke();
+        x.beginPath(); x.moveTo(s * 36, -7); x.quadraticCurveTo(s * 49, -12, s * L / 2, 0); x.stroke();
+        x.beginPath(); x.moveTo(s * 36, 7); x.quadraticCurveTo(s * 49, 12, s * L / 2, 0); x.stroke();
+      }
+      x.restore();
+    };
+    const 門樓 = (cx, cy, 角) => {
+      x.save(); x.translate(cx, cy); x.rotate(角);
+      x.lineWidth = 2.2;
+      // 丁字門闕：雙柱承兩重出跳橫枋，門洞朝壇心。
+      for (const s of [-1, 1]) {
+        x.strokeRect(s * 78 - 8, -34, 16, 112);
+        x.beginPath(); x.moveTo(s * 104, -66); x.lineTo(s * 104, 70); x.stroke();
+        x.beginPath(); x.moveTo(s * 104, -62); x.lineTo(s * 127, -49); x.lineTo(s * 104, -37); x.stroke();
+        for (const yy of [-43, -25]) {
+          x.beginPath(); x.moveTo(s * 8, yy); x.lineTo(s * 137, yy);
+          x.quadraticCurveTo(s * 149, yy, s * 158, yy - 9); x.stroke();
+        }
+      }
+      x.beginPath(); x.moveTo(-146, -50); x.lineTo(146, -50); x.stroke();
+      x.beginPath(); x.moveTo(-121, -67); x.lineTo(121, -67); x.stroke();
+      x.beginPath(); x.moveTo(-96, -82); x.lineTo(96, -82); x.stroke();
+      x.beginPath(); x.moveTo(-85, -82); x.quadraticCurveTo(0, -116, 85, -82); x.stroke();
+      x.beginPath(); x.moveTo(-44, 76); x.lineTo(-44, -20); x.lineTo(44, -20); x.lineTo(44, 76); x.stroke();
+      x.beginPath(); x.moveTo(0, -116); x.lineTo(0, -132); x.stroke(); 圓(0, -138, 6);
+      x.restore();
+    };
+    const 雜寶 = (kind, cx, cy, s, 角 = 0) => {
+      x.save(); x.translate(cx, cy); x.rotate(角); x.lineWidth = 1.35;
+      if (kind === '輪') {
+        圓(0, 0, s); 圓(0, 0, s * 0.22);
+        for (let i = 0; i < 8; i++) {
+          const a = Math.PI * i / 4;
+          x.beginPath(); x.moveTo(s * 0.25 * Math.cos(a), s * 0.25 * Math.sin(a));
+          x.lineTo(s * 0.86 * Math.cos(a), s * 0.86 * Math.sin(a)); x.stroke();
+        }
+      } else if (kind === '螺') {
+        x.beginPath(); x.moveTo(-s * 0.68, s * 0.55);
+        x.quadraticCurveTo(-s * 0.9, -s * 0.36, 0, -s * 0.76);
+        x.quadraticCurveTo(s * 0.9, -s * 0.34, s * 0.62, s * 0.58);
+        x.quadraticCurveTo(0, s * 0.92, -s * 0.68, s * 0.55); x.stroke();
+        x.beginPath(); x.arc(0, 0, s * 0.42, 0.2, Math.PI * 2.15); x.stroke();
+      } else {
+        x.beginPath(); x.moveTo(-s, 0); x.quadraticCurveTo(0, -s * 0.9, s, 0); x.stroke();
+        x.beginPath(); x.moveTo(-s, 0); x.quadraticCurveTo(0, s * 0.35, s, 0); x.stroke();
+        x.beginPath(); x.moveTo(0, -s * 0.86); x.lineTo(0, s * 1.2); x.stroke();
+        if (kind === '蓋') { 圓(0, -s * 1.02, s * 0.13); 圓(0, s * 1.3, s * 0.12); }
+        else for (const q of [-0.62, 0, 0.62]) {
+          x.beginPath(); x.moveTo(q * s, s * 0.1); x.lineTo(q * s, s * 0.56); x.stroke();
+        }
+      }
+      x.restore();
+    };
+
+    // 外金剛牆：方界雙線、連珠帶；四門留闕而以丁字樓與幢幡鎮之。
+    x.save(); x.strokeStyle = 硃; x.globalAlpha = 0.48; x.lineWidth = 3;
+    x.strokeRect(82, 82, 2236, 2236); x.strokeRect(126, 126, 2148, 2148);
+    x.strokeStyle = 金; x.globalAlpha = 0.56; x.lineWidth = 1.2;
+    方連珠(176, 2224, 104, true); 方連珠(176, 2224, 2296, true);
+    方連珠(176, 2224, 104, false); 方連珠(176, 2224, 2296, false);
+    門樓(c, cy - 1080, Math.PI); 門樓(120, cy, Math.PI / 2);
+    門樓(c, cy + 1080, 0); 門樓(2280, cy, -Math.PI / 2);
+    x.restore();
+
+    // 內外輪界：大圓雙環；方圓四隅各鎮一金剛杵印。
+    x.save(); x.strokeStyle = 硃; x.globalAlpha = 0.34; x.lineWidth = 2.6;
+    圓(c, cy, 1080); 圓(c, cy, 1057);
+    x.strokeStyle = 金; x.globalAlpha = 0.54;
+    金剛杵(388, cy - 812, Math.PI / 4); 金剛杵(2012, cy - 812, -Math.PI / 4);
+    金剛杵(388, cy + 812, -Math.PI / 4); 金剛杵(2012, cy + 812, Math.PI / 4);
+    x.restore();
+
+    // 輪際虛空之雜寶：定序疏布，無隨機，亦不塞滿月輪。
+    x.save(); x.strokeStyle = 金; x.globalAlpha = 0.44;
+    [
+      ['輪', 1836, cy + 636, 22, 0], ['螺', 564, cy + 636, 21, -0.35],
+      ['傘', 564, cy - 636, 22, 0.25], ['蓋', 1836, cy - 636, 21, -0.18],
+      ['螺', 2076, cy + 370, 18, 0.42], ['輪', 324, cy - 370, 19, 0],
+      ['蓋', 830, cy + 876, 18, -0.2], ['傘', 1570, cy - 876, 19, 0.18],
+      ['輪', 324, cy + 370, 17, 0], ['螺', 2076, cy - 370, 18, -0.3],
+      ['傘', 830, cy - 876, 18, 0.2], ['蓋', 1570, cy + 876, 18, -0.18],
+    ].forEach(args => 雜寶(...args));
+    x.restore();
     const 落 = (id, px, py, R) => {
       const c2 = document.createElement('canvas'); c2.width = W; c2.height = H;
       const x2 = c2.getContext('2d');
@@ -90,26 +192,40 @@ const 壇譜 = {
       白描(x2, R, 依號[id].k, `${id}|k`);
       x.drawImage(c2, 0, 0);
     };
-    // 五解脫輪：輪環（金淡）＋佛居中＋四親近（首者向壇心，餘三順時針）
+    // 五解脫輪：雙輪環＋環上連珠；佛與諸親近各居雙線月輪。
     for (const { 佛, 繞, 位 } of 壇譜.輪) {
-      const wx = c + 位[0] * 640, wy = c + 位[1] * 640;
-      x.strokeStyle = 金; x.globalAlpha = 0.35; x.lineWidth = 2.5;
-      x.beginPath(); x.arc(wx, wy, 310, 0, 7); x.stroke();
-      x.globalAlpha = 1;
+      const wx = c + 位[0] * 670, wy = cy + 位[1] * 670;
+      x.save(); x.strokeStyle = 金; x.globalAlpha = 0.55; x.lineWidth = 2.2;
+      圓(wx, wy, 335); 圓(wx, wy, 323);
+      x.globalAlpha = 0.46; x.lineWidth = 1; 連珠環(wx, wy, 329, 68, 3.7);
+      x.restore();
       // 向壇心之角（中央輪取向下＝東為首）
-      const 首角 = (位[0] === 0 && 位[1] === 0) ? Math.PI / 2 : Math.atan2(c - wy, c - wx);
+      const 首角 = (位[0] === 0 && 位[1] === 0) ? Math.PI / 2 : Math.atan2(cy - wy, c - wx);
       繞.forEach((id, i) => {
         const a = 首角 + (Math.PI / 2) * i;
-        落(id, wx + 205 * Math.cos(a), wy + 205 * Math.sin(a), 100);
+        const px = wx + 235 * Math.cos(a), py = wy + 235 * Math.sin(a);
+        const 波羅蜜 = id.startsWith('p-');
+        月輪(px, py, 波羅蜜 ? 95 : 100);
+        落(id, px, py, 波羅蜜 ? 136 : 145);
       });
-      落(佛, wx, wy, 185);
+      月輪(wx, wy, 160, 0.5);
+      落(佛, wx, wy, 230);
     }
     // 內四供（輪間四隅，圓輪之內）
-    for (const [id, dx, dy] of 壇譜.內四供) 落(id, c + dx * 680 * 0.7071, c + dy * 680 * 0.7071, 110);
+    for (const [id, dx, dy] of 壇譜.內四供) {
+      const px = c + dx * 700 * 0.7071, py = cy + dy * 700 * 0.7071;
+      月輪(px, py, 90); 落(id, px, py, 125);
+    }
     // 外四供（外院四隅）
-    for (const [id, dx, dy] of 壇譜.外四供) 落(id, c + dx * 930, c + dy * 930, 110);
+    for (const [id, dx, dy] of 壇譜.外四供) {
+      const px = c + dx * 930, py = cy + dy * 930;
+      月輪(px, py, 84); 落(id, px, py, 116);
+    }
     // 四攝（四門：下東・左南・上西・右北）
-    for (const [id, dx, dy] of 壇譜.四攝) 落(id, c + dx * 1085, c + dy * 1085, 105);
+    for (const [id, dx, dy] of 壇譜.四攝) {
+      const px = c + dx * 1080, py = cy + dy * 1080;
+      月輪(px, py, 75); 落(id, px, py, 104);
+    }
     // 卷末注記
     x.fillStyle = 灰; x.textAlign = 'center'; x.font = '34px "Songti TC", serif';
     x.fillText('金剛界成身會三十七尊 · 五解脫輪之制（下東阿閦・左南寶生・上西彌陀・右北不空成就）', c, 2380);
