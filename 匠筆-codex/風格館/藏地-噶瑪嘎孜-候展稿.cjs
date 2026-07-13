@@ -69,11 +69,13 @@
 
 'use strict';
 
+// 已退役候展原稿：留存備查；新分層制見「藏地-噶瑪嘎孜-框飾層.js」。
+
 const { 候展合幀 } = require('./lib/候展共具.cjs');
 
 (async () => {
   await 候展合幀({
-    出: '圖錄/風格館/藏地-噶瑪嘎孜-候展稿.png',
+    出: '圖錄/風格館/藏地-噶瑪嘎孜-候展稿-已退役.png',
     幀: page => page.evaluate(async () => {
       const { 依號 } = await import('/dist/yigui.js');
       const { 白描 } = await import('/dist/baimiao.js');
