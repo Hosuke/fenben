@@ -64,11 +64,34 @@ function 畫樹冠(筆) {
   for (let row = 0; row < 13; row++) {
     const y = 334 + row * 43;
     const inset = 185 + Math.abs(row - 5) * 22;
-    for (let x = inset + (row % 2) * 20, k = 0; x <= 1800 - inset; x += 40, k++) {
+    const x1 = 1800 - inset;
+    // 近冠密、遠緣疏：25px 候點於外緣間取，舊 411 葉增為 535 葉（+30.17%）。
+    for (let x = inset + (row % 2) * 20, k = 0; x <= x1; x += 25, k++) {
       const 葉y = y + Math.sin(k * 1.31 + row) * 10;
+      const 離緣 = Math.min(x - inset, x1 - x, row * 43, (12 - row) * 43);
+      const 遠緣 = 離緣 < 72;
+      if (遠緣 && k % 2) continue;
       if (入髻頂尖拱淨空(x, 葉y)) continue;
-      菩提葉(筆, x, 葉y, 27 + (k % 4) * 3,
-        ((k + row) % 5 - 2) * .1, .55);
+      菩提葉(筆, x, 葉y, 遠緣 ? 22 + (k % 3) * 2 : 31 + (k % 4) * 3,
+        ((k + row) % 5 - 2) * .1, 遠緣 ? .55 : .9);
+    }
+  }
+}
+
+function 畫角隅點陣(筆) {
+  // 只作景層內角疏點；中尊仍由主坊尊身層依原序蔽之。
+  const 區 = [
+    [188, 470, 382, 940], [1330, 1612, 382, 940],
+    [188, 410, 970, 1908], [1390, 1612, 970, 1908],
+  ];
+  for (const [x0, x1, y0, y1] of 區) {
+    for (let y = y0, row = 0; y <= y1; y += 18, row++) {
+      for (let x = x0 + (row % 2) * 9, col = 0; x <= x1; x += 18, col++) {
+        if ((row * 5 + col * 3) % 7 === 0) continue;
+        const jx = Math.sin((row + 1) * 17 + col * 11) * 2.2;
+        const jy = Math.cos((col + 1) * 13 + row * 7) * 2.2;
+        筆.圓(x + jx, y + jy, 1.6 + ((row + col) % 3) * .22, .62, .5);
+      }
     }
   }
 }
@@ -149,6 +172,7 @@ export async function 景(ctx, 助) {
     畫樹冠(筆);
     畫側林(筆, 1);
     畫側林(筆, -1);
+    畫角隅點陣(筆);
   } finally {
     ctx.restore();
   }
@@ -186,6 +210,14 @@ function 畫框帶(筆) {
   }
   線([[170, 338], [1630, 338]], 1.8, false, .78);
   線([[170, 1930], [1630, 1930]], 1.8, false, .78);
+  // 於內橫帶旁加一重相扣連環，不複鄰帶之珠、菱、卷葉。
+  for (const y of [181, 1950]) {
+    線([[170, y - 12], [1630, y - 12]], .82, false, .58);
+    線([[170, y + 12], [1630, y + 12]], .82, false, .58);
+    for (let x = 181, k = 0; x < 1620; x += 18, k++) {
+      筆.橢(x, y, 13, 8.5, 1.05, k % 2 ? .18 : -.18, .68);
+    }
+  }
 }
 
 function 畫空底欄(筆) {
