@@ -2,6 +2,20 @@
 // 重繪(ctx, 變換) 之「變換」為 Canvas 2D 六值陣列 [縮, 0, 0, 縮, 平x, 平y]；
 // 呼方於透明布上自畫，觀具只理視野與手勢。
 export function 掛觀(canvas, 重繪, 選項 = {}) {
+  if (location.protocol === 'file:') {
+    const x = canvas.getContext('2d');
+    const 行 = [
+      '此頁須經 http 開啟',
+      '倉根執行：python3 -m http.server 8000',
+      '而後開 http://localhost:8000/本頁名',
+    ];
+    x.fillStyle = '#d8b36a';
+    x.font = '20px sans-serif';
+    x.textAlign = 'center';
+    x.textBaseline = 'middle';
+    行.forEach((字, i) => x.fillText(字, canvas.width / 2, canvas.height / 2 + (i - 1) * 32));
+    return;
+  }
   const 世 = { W: 選項.寬 ?? canvas.width, H: 選項.高 ?? canvas.height };
   let 縮 = 1, 平x = 0, 平y = 0;
   const dpr = () => Math.min(window.devicePixelRatio || 1, 3);
