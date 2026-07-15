@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>金剛薩埵・金密初彩</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1124; overscroll-behavior: none; }
+  canvas { display: block; width: 100vw; height: 100vh; height: 100dvh; cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; }
+  canvas.拖 { cursor: grabbing; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<script type="module">
+// 金剛薩埵金密圖・料法初彩試色之頁——設色程第四筆（光料二辨之料法首試）。
+// 線稿取金剛薩埵.html 內嵌之 __描（彼頁勿手改之律遵之，此處唯讀取其源）；
+// 彩層 destination-over 居線下：朱地統攝・分龕填彩・礦末顆粒・胭脂邊沉。
+// 研色：docs/考據/研色-總綱.md＋研色-尼瓦爾.md（十色雙源過堂）。
+import { 掛觀 } from './tools/lib/觀具.js';
+import { 彩 } from './匠筆-主坊/風格館/尼瓦爾-金剛薩埵金密-彩層.js';
+
+const cv = document.getElementById('cv');
+
+let __描約 = null;
+async function 取描() {
+  if (__描約) return __描約;
+  __描約 = (async () => {
+    const txt = await (await fetch('./金剛薩埵.html')).text();
+    const a = txt.indexOf('async function __描');
+    const b = txt.indexOf('掛觀(cv');
+    if (a < 0 || b < 0 || b <= a) throw new Error('金剛薩埵.html 結構異動，覓 __描 不得');
+    let src = txt.slice(a, b);
+    src = src.slice(0, src.lastIndexOf('}') + 1);
+    return (0, eval)('(' + src + ')');
+  })();
+  return __描約;
+}
+
+掛觀(cv, async (ctx, 變換) => {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  let 描;
+  try {
+    描 = await 取描();
+  } catch (e) {
+    // 敗須可見：取描不得（頁構異動或 CSP 禁 eval），布上明告，不默壞。
+    ctx.fillStyle = '#d8b36a'; ctx.font = '16px serif'; ctx.textAlign = 'center';
+    ctx.fillText('取金剛薩埵.html之描不得：' + e.message, cv.width / 2, cv.height / 2);
+    return;
+  }
+  await 描(cv, 變換);
+  ctx.setTransform(...變換);
+  彩(ctx);
+
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.fillStyle = '#0d1124';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.restore();
+}, { 寬: 1800, 高: 2400 });
+</script>
+</body>
+</html>
