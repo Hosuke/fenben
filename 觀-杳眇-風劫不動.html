@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>觀・杳眇・風劫不動</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1124; overscroll-behavior: none; }
+  canvas { display: block; width: 100vw; height: 100vh; height: 100dvh; cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; }
+  canvas.拖 { cursor: grabbing; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<script type="module">
+// 杳眇現代派第四作《風劫・不動》· 純觀之頁——兩坊合筆（主坊尊身・匠景層）。
+// 勢：萬風皆過，惟此一身不移。前三作畫光歸何處，此作畫力經何物。
+import { 掛觀 } from './tools/lib/觀具.js';
+import { 尊位 as 框位, 景, 飾 } from './匠筆-codex/風格館/杳眇-風劫不動-框飾層.js';
+import { 尊, 修 } from './匠筆-主坊/風格館/杳眇-風劫不動-尊身層.js';
+
+const cv = document.getElementById('cv');
+const 助 = { W: 框位.W, H: 框位.H, 尊位: 框位 };
+
+掛觀(cv, async (ctx, 變換) => {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.setTransform(...變換);
+  await 景(ctx, 助);
+  await 尊(ctx, 助);
+  await 飾(ctx, 助);
+  await 修(ctx, 助);
+
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.fillStyle = '#0d1124';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.restore();
+}, { 寬: 框位.W, 高: 框位.H });
+</script>
+</body>
+</html>
