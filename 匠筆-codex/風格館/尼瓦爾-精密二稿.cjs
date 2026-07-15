@@ -35,8 +35,8 @@ const { 合幀 } = require('../../tools/lib/幀具.cjs');
   await 合幀({
     出: '圖錄/風格館/尼瓦爾-精密二稿.png',
     幀: page => page.evaluate(async () => {
-      const { 依號 } = await import('/dist/yigui.js');
-      const { 白描 } = await import('/dist/baimiao.js');
+      const { 依號 } = await import('./dist/yigui.js');
+      const { 白描 } = await import('./dist/baimiao.js');
 
       const W = 1800, H = 2400;
       const 墨 = '#d8b36a', 地 = '#0d1124';
