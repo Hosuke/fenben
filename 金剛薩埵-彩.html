@@ -51,7 +51,7 @@ async function 取描() {
   }
   await 描(cv, 變換);
   ctx.setTransform(...變換);
-  彩(ctx);
+  await 彩(ctx, 描);
 
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
